@@ -2,8 +2,10 @@ WJElement - JSON manipulation in C
 ==================================
 
 WJElement is a very flexible JSON library developed by Messaging Architects.
-It was created for MA's "WARP" webserver, and is built on top of the (also-
-included) lower-level WJReader and WJWriter libraries.
+It was created for MA's "WARP" webserver, and is built on top of the
+(also-included) lower-level WJReader and WJWriter libraries.
+
+See the [wiki] for more information and full [API](wiki/WJElement-API) reference.
 
 WJReader and WJWriter are optimized for speed and memory-efficiency.
 WJElement focuses on flexibility and handy features, allowing C code to
@@ -20,5 +22,5 @@ in ways we haven't thought of.  Read the docs/headers, have fun, and if you
 use it for something awesome, let us know about it!  :^)
 
 
-* Owen Swerkstrom <<owens@netmail.com>>  - community/repository front-man
+* Owen Swerkstrom <<owens@netmail.com>> - community/repository front-man
 * Micah N Gorrell <<micahg@netmail.com>> - primary author of WJElement code
