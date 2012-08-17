@@ -1,0 +1,149 @@
+<html>
+<head>
+<title>WJElement Documentation: index</title>
+</head>
+<body>
+
+<h1>About</h1>
+<p>
+WJElement - JSON manipulation in C
+</p>
+<p>
+WJElement is a very flexible JSON library developed by Messaging Architects.
+It was created for MA's "WARP" webserver, and is built on top of the (also-
+included) lower-level WJReader and WJWriter libraries.
+</p>
+<p>
+<ul>
+<li>
+WJReader and WJWriter are optimized for speed and memory-efficiency.
+</li>
+<li>
+WJElement focuses on flexibility and handy features, allowing C code to
+manipulate JSON documents with as few statements (fewer, sometimes!) as
+JavaScript itself.
+</li>
+</ul>
+</p>
+
+<h1>License</h1>
+<p>
+WJElement and its related libraries may be consumed in any project,
+open or closed, as outlined by the
+<a href="http://www.gnu.org/licenses/lgpl.txt">GNU Lesser
+General Public License</a>.
+Include it as-is and link to it
+from your code, massage it into your own statically-linked package, or use it
+in ways we haven't thought of.  Read the docs/headers, have fun, and if you
+use it for something awesome, let us know about it!  :^)
+</p>
+
+<h1>API</h1>
+<p>
+<ul>
+<li>
+<a href="wjelement.html">
+WJElement
+</a> - flexible JSON manipulation
+</li>
+<li>
+<a href="wjreader.html">
+WJReader
+</a> - lightweight JSON reader
+</li>
+<li>
+<a href="wjwriter.html">
+WJWriter
+</a> - lightweight JSON writer
+</li>
+</ul>
+</p>
+
+<h1>Quirks</h1>
+<p>
+In the spirit of being upfront, and to help you guage whether WJElement is
+right for you without asking you to invest too much time, it should be noted
+that there are a few things this library currently does not do particularly
+well, or in a generally-useful fashion, or handles in a seemingly-awkward
+way...
+</p>
+<p>
+<ul>
+<li>
+XplBool return values
+ <ul>
+ <li>
+   Many functions return TRUE on success.  Deal.  :^)
+ </li>
+ </ul>
+</li>
+<li>
+Floating-point number values (unimplemented)
+ <ul>
+ <li>
+   WJElement does not support floats, because we don't need them, at least
+   not yet.
+ </li>
+ </ul>
+</li>
+<li>
+Schema validation (useful, incomplete)
+ <ul>
+ <li>
+   "patternProperties" validation is unimplemented; JSON with invalid data in
+   such a defined property will pass.
+ </li>
+ <li>
+   "format" validation on strings is unimplemented.  The json-schema draft
+   specification allows this to be missing, and so far, so do we.
+ </li>
+ <li>
+   "backlinks"... This is something we're making use of in netmail, but is not
+   part of the base json-schema spec.  You can safely ignore it (or dig in and
+   use it, why not?  :^)
+ </li>
+ </ul>
+<li>
+Libraries, headers (stubs and #define's)
+ <ul>
+ <li>
+   Xpl (cross-platform library) provides a consistent set of utility
+   functions within netmail.  WJElement uses a subset of these functions
+   and definitions, so they have been included.
+ </li>
+ <li>
+   MemMgr (memory manager) provides optimized, slab-based memory management
+   in netmail; for the sake of a general WJElement release, the MemMgr API
+   simply calls malloc et al.
+ </li>
+ </ul>
+</li>
+</li>
+</ul>
+</p>
+<p>
+You are free and encouraged to add (and contribute back ;^) these features if
+you are so inclined.  In most cases, there are comments or even empty code
+blocks, just waiting to be filled in.  WJElement is great, but you can make it
+even better!
+</p>
+
+<h1>Contact</h1>
+<p>
+<ul>
+<li>
+<a href="mailto:owens@netmail.com">
+Owen Swerkstrom &lt;owens@netmail.com&gt;
+</a> - community/repository front-man, primary WJElementSchema author
+</li>
+<li>
+<a href="mailto:migahg@netmail.com">
+Micah N Gorrell &lt;micahg@netmail.com&gt;
+</a> - primary WJElement, WJReader, WJWriter author
+</li>
+</ul>
+</p>
+
+
+</body>
+</html>

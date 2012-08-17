@@ -1,0 +1,208 @@
+<html>
+<head>
+<title>WJElement Documentation: wjreader</title>
+</head>
+<body>
+
+<a href="index.html">Index</a>
+
+<h1>WJReader Synopsis</h1>
+<p>
+  The WARP JSON Reader provides the ability to parse a JSON document as a
+  stream.  All parsing is done with a portion of the document loaded into a
+  buffer, and the buffer is reloaded as needed.
+</p>
+<p>
+  This allows the parser to be very fast, but does require that data in the
+  document is accessed in the order of the document.
+</p>
+
+<h1>WJReader Data Types</h1>
+<p>
+<strong>WJReader</strong>
+is The WJReader document, the library's primary structure
+</p>
+<p>
+From wjreader.h:
+<blockquote><pre>
+typedef struct {
+    uint32                  depth;
+    uint32                  maxdepth;
+    void                    *userdata;
+} WJReaderPublic;
+typedef WJReaderPublic *    WJReader;
+</pre></blockquote>
+</p>
+<p>
+<strong>WJRType</strong>
+specifies the type of a value being read.
+</p>
+<p>
+From wjreader.h:
+<blockquote><pre>
+typedef enum {
+    WJR_TYPE_OBJECT         = 'O',
+    WJR_TYPE_ARRAY          = 'A',
+
+    WJR_TYPE_STRING         = 'S',
+    WJR_TYPE_NUMBER         = 'N',
+
+    WJR_TYPE_BOOL           = 'B',
+    WJR_TYPE_TRUE           = 'T',
+    WJR_TYPE_FALSE          = 'F',
+    WJR_TYPE_NULL           = '0',
+
+    WJR_TYPE_UNKNOWN        = '?'
+} WJRType;
+</pre></blockquote>
+</p>
+<p>
+<strong>WJReadCallback</strong>
+ - Generic data reader (from file, socket, decoder, etc.)
+</p>
+<p>
+<blockquote><pre>
+typedef size_t (* WJReadCallback)(char *data, size_t length, size_t seen, void *userdata);
+</pre></blockquote>
+</p>
+
+<h1>WJReader Interfaces</h1>
+<h2>Document/Reader Management</h2>
+<p>
+<strong>WJROpenDocument</strong>
+ - Open a JSON document and prepare to parse.
+</p>
+<p>
+<blockquote><pre>
+WJReader WJROpenDocument(WJReadCallback callback, void *userdata, char *buffer,
+                         size_t buffersize);
+WJReader _WJROpenDocument(WJReadCallback callback, void *userdata, char *buffer,
+                          size_t buffersize, uint32 maxdepth);
+</pre></blockquote>
+</p>
+<p>
+  A callback function must be
+  provided which will be used to read data as it is needed.    The callback is
+  expected to load data into the provided buffer and return the number of
+  bytes that where loaded.  If the number of bytes loaded is less than the
+  requested length then it is assumed that the end of the document has been
+  reached.
+</p>
+<p>
+  If a buffer is provided to WJROpenDocument() then that buffer will be used,
+  rather than allocating a new buffer.  The size of the buffer must be
+  provided as buffersize.  If a buffer is not provided then one will be
+  allocated of size buffersize.
+</p>
+<p>
+  If a buffersize of 0 is passed to WJROpenDocument then the default size will
+  be used (4KB).  Some data is kept in the buffer while parsing, such as
+  element names and values.  If the buffer is not large enough for these then
+  the document will fail to be parsed and will be aborted.
+</p>
+<p>
+<strong>WJROpenFILEDocument</strong>
+ - helper to read from an open FILE *.
+</p>
+<p>
+<blockquote><pre>
+WJReader WJROpenFILEDocument(FILE *jsonfile, char *buffer, size_t buffersize);
+</pre></blockquote>
+</p>
+<p>
+  An alternative method of opening a JSON document, which will provide a
+  proper callback for reading the data from an open FILE *.
+</p>
+<p>
+  As with the standard WJROpenDocument() a buffersize of 0 will use the
+  default buffer size.
+</p>
+<p>
+<strong>WJROpenMemDocument</strong>
+ - helper to read from memory.
+</p>
+<p>
+<blockquote><pre>
+WJReader WJROpenMemDocument(char *json, char *buffer, size_t buffersize);
+</pre></blockquote>
+</p>
+<p>
+  An alternative method of opening a JSON document, which will provide a
+  proper callback for reading from a pre-allocated buffer in memory.
+</p>
+<p>
+  As with the standard WJROpenDocument() a buffersize of 0 will use the
+  default buffer size.
+</p>
+<p>
+<strong>WJRCloseDocument</strong>
+ - Close a WJReader document.
+</p>
+<p>
+<blockquote><pre>
+XplBool WJRCloseDocument(WJReader doc);
+</pre></blockquote>
+</p>
+<h2>JSON Values</h2>
+<p>
+<strong>WJRNext</strong>
+ - Get the type and name of the next element in 'doc'.
+</p>
+<p>
+<blockquote><pre>
+char * WJRNext(char *parent, size_t maxnamelen, WJReader doc);
+</pre></blockquote>
+</p>
+<p>
+  Returns a string, which contains the name of the next element of the
+  specified parent, prefixed by a single character that represents the type.
+  The pointer returned may be used as the parent argument in future calls to
+  WJRNext() in order to return the children of the current object.
+</p>
+<p>
+  If the object's name is larger than the maxnamelen argument then it will be
+  truncated.
+</p>
+<p>
+  These WJReader functions
+  Return the value of the last object returned by WJRNext().    The calling
+  application is expected to know the type of the value, and call the
+  appropriate function.  When possible the value will be converted if it does
+  not match the requested type.
+</p>
+<p>
+  If the buffer is not large enough to contain the entire value then the
+  WJRString() function may return a partial value.  It may be called multiple
+  times until a NULL is returned to ensure that the entire value has been
+  read.
+</p>
+<p>
+<blockquote><pre>
+char *  WJRString(XplBool *complete, WJReader doc);
+char *  WJRStringEx(XplBool *complete, size_t *length, WJReader doc);
+XplBool WJRBoolean(WJReader doc);
+
+int32   WJRInt32(WJReader doc);
+uint32  WJRUInt32(WJReader doc);
+int64   WJRInt64(WJReader doc);
+uint64  WJRUInt64(WJReader doc);
+double  WJRDouble(WJReader doc);
+</pre></blockquote>
+</p>
+<p>
+<strong>WJRNegative</strong>
+ - Check whether the current WJR_TYPE_NUMBER value is negative
+</p>
+<p>
+<blockquote><pre>
+XplBool WJRNegative(WJReader doc);
+</pre></blockquote>
+</p>
+<p>
+  If the current element is a WJR_TYPE_NUMBER then this function can be used
+  to determine if the value is negative or positive.  If negative then TRUE
+  will be returned.
+</p>
+
+</body>
+</html>
