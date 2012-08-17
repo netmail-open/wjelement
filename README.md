@@ -20,5 +20,5 @@ in ways we haven't thought of.  Read the docs/headers, have fun, and if you
 use it for something awesome, let us know about it!  :^)
 
 
-Owen Swerkstrom <owens@netmail.com>  - community/repository front-man
-Micah N Gorrell <micahg@netmail.com> - primary author of WJElement code
+* Owen Swerkstrom <owens@netmail.com>  - community/repository front-man
+* Micah N Gorrell <micahg@netmail.com> - primary author of WJElement code
