@@ -128,6 +128,8 @@ typedef enum {
  </li>
  <li>
    If the element does not exist then no elements are created or modified.
+ </li>
+ <li>
    When applicable a NULL will be returned.  Otherwise a value that does
    not match the requested value will be returned.
  </li>
@@ -207,7 +209,7 @@ XplBool WJERename(WJElement document, const char *name);
 </pre></blockquote>
 </p>
 <p>
-<strong>WJERename</strong>
+<strong>WJEMergeObjects</strong>
  - Merge all fields from one object to another
 </p>
 <p>
