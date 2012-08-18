@@ -5,7 +5,9 @@ WJElement is a very flexible JSON library developed by Messaging Architects.
 It was created for MA's "WARP" webserver, and is built on top of the
 (also-included) lower-level WJReader and WJWriter libraries.
 
-See the [wiki](wjelement/wiki) for more information and full [API](wjelement/wiki/WJElement-API) reference.
+See the [wiki](wjelement/wiki) for more information,
+[example code](wjelement/wiki/WJElement-Example)
+and full [API](wjelement/wiki/WJElement-API) reference.
 
 WJReader and WJWriter are optimized for speed and memory-efficiency.
 WJElement focuses on flexibility and handy features, allowing C code to
