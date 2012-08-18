@@ -29,12 +29,20 @@ var doc = {
 	]
 };
 var person = null;
+
+for(i in doc.crew) {
+	person = doc.crew[i];
+	if(person.born == 2468) {
+		person.born = 2486;
+	}
+}
+
 for(i in doc.crew) {
 	person = doc.crew[i];
 	console.log(person.name +" ("+ person.job +") is "+ (2517 - person.born));
 }
-console.log(JSON.stringify(doc));
 
+console.log(JSON.stringify(doc));
 */
 
 
@@ -64,6 +72,8 @@ int main(int argc, char **argv) {
 	WJEString(doc, "crew[-1].name", WJE_SET, "Jayne Cobb");
 	WJEString(doc, "crew[-1].job", WJE_SET, "public relations");
 	WJEInt64(doc, "crew[-1].born", WJE_SET, 2485);
+
+	WJEInt64(doc, "crew[].born == 2468", WJE_SET, 2486);  /* note: awesome! */
 
 	while((person = _WJEObject(doc, "crew[]", WJE_GET, &person))) {
 		printf("%s (%s) is %d\n",
