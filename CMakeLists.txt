@@ -50,6 +50,10 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ENABLE_TESTING(1)
 
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/documentation/
+	DESTINATION doc/wjelement/
+)
+
 include_directories(include)
 add_subdirectory(src)
 add_subdirectory(include)
