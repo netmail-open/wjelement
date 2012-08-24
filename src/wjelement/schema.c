@@ -18,6 +18,9 @@
 
 #include "element.h"
 #include <stdlib.h>
+#ifdef HAVE_REGEX_H
+#include <regex.h>
+#endif
 
 
 static char *CatString(char *prefix, char *str) {
@@ -353,7 +356,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 	if(!schema) {
 		schemaGiven = FALSE;
 		/* fetch document's schema if we don't have it already */
-		if(loadcb && (str = WJEString(document, "describedby", WJE_GET, NULL))) {
+		if(loadcb &&
+		   (str = WJEString(document, "describedby", WJE_GET, NULL))) {
 			schema = loadcb(str, client, __FILE__, __LINE__);
 		}
 	}
@@ -435,7 +439,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 									   arr->name)) {
 						fail = TRUE;
 						if(err) {
-							err(client, "% failed validation", arr->name);
+							err(client, "%s failed validation", arr->name);
 						}
 					}
 				}
@@ -443,7 +447,38 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			anyFail = anyFail || fail;
 
 		} else if(!stricmp(memb->name, "patternProperties")) {
-			/* TODO: verify this if we ever care about it */
+#ifdef HAVE_REGEX_H
+			regex_t preg;
+
+			if(document && memb->type == WJR_TYPE_OBJECT) {
+				arr = NULL;
+				while((arr = WJEGet(memb, "[]", arr))) {
+					if(!regcomp(&preg, arr->name, REG_EXTENDED | REG_NOSUB)) {
+						data = NULL;
+						while((data = WJEGet(document, "[]", data))) {
+							if(!regexec(&preg, data->name, 0, NULL, 0)) {
+								/* found a matching property */
+								if(!SchemaValidate(memb, data, err,
+												   loadcb, freecb,
+												   client, arr->name)) {
+									fail = TRUE;
+									if(err) {
+										err(client, "%s failed validation",
+											arr->name);
+									}
+								}
+							}
+						}
+					} else {
+						fail = TRUE;
+						if(err) {
+							err(client, "%s failed to build regex", arr->name);
+						}
+					}
+				}
+			}
+			anyFail = anyFail || fail;
+#endif
 
 		} else if(!stricmp(memb->name, "additionalProperties")) {
 			sub = WJEObject(schema, "properties", WJE_GET);

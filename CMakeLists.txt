@@ -26,6 +26,14 @@ add_definitions(-DHAVE_CONFIG_H)
 check_include_files(string.h HAVE_STRING_H)
 check_symbol_exists(strcasecmp "strings.h" HAVE_STRCASECMP)
 
+check_include_files(regex.h HAVE_REGEX_H)
+if(HAVE_REGEX_H)
+	add_definitions(-DHAVE_REGEX_H)
+else(HAVE_REGEX_H)
+	message("***  WARNING: GNU C regex library not found.")
+	message("     WJESchemaValidate() will not support patternProperties")
+endif(HAVE_REGEX_H)
+
 set(OPENSSL_LIBS ssl crypto)
 set(PTHREAD_LIBS pthread)
 
