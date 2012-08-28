@@ -18,6 +18,7 @@
 
 #include "element.h"
 #include <stdlib.h>
+#include <arpa/inet.h>
 #ifdef HAVE_REGEX_H
 #include <regex.h>
 #endif
@@ -352,6 +353,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 	XplBool schemaGiven = TRUE;
 	XplBool fail = FALSE;
 	XplBool anyFail = FALSE;
+	struct in6_addr ip;
 
 	if(!schema) {
 		schemaGiven = FALSE;
@@ -779,23 +781,74 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				  !stricmp(memb->name, "description")) {
 
 		} else if(!stricmp(memb->name, "format")) {
-			/* not required to validate, TODO: validate anyway */
+#ifdef HAVE_REGEX_H
+			/* spec says we're not required to validate, but do it anyway! */
+			/*
+			  TODO: it could get CPU-wasteful to compile regex's each time.
+			  we could create as needed and keep them someplace, but where?
+			*/
+			regex_t freg;
 			str = WJEString(memb, NULL, WJE_GET, NULL);
+			str2 = NULL;
 			if(!stricmp(str, "date-time")) {
+				str2 = "^[0-9][0-9][0-9][0-9](-[0-1][0-9](-[0-3][0-9]"
+					"(T[0-9][0-9](:[0-9][0-9](:[0-9][0-9])?)?)?)?)?Z?$";
 			} else if(!stricmp(str, "date")) {
+				str2 = "^[0-9][0-9][0-9][0-9](-[0-1][0-9](-[0-3][0-9])?)?$";
 			} else if(!stricmp(str, "time")) {
+				str2 = "^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$";
 			} else if(!stricmp(str, "utc-millisec")) {
+				fail = (document->type != WJR_TYPE_NUMBER);
 			} else if(!stricmp(str, "regex")) {
+				if(regcomp(&freg, WJEString(document, NULL, WJE_GET, ""),
+						   REG_EXTENDED | REG_NOSUB)) {
+					fail = TRUE;
+				}
 			} else if(!stricmp(str, "color")) {
+				str2 = "^((#([0-9A-F]{3,6}))|(aqua)|(black)|(blue)|(fuchsia)"
+					"|(gray)|(green)|(lime)|(maroon)|(navy)|(olive)|(orange)"
+					"|(purple)|(red)|(silver)|(teal)|(white)|(yellow))$";
+				/* note: excludes "rgb(1, 2, 3) etc */
 			} else if(!stricmp(str, "style")) {
+				str2 = "^([-a-z]+\\s?:\\s?[-0-9a-z\\(\\)\"',. ]+;?\\s?)*$";
+				/* if you want this for real, be my guest!
+				   (but please don't do it with a regex...) */
 			} else if(!stricmp(str, "phone")) {
+				str2 = "^\\+?\\(?[0-9]{2,3}?\\)?[-. ]?([0-9]{2,3})?[-. ])?"
+					"([0-9]{3})[-. ]?([0-9]{4})[-. ]?([xXeE][0-9]{1,10})?$";
 			} else if(!stricmp(str, "uri")) {
+				str2 = "^([A-Z][-A-Z0-9+&@#/%=~_|]*)://"
+					"[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|]$";
 			} else if(!stricmp(str, "email")) {
+				str2 = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$";
 			} else if(!stricmp(str, "ip-address")) {
+				if(inet_pton(AF_INET, WJEString(document, NULL, WJE_GET, ""),
+							 &ip) != 1) {
+					fail = TRUE;
+				}
 			} else if(!stricmp(str, "ipv6")) {
+				if(inet_pton(AF_INET6, WJEString(document, NULL, WJE_GET, ""),
+							  &ip) != 1) {
+					fail = TRUE;
+				}
 			} else if(!stricmp(str, "host-name")) {
+				str2 = "^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*"
+					"([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$";
 			} else {
+				/* unknown or user-defined format, let it pass */
 			}
+			if(str2 && !regcomp(&freg, str2,
+								REG_ICASE | REG_EXTENDED | REG_NOSUB) &&
+			   regexec(&freg, WJEString(document, NULL, WJE_GET, ""),
+					   0, NULL, 0)) {
+				fail = TRUE;
+			}
+			if(fail && err) {
+				err(client, "%s: '%s' does not match '%s' format.",
+					name, WJEString(document, NULL, WJE_GET, ""), str);
+			}
+			anyFail = anyFail || fail;
+#endif
 
 		} else if(!stricmp(memb->name, "divisibleBy")) {
 			if(document && document->type == WJR_TYPE_NUMBER &&
