@@ -6,7 +6,7 @@
 
 <h1>About</h1>
 <p>
-WJElement - JSON manipulation in C
+WJElement - <a href="http://json.org/">JSON</a> manipulation in C
 </p>
 <p>
 WJElement is a very flexible JSON library developed by Messaging Architects.
@@ -22,6 +22,12 @@ WJReader and WJWriter are optimized for speed and memory-efficiency.
 WJElement focuses on flexibility and handy features, allowing C code to
 manipulate JSON documents with as few statements (fewer, sometimes!) as
 JavaScript itself.
+ <ul>
+ <li>
+   WJElement prides complete
+   <a href="http://json-schema.org/">JSON-schema</a> validation
+ </li>
+ </ul>
 </li>
 </ul>
 </p>
@@ -87,18 +93,15 @@ Floating-point number values (unimplemented)
  </ul>
 </li>
 <li>
-<a href="http://json-schema.org">Schema</a> validation (useful, incomplete)
+Schema "backlink"
  <ul>
  <li>
-   "format" validation on strings is unimplemented.  The json-schema draft
-   specification allows this to be missing, and so far, so do we.
- </li>
- <li>
-   "backlinks"... This is something we're making use of in netmail, but is not
-   part of the base json-schema spec.  You can safely ignore it (or dig in and
-   use it, why not?  :^)
+   This is something we're making use of in netmail, but is not
+   part of the base <a href="http://json-schema.org/">json-schema spec</a>.
+   You can safely ignore it (or dig in and use it, why not?  :^)
  </li>
  </ul>
+</li>
 <li>
 Libraries, headers (stubs and #define's)
  <ul>
@@ -118,8 +121,8 @@ Libraries, headers (stubs and #define's)
 </ul>
 </p>
 <p>
-You are free and encouraged to add (and contribute back ;^) these features if
-you are so inclined.  In most cases, there are comments or even empty code
+You are free and encouraged to add and contribute features if
+you are so inclined.  In some cases, there are comments or even empty code
 blocks, just waiting to be filled in.  WJElement is great, but you can make it
 even better!
 </p>
