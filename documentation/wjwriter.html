@@ -159,6 +159,12 @@ XplBool WJWCloseObject(WJWriter doc);
   provided.
 </p>
 <p>
+  A string value may be written in multiple pieces. A JSON string will be
+  started with the first call to WJWString, or WJWStringN and the string will
+  not be completed until the "done" argument is set to TRUE or there is a call
+  to write a non-string type value.
+</p>
+<p>
 <blockquote><pre>
 XplBool WJWStringN(char *name, char *value, size_t length, XplBool done, WJWriter doc);
 XplBool WJWString(char *name, char *value, XplBool done, WJWriter doc);
