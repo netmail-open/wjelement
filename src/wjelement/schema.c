@@ -18,7 +18,9 @@
 
 #include "element.h"
 #include <stdlib.h>
-#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 #ifdef HAVE_REGEX_H
 #include <regex.h>
 #endif
@@ -353,7 +355,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 	XplBool schemaGiven = TRUE;
 	XplBool fail = FALSE;
 	XplBool anyFail = FALSE;
-	struct in6_addr ip;
+	struct addrinfo *ip;
 
 	if(!schema) {
 		schemaGiven = FALSE;
@@ -756,6 +758,20 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			anyFail = anyFail || fail;
 
 		} else if(!stricmp(memb->name, "pattern")) {
+#ifdef HAVE_REGEX_H
+			regex_t pat;
+			str = WJEString(memb, NULL, WJE_GET, NULL);
+			if(str && !regcomp(&pat, str, REG_EXTENDED | REG_NOSUB) &&
+			   regexec(&pat, WJEString(document, NULL, WJE_GET, ""),
+					   0, NULL, 0)) {
+				fail = TRUE;
+			}
+			if(fail && err) {
+				err(client, "%s: '%s' does not match '%s' format.",
+					name, WJEString(document, NULL, WJE_GET, ""), str);
+			}
+			anyFail = anyFail || fail;
+#endif
 
 		} else if(!stricmp(memb->name, "enum")) {
 			if(document && memb->type == WJR_TYPE_ARRAY) {
@@ -821,15 +837,13 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 					"[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|]$";
 			} else if(!stricmp(str, "email")) {
 				str2 = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$";
-			} else if(!stricmp(str, "ip-address")) {
-				if(inet_pton(AF_INET, WJEString(document, NULL, WJE_GET, ""),
-							 &ip) != 1) {
+			} else if(!stricmp(str, "ip-address") ||
+					  !stricmp(str, "ipv6")) {
+				if(getaddrinfo(WJEString(document, NULL, WJE_GET, ""),
+							   NULL, NULL, &ip)) {
 					fail = TRUE;
-				}
-			} else if(!stricmp(str, "ipv6")) {
-				if(inet_pton(AF_INET6, WJEString(document, NULL, WJE_GET, ""),
-							  &ip) != 1) {
-					fail = TRUE;
+				} else {
+					freeaddrinfo(ip);
 				}
 			} else if(!stricmp(str, "host-name")) {
 				str2 = "^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*"
