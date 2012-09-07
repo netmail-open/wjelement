@@ -19,8 +19,6 @@
 #include "element.h"
 #include <stdlib.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
 #ifdef HAVE_REGEX_H
 #include <regex.h>
 #endif
