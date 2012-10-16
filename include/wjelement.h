@@ -269,7 +269,7 @@ EXPORT void WJEHash(WJElement document, WJEHashCB update, void *context);
   WJESchemaFreeCB are called when schema is no longer needed.
  */
 
-	typedef WJElement (* WJESchemaLoadCB)(const char *name, void *client, const char *file, const int line);
+typedef WJElement (* WJESchemaLoadCB)(const char *name, void *client, const char *file, const int line);
 typedef void (* WJESchemaFreeCB)(WJElement schema, void *client);
 typedef void (* WJESchemaMatchCB)(WJElement schema, const char *selector, void *client);
 typedef void (* WJEErrCB)(void *client, const char *format, ...);
