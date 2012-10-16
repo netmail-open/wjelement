@@ -376,7 +376,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 		/* look through any "extends" schema(s) */
 		if((str = WJEString(schema, "extends", WJE_GET, NULL))) {
 			sub = loadcb(str, client, __FILE__, __LINE__);
-			SchemaValidate(sub, document, err, loadcb, freecb, client, name);
+			anyFail = anyFail || SchemaValidate(sub, document, err,
+												loadcb, freecb, client, name);
 			if(sub && freecb) {
 				freecb(sub, client);
 				sub = NULL;
@@ -387,7 +388,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			while((str = _WJEString(schema, "extends[]", WJE_GET, &last,
 									NULL))) {
 				sub = loadcb(str, client, __FILE__, __LINE__);
-				SchemaValidate(sub, document, err, loadcb, freecb, client, name);
+				anyFail = anyFail || SchemaValidate(sub, document, err, loadcb,
+													freecb, client, name);
 				if(sub && freecb) {
 					freecb(sub, client);
 					sub = NULL;
@@ -437,7 +439,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				arr = NULL;
 				while((arr = WJEGet(memb, "[]", arr))) {
 					data = WJEGet(document, arr->name, NULL);
-					if(!SchemaValidate(memb, data, err, loadcb, freecb, client,
+					if(!SchemaValidate(arr, data, err, loadcb, freecb, client,
 									   arr->name)) {
 						fail = TRUE;
 						if(err) {
@@ -460,7 +462,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 						while((data = WJEGet(document, "[]", data))) {
 							if(!regexec(&preg, data->name, 0, NULL, 0)) {
 								/* found a matching property */
-								if(!SchemaValidate(memb, data, err,
+								if(!SchemaValidate(arr, data, err,
 												   loadcb, freecb,
 												   client, arr->name)) {
 									fail = TRUE;
