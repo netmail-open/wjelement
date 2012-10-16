@@ -275,6 +275,9 @@ EXPORT void WJESchemaGetAllSelectors(char *describedby,
 
 
 static XplBool ValidateType(WJElement value, char *type) {
+	if(!value) {
+		return FALSE;
+	}
 	if(!stricmp(type, "string")) {
 		return (value->type == WJR_TYPE_STRING);
 	} else if(!stricmp(type, "number")) {
@@ -432,7 +435,13 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				fail = !fail;
 			}
 			if(err && fail) {
-				err(client, "%s is of incorrect type", document->name);
+				if(name) {
+					err(client, "%s is of incorrect type", name);
+				} else if(document) {
+					err(client, "%s is of incorrect type", document->name);
+				} else {
+					err(client, "incorrect type");
+				}
 			}
 			anyFail = anyFail || fail;
 
@@ -838,7 +847,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				str2 = "^([A-Z][-A-Z0-9+&@#/%=~_|]*)://"
 					"[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|]$";
 			} else if(!stricmp(str, "email")) {
-				str2 = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$";
+				str2 = "^[A-Z0-9._%+\\-]+@[A-Z0-9.-]+\\.[A-Z]{2,10}$";
 			} else if(!stricmp(str, "ip-address") ||
 					  !stricmp(str, "ipv6")) {
 				if(getaddrinfo(WJEString(document, NULL, WJE_GET, ""),
