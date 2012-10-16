@@ -283,7 +283,9 @@ static XplBool ValidateType(WJElement value, char *type) {
 		//NOTE: WJElement doesn't do floats
 		return (value->type == WJR_TYPE_NUMBER);
 	} else if(!stricmp(type, "boolean")) {
-		return (value->type == WJR_TYPE_BOOL);
+		return (value->type == WJR_TYPE_BOOL ||
+				value->type == WJR_TYPE_TRUE ||
+				value->type == WJR_TYPE_FALSE);
 	} else if(!stricmp(type, "object")) {
 		return (value->type == WJR_TYPE_OBJECT);
 	} else if(!stricmp(type, "array")) {
