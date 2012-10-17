@@ -276,14 +276,14 @@ EXPORT void WJESchemaGetAllSelectors(char *describedby,
 
 static XplBool ValidateType(WJElement value, char *type) {
 	if(!value) {
-		return FALSE;
+		return TRUE;  /* not a crime here to be absent, only wrong-typed */
 	}
 	if(!stricmp(type, "string")) {
 		return (value->type == WJR_TYPE_STRING);
 	} else if(!stricmp(type, "number")) {
 		return (value->type == WJR_TYPE_NUMBER);
 	} else if(!stricmp(type, "integer")) {
-		//NOTE: WJElement doesn't do floats
+		/* NOTE: WJElement doesn't do floats */
 		return (value->type == WJR_TYPE_NUMBER);
 	} else if(!stricmp(type, "boolean")) {
 		return (value->type == WJR_TYPE_BOOL ||
@@ -606,7 +606,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			}
 			anyFail = anyFail || fail;
 
-		} else if(!stricmp(memb->name, "required")) {
+		} else if(!stricmp(memb->name, "required") &&
+				  WJEBool(memb, NULL, WJE_GET, FALSE)) {
 			fail = (!document || document->type == WJR_TYPE_UNKNOWN);
 			if(fail && err) {
 				err(client, "required item '%s' not found.", name);
@@ -657,8 +658,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 		} else if(!stricmp(memb->name, "minimum")) {
 			if(document && memb->type == WJR_TYPE_NUMBER) {
 				val = WJENumber(memb, NULL, WJE_GET, 0);
+				num = WJENumber(document, NULL, WJE_GET, 0);
 				if(WJEBool(schema, "exclusiveMinimum", WJE_GET, FALSE)) {
-					num = WJENumber(document, NULL, WJE_GET, 0);
 					fail = (num < val && num != val);
 				} else {
 					fail = (num < val);
@@ -673,8 +674,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 		} else if(!stricmp(memb->name, "maximum")) {
 			if(document && memb->type == WJR_TYPE_NUMBER) {
 				val = WJENumber(memb, NULL, WJE_GET, 0);
+				num = WJENumber(document, NULL, WJE_GET, 0);
 				if(WJEBool(schema, "exclusiveMaximum", WJE_GET, FALSE)) {
-					num = WJENumber(document, NULL, WJE_GET, 0);
 					fail = (num > val && num != val);
 				} else {
 					fail = (num > val);
