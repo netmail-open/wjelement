@@ -12,7 +12,7 @@ and full [API](wjelement/wiki/WJElement-API) reference.
 WJReader and WJWriter are optimized for speed and memory-efficiency.
 WJElement focuses on flexibility and handy features, allowing C code to
 manipulate JSON documents with as few statements (fewer, sometimes!) as
-JavaScript itself.
+JavaScript itself.  WJElement is also capable of json-schema validation.
 
 WJElement has grown into a generally-useful library, and is used across
 Messaging Architects' netmail and related projects.  It is loved enough by
@@ -24,5 +24,5 @@ in ways we haven't thought of.  Read the docs/headers, have fun, and if you
 use it for something awesome, let us know about it!  :^)
 
 
-* Owen Swerkstrom <<owens@netmail.com>> - community/repository front-man
-* Micah N Gorrell <<micahg@netmail.com>> - primary author of WJElement code
+* Owen Swerkstrom <owens@netmail.com> - community/repo front-man, WJESchema
+* Micah N Gorrell micahg@netmail.com - primary author of WJElement
