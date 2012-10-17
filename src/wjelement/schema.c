@@ -789,7 +789,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				val = 0;
 				arr = NULL;
 				while((arr = WJEGet(memb, "[]", arr))) {
-					if(!CompareJson(document, memb)) {
+					if(!CompareJson(document, arr)) {
 						/* found a match */
 						val = 1;
 					}
