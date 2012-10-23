@@ -420,7 +420,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				while((arr = WJEGet(memb, "[]", arr))) {
 					if(arr->type == WJR_TYPE_STRING) {
 						str = WJEString(arr, NULL, WJE_GET, NULL);
-						if(ValidateType(document, str)) {
+						if(str && ValidateType(document, str)) {
 							fail = FALSE;
 						}
 					}
