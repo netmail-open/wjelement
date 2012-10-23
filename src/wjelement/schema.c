@@ -416,11 +416,12 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 		   !stricmp(memb->name, "disallow")) {
 			if(memb->type == WJR_TYPE_ARRAY) {
 				arr = NULL;
+				fail = TRUE;
 				while((arr = WJEGet(memb, "[]", arr))) {
 					if(arr->type == WJR_TYPE_STRING) {
-						str = WJEString(memb, NULL, WJE_GET, NULL);
-						if(!ValidateType(document, str)) {
-							fail = TRUE;
+						str = WJEString(arr, NULL, WJE_GET, NULL);
+						if(ValidateType(document, str)) {
+							fail = FALSE;
 						}
 					}
 				}
