@@ -770,6 +770,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 									name, i, name, num);
 							}
 						}
+						MemFree(str);
+						MemFree(str2);
 					}
 				}
 				if(val) {
