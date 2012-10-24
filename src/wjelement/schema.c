@@ -423,12 +423,23 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 						if(str && ValidateType(document, str)) {
 							fail = FALSE;
 						}
+					} else if(arr->type == WJR_TYPE_OBJECT) {
+						if(SchemaValidate(arr, document, err,
+										  loadcb, freecb, client, name)) {
+							fail = FALSE;
+						}
 					}
 				}
 			} else if(memb->type == WJR_TYPE_STRING) {
 				str = WJEString(memb, NULL, WJE_GET, NULL);
 				if(!ValidateType(document, str)) {
 					fail = TRUE;
+				}
+			} else if(memb->type == WJR_TYPE_OBJECT) {
+				/* spec isn't clear here, but we do it for arrays, so... */
+				if(SchemaValidate(memb, document, err,
+								  loadcb, freecb, client, name)) {
+					fail = FALSE;
 				}
 			}
 
