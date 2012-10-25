@@ -496,6 +496,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 								}
 							}
 						}
+						regfree(&preg);
 					} else {
 						fail = TRUE;
 						if(err) {
@@ -791,6 +792,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			   regexec(&pat, WJEString(document, NULL, WJE_GET, ""),
 					   0, NULL, 0)) {
 				fail = TRUE;
+				regfree(&pat);
 			}
 			if(fail && err) {
 				err(client, "%s: '%s' does not match '%s' format.",
@@ -845,6 +847,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				if(regcomp(&freg, WJEString(document, NULL, WJE_GET, ""),
 						   REG_EXTENDED | REG_NOSUB)) {
 					fail = TRUE;
+					regfree(&freg);
 				}
 			} else if(!stricmp(str, "color")) {
 				str2 = "^((#([0-9A-F]{3,6}))|(aqua)|(black)|(blue)|(fuchsia)"
@@ -882,6 +885,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			   regexec(&freg, WJEString(document, NULL, WJE_GET, ""),
 					   0, NULL, 0)) {
 				fail = TRUE;
+				regfree(&freg);
 			}
 			if(fail && err) {
 				err(client, "%s: '%s' does not match '%s' format.",
