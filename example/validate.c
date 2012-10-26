@@ -90,7 +90,9 @@ int main(int argc, char **argv) {
 	}
 
 	WJEDump(json);
+	printf("json: %s\n", readjson->depth ? "bad" : "good");
 	WJEDump(schema);
+	printf("schema: %s\n", readschema->depth ? "bad" : "good");
 
 	if(WJESchemaValidate(schema, json, schema_error, schema_load, NULL,
 						 format)) {
