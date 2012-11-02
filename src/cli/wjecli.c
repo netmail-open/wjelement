@@ -44,57 +44,6 @@ static void usage(char *arg0)
 	}
 }
 
-static char * nextArg(int *c, int argc, char **argv)
-{
-	if ((*c) > argc || (*c) < 0) {
-		return(NULL);
-	}
-
-	return(argv[(*c)++]);
-}
-
-static char * escapeString(char *src)
-{
-	size_t		l;
-	char		*s, *d, *r;
-
-	if (!src) {
-		return(NULL);
-	}
-
-	/* Determine the size needed to hold the escaped string */
-	l = 1;
-	for (s = src; *s; s++) {
-		switch (*s) {
-			case '"':
-			case '\\':
-				l++;
-				/* fallthrough */
-
-			default:
-				l++;
-		}
-	}
-
-	if ((r = MemMallocWait(l))) {
-		for (s = src, d = r; *s; s++) {
-			switch (*s) {
-				case '"':
-				case '\\':
-					*(d++) = '\\';
-					/* fallthrough */
-
-				default:
-					*(d++) = *s;
-					break;
-			}
-		}
-		*d = '\0';
-	}
-
-	return(r);
-}
-
 char * nextField(char *value, char **end)
 {
 	char		*d, *s;
@@ -161,7 +110,6 @@ static int runcmd(WJElement *doc, WJElement *current, char *cmd, char *args)
 {
 	WJECLIcmd		*command;
 	int				i;
-	int				r;
 
 	for (i = 0; (command = &WJECLIcmds[i]) && command->name; i++) {
 		if (!stricmp(cmd, command->name)) {
@@ -191,7 +139,6 @@ int main(int argc, char **argv)
 	WJElement	current		= NULL;
 	int			r			= 0;
 	WJReader	reader;
-	WJWriter	writer;
 	char		*cmd, *args;
 	char		line[1024];
 

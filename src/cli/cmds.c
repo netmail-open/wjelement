@@ -412,7 +412,7 @@ static int WJECLIpwd(WJElement *doc, WJElement *current, char *line)
 static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 {
 	char		*selector;
-	WJElement	t, n, p;
+	WJElement	t, n;
 	WJReader	reader;
 	int			r = 0;
 
