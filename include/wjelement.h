@@ -236,6 +236,8 @@ typedef enum {
 #define  WJEInt64(	container, path, action,		value)	__WJEInt64(		(container), (path), (action), NULL,	(value),	__FILE__, __LINE__)
 #define _WJEUInt64(	container, path, action, last,	value)	__WJEUInt64(	(container), (path), (action), (last),	(value),	__FILE__, __LINE__)
 #define  WJEUInt64(	container, path, action,		value)	__WJEUInt64(	(container), (path), (action), NULL,	(value),	__FILE__, __LINE__)
+#define _WJEDouble( container, path, action, last,	value)	__WJEDouble(	(container), (path), (action), (last),	(value),	__FILE__, __LINE__)
+#define  WJEDouble( container, path, action,		value)	__WJEDouble(	(container), (path), (action), NULL,	(value),	__FILE__, __LINE__)
 
 EXPORT XplBool		__WJEBool(		WJElement container, char *path, WJEAction action, WJElement *last, XplBool value,	const char *file, const int line);
 EXPORT char *		__WJEString(	WJElement container, char *path, WJEAction action, WJElement *last, char *value,	const char *file, const int line);
@@ -246,6 +248,7 @@ EXPORT int32		__WJEInt32(		WJElement container, char *path, WJEAction action, WJ
 EXPORT uint32		__WJEUInt32(	WJElement container, char *path, WJEAction action, WJElement *last, uint32 value,	const char *file, const int line);
 EXPORT int64		__WJEInt64(		WJElement container, char *path, WJEAction action, WJElement *last, int64 value,	const char *file, const int line);
 EXPORT uint64		__WJEUInt64(	WJElement container, char *path, WJEAction action, WJElement *last, uint64 value,	const char *file, const int line);
+EXPORT double		__WJEDouble(	WJElement container, char *path, WJEAction action, WJElement *last, double value,	const char *file, const int line);
 
 /*
 	Find, create or update an element by name instead of path.  This allows
