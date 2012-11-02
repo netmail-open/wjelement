@@ -263,16 +263,19 @@ static WJElement _WJELoad(_WJElement *parent, WJReader reader, char *where, WJEL
 				break;
 
 			case WJR_TYPE_NUMBER:
+				l->value.number.hasDecimalPoint = WJRIntOrDouble(reader,
+								&l->value.number.i,
+								&l->value.number.d);
+
+
 				if (WJRNegative(reader)) {
 					/*
 						Store the number as a positive, but keep track of the
 						fact that it was negative.
 					*/
-					l->negative = TRUE;
-					l->value.number = (-WJRInt64(reader));
+					l->value.number.negative = TRUE;
 				} else {
-					l->negative = FALSE;
-					l->value.number = WJRUInt64(reader);
+					l->value.number.negative = FALSE;
 				}
 				break;
 
@@ -304,9 +307,10 @@ EXPORT WJElement _WJEOpenDocument(WJReader reader, char *where, WJELoadCB loadcb
 static WJElement _WJECopy(_WJElement *parent, WJElement original, WJELoadCB loadcb, void *data, const char *file, const int line)
 {
 	_WJElement	*l = NULL;
+	_WJElement	*o;
 	WJElement	c;
 
-	if (!original) {
+	if (!(o = (_WJElement *) original)) {
 		return(NULL);
 	}
 
@@ -334,7 +338,10 @@ static WJElement _WJECopy(_WJElement *parent, WJElement original, WJELoadCB load
 				break;
 
 			case WJR_TYPE_NUMBER:
-				l->value.number = WJENumber(original, NULL, WJE_GET, 0);
+				l->value.number.negative		= o->value.number.negative;
+				l->value.number.i				= o->value.number.i;
+				l->value.number.d				= o->value.number.d;
+				l->value.number.hasDecimalPoint	= o->value.number.hasDecimalPoint;
 				break;
 
 			case WJR_TYPE_TRUE:
@@ -441,10 +448,18 @@ EXPORT XplBool WJEWriteDocument(WJElement document, WJWriter writer, char *name)
 			break;
 
 		case WJR_TYPE_NUMBER:
-			if (!current->negative) {
-				WJWUInt64(name, current->value.number, writer);
+			if (current->value.number.hasDecimalPoint) {
+				if (!current->value.number.negative) {
+					WJWDouble(name, current->value.number.d, writer);
+				} else {
+					WJWDouble(name, -current->value.number.d, writer);
+				}
 			} else {
-				WJWInt64(name, current->value.number, writer);
+				if (!current->value.number.negative) {
+					WJWUInt64(name, current->value.number.i, writer);
+				} else {
+					WJWInt64(name, -current->value.number.i, writer);
+				}
 			}
 			break;
 

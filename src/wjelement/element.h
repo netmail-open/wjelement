@@ -35,10 +35,15 @@ typedef struct {
 	union {
 		char			*string;
 		XplBool			boolean;
-		uint64			number;
-	} value;
 
-	XplBool				negative;
+		struct {
+			uint64		i;
+			double		d;
+
+			XplBool		hasDecimalPoint;
+			XplBool		negative;
+		} number;
+	} value;
 
 	char				_name[];
 } _WJElement;

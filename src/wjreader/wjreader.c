@@ -1240,13 +1240,24 @@ EXPORT char * WJRStringEx(XplBool *complete, size_t *length, WJReader indoc)
 	return(NULL);
 }
 
-typedef enum {
+typedef enum
+{
 	WJR_TYPE_INT32 = 0,
 	WJR_TYPE_UINT32,
 	WJR_TYPE_INT64,
 	WJR_TYPE_UINT64,
 	WJR_TYPE_DOUBLE,
+
+	WJR_TYPE_MIXED
 } WJRNumberType;
+
+typedef struct
+{
+	XplBool		hasDecimalPoint;
+
+	uint64		i;
+	double		d;
+} WJRMixedNumber;
 
 static void WJRNumber(void *value, WJRNumberType type, WJReader indoc)
 {
@@ -1272,6 +1283,16 @@ static void WJRNumber(void *value, WJRNumberType type, WJReader indoc)
 				break;
 			case WJR_TYPE_DOUBLE:
 				*((double *) value) = strtod(doc->read, &end);
+				break;
+			case WJR_TYPE_MIXED:
+				((WJRMixedNumber *) value)->hasDecimalPoint = FALSE;
+				((WJRMixedNumber *) value)->i = strtoul(doc->read, &end, 0);
+
+				if (end && '.' == *end) {
+					/* A decimal point was found, parse again as a double */
+					((WJRMixedNumber *) value)->hasDecimalPoint = TRUE;
+					((WJRMixedNumber *) value)->d = strtod(doc->read, &end);
+				}
 				break;
 		}
 
@@ -1302,6 +1323,16 @@ static void WJRNumber(void *value, WJRNumberType type, WJReader indoc)
 				case WJR_TYPE_DOUBLE:
 					*((double *) value) = strtod(doc->read, &end);
 					break;
+				case WJR_TYPE_MIXED:
+					((WJRMixedNumber *) value)->hasDecimalPoint = FALSE;
+					((WJRMixedNumber *) value)->i = strtoul(doc->read, &end, 0);
+
+					if (end && '.' == *end) {
+						/* A decimal point was found, parse again as a double */
+						((WJRMixedNumber *) value)->hasDecimalPoint = TRUE;
+						((WJRMixedNumber *) value)->d = strtod(doc->read, &end);
+					}
+					break;
 			}
 		}
 
@@ -1329,7 +1360,6 @@ EXPORT XplBool WJRNegative(WJReader indoc)
 
 	return(doc->negative);
 }
-
 
 EXPORT int32 WJRInt32(WJReader doc)
 {
@@ -1369,6 +1399,32 @@ EXPORT double WJRDouble(WJReader doc)
 
 	WJRNumber(&result, WJR_TYPE_DOUBLE, doc);
 	return(result);
+}
+
+/*
+	Parse the number in the JSON document as either a UInt64 or a double,
+	depending on the existance of a decimal point.
+
+	Return TRUE if there was a decimal point, and fill out *d. If there is no
+	decimal point then return FALSE and fill out *i.
+*/
+EXPORT XplBool WJRIntOrDouble(WJReader doc, uint64 *i, double *d)
+{
+	WJRMixedNumber result;
+
+	WJRNumber(&result, WJR_TYPE_MIXED, doc);
+
+	if (result.hasDecimalPoint) {
+		if (i) *i = (uint64) result.d;
+		if (d) *d = result.d;
+
+		return(TRUE);
+	} else {
+		if (i) *i = result.i;
+		if (d) *d = (double) result.i;
+
+		return(FALSE);
+	}
 }
 
 EXPORT XplBool WJRBoolean(WJReader indoc)

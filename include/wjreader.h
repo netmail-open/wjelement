@@ -116,6 +116,16 @@ EXPORT uint64				WJRUInt64(WJReader doc);
 EXPORT double				WJRDouble(WJReader doc);
 
 /*
+	If the number type is not known, then attempt to read it as either a uint64
+	or a double.
+
+	If a decimal point is found in the number then TRUE will be returned and the
+	value will be stored in *d. Otherwise FALSE will be returned and the value
+	stored in *i.
+*/
+EXPORT XplBool				WJRIntOrDouble(WJReader doc, uint64 *i, double *d);
+
+/*
 	If the current element is a WJR_TYPE_NUMBER then this function can be used
 	to determine if the value is negative or positive.  If negative then TRUE
 	will be returned.

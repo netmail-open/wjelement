@@ -67,7 +67,12 @@ EXPORT XplBool __WJEBool(WJElement container, char *path, WJEAction action, WJEl
 					return(e->value.boolean);
 
 				case WJR_TYPE_NUMBER:
-					return(e->value.number != 0);
+					if (e->value.number.hasDecimalPoint) {
+						return(e->value.number.d != 0);
+					} else {
+						return(e->value.number.i != 0);
+					}
+					break;
 
 				default:
 				case WJR_TYPE_UNKNOWN:
@@ -194,8 +199,8 @@ static void _WJENum(WJElement container, char *path, WJEAction action, WJElement
 			case WJR_TYPE_NUMBER:
 				negative = FALSE;
 
-				if ((e->value.number == _WJEGetNum(value, size, issigned, &negative)) &&
-					negative == e->negative
+				if ((e->value.number.i == _WJEGetNum(value, size, issigned, &negative)) &&
+					negative == e->value.number.negative
 				) {
 					break;
 				}
@@ -220,7 +225,7 @@ static void _WJENum(WJElement container, char *path, WJEAction action, WJElement
 
 			switch (e->pub.type) {
 				case WJR_TYPE_NUMBER:
-					_WJESetNum(value, size, issigned, e->value.number, e->negative);
+					_WJESetNum(value, size, issigned, e->value.number.i, e->value.number.negative);
 					return;
 
 				case WJR_TYPE_BOOL:
@@ -256,8 +261,8 @@ static void _WJENum(WJElement container, char *path, WJEAction action, WJElement
 		case WJE_NEW:
 		case WJE_PUT:
 			if ((e = _WJEReset(e, WJR_TYPE_NUMBER))) {
-				e->negative = FALSE;
-				e->value.number = _WJEGetNum(value, size, issigned, &e->negative);
+				e->value.number.negative = FALSE;
+				e->value.number.i = _WJEGetNum(value, size, issigned, &e->value.number.negative);
 				return;
 			} else {
 				/* Negate the value - It must NOT match the original */
@@ -543,5 +548,122 @@ EXPORT uint64 __WJEUInt64(WJElement container, char *path, WJEAction action, WJE
 	_WJENum(container, path, action, last, &value, sizeof(value), FALSE, file, line);
 
 	return(value);
+}
+
+EXPORT double __WJEDouble(WJElement container, char *path, WJEAction action, WJElement *last, double value, const char *file, const int line)
+{
+	_WJElement		*e;
+	char			*s;
+
+	/*
+		Find an element that is appropriate for the given action, creating new
+		elements as needed.
+	*/
+	if ((e = _WJESearch(container, path, &action, last ? *last : NULL, file, line))) {
+		switch (e->pub.type) {
+			case WJR_TYPE_UNKNOWN:
+				/*
+					A new object was created, and the changes count has already
+					been updated.
+				*/
+				e->pub.type = WJR_TYPE_BOOL;
+				break;
+
+			case WJR_TYPE_NUMBER:
+				if (e->value.number.hasDecimalPoint) {
+					if (e->value.number.negative) {
+						if (-e->value.number.d == value) {
+							break;
+						}
+					} else {
+						if (e->value.number.d == value) {
+							break;
+						}
+					}
+				} else {
+					if (e->value.number.negative) {
+						if ((double) -e->value.number.i == value) {
+							break;
+						}
+					} else {
+						if ((double) e->value.number.i == value) {
+							break;
+						}
+					}
+				}
+				/* fallthrough */
+
+			default:
+				if (WJE_GET != action) {
+					_WJEChanged(e);
+				}
+				break;
+		}
+	}
+
+	if (last) *last = (WJElement) e;
+	switch (action) {
+		default:
+		case WJE_GET:
+			if (!e) return(value);
+
+			switch (e->pub.type) {
+				case WJR_TYPE_NUMBER:
+					if (e->value.number.hasDecimalPoint) {
+						if (e->value.number.negative) {
+							return(-e->value.number.d);
+						} else {
+							return(e->value.number.d);
+						}
+					} else {
+						if (e->value.number.negative) {
+							return((double) -e->value.number.i);
+						} else {
+							return((double) e->value.number.i);
+						}
+					}
+					break;
+
+				case WJR_TYPE_BOOL:
+				case WJR_TYPE_TRUE:
+				case WJR_TYPE_FALSE:
+					if (e->value.boolean) {
+						return(1);
+					} else {
+						return(0);
+					}
+					break;
+
+				default:
+					return(0);
+			}
+
+		case WJE_SET:
+		case WJE_NEW:
+		case WJE_PUT:
+			if ((e = _WJEReset(e, WJR_TYPE_NUMBER))) {
+				if (value < 0) {
+					e->value.number.negative = TRUE;
+					e->value.number.d = -value;
+					e->value.number.i = (uint64) -value;
+				} else {
+					e->value.number.negative = FALSE;
+					e->value.number.d = value;
+					e->value.number.i = (uint64) value;
+				}
+
+				if (e->value.number.d != (double) e->value.number.i) {
+					e->value.number.hasDecimalPoint = TRUE;
+				} else {
+					e->value.number.hasDecimalPoint = FALSE;
+				}
+
+				return(value);
+
+			} else {
+				/* Negate the value - It must NOT match the original */
+				return(-value);
+			}
+	}
 }
 
