@@ -415,6 +415,9 @@ static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 	WJElement	t, n;
 	WJReader	reader;
 	int			r = 0;
+	uint64		u;
+	int64		i;
+	double		d;
 
 	if (!(selector = nextField(line, &line)) || !line || !*line) {
 		fprintf(stderr, "Invalid arguments\n");
@@ -445,8 +448,21 @@ static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 				break;
 
 			case WJR_TYPE_NUMBER:
-				WJENumber(*current, selector, WJE_SET,
-						WJENumber(n, NULL, WJE_GET, 0));
+				d = WJEDouble(n, NULL, WJE_GET, 0);
+
+				if (d != (uint64) d) {
+					WJEDouble(*current, selector, WJE_SET, d);
+				} else {
+					u = WJEUInt64(n, NULL, WJE_GET, 0);
+					i = WJEInt64( n, NULL, WJE_GET, 0);
+
+					if (i < 0) {
+						WJEInt64(*current, selector, WJE_SET, i);
+					} else {
+						WJEUInt64(*current, selector, WJE_SET, u);
+					}
+				}
+
 				break;
 
 			case WJR_TYPE_BOOL:

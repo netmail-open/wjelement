@@ -261,8 +261,10 @@ static void _WJENum(WJElement container, char *path, WJEAction action, WJElement
 		case WJE_NEW:
 		case WJE_PUT:
 			if ((e = _WJEReset(e, WJR_TYPE_NUMBER))) {
-				e->value.number.negative = FALSE;
+				e->value.number.negative		= FALSE;
+				e->value.number.hasDecimalPoint	= FALSE;
 				e->value.number.i = _WJEGetNum(value, size, issigned, &e->value.number.negative);
+				e->value.number.d = (double) e->value.number.i;
 				return;
 			} else {
 				/* Negate the value - It must NOT match the original */
