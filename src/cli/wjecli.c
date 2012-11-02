@@ -154,14 +154,18 @@ int main(int argc, char **argv)
 		return(1);
 	}
 
+	MemoryManagerOpen("wje-cli");
+
 	if (argc == 2) {
 		if (!stricmp(argv[1], "--help") || !stricmp(argv[1], "-h")) {
 			usage(argv[0]);
+			MemoryManagerClose("wje-cli");
 			return(0);
 		}
 
 		if (!(in = fopen(argv[1], "rb"))) {
 			perror(NULL);
+			MemoryManagerClose("wje-cli");
 			return(2);
 		}
 
@@ -190,6 +194,7 @@ int main(int argc, char **argv)
 
 			if (!doc) {
 				fprintf(stderr, "Could not parse JSON document: %s\n", argv[1]);
+			MemoryManagerClose("wje-cli");
 				return(3);
 			}
 		}
@@ -205,8 +210,6 @@ int main(int argc, char **argv)
 		doc = WJEObject(NULL, NULL, WJE_SET);
 	}
 	current = doc;
-
-	MemoryManagerOpen("wje-cli");
 
 	for (;;) {
 		/* Read the next command */
