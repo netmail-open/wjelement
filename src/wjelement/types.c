@@ -553,7 +553,6 @@ EXPORT uint64 __WJEUInt64(WJElement container, char *path, WJEAction action, WJE
 EXPORT double __WJEDouble(WJElement container, char *path, WJEAction action, WJElement *last, double value, const char *file, const int line)
 {
 	_WJElement		*e;
-	char			*s;
 
 	/*
 		Find an element that is appropriate for the given action, creating new
