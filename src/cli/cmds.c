@@ -409,6 +409,67 @@ static int WJECLIpwd(WJElement *doc, WJElement *current, char *line)
 	return(WJECLIList(doc, current, "."));
 }
 
+static int WJECLISet(WJElement *doc, WJElement *current, char *line)
+{
+	char		*selector;
+	WJElement	t, n, p;
+	WJReader	reader;
+	int			r = 0;
+
+	if (!(selector = nextField(line, &line)) || !line || !*line) {
+		fprintf(stderr, "Invalid arguments\n");
+		return(2);
+	}
+
+	if (!(reader = WJROpenMemDocument(line, NULL, 0))) {
+		fprintf(stderr, "Internal error, failed to open JSON reader\n");
+		r = 3;
+	} else if (!(n = WJEOpenDocument(reader, NULL, NULL, NULL))) {
+		fprintf(stderr, "Failed to parse JSON document\n");
+		r = 4;
+	} else {
+		switch (n->type) {
+			case WJR_TYPE_OBJECT:
+				t = WJEObject(*current, selector, WJE_SET);
+				WJEMergeObjects(t, n, TRUE);
+				break;
+
+			case WJR_TYPE_ARRAY:
+				t = WJEArray(*current, selector, WJE_SET);
+				WJEMergeObjects(t, n, TRUE);
+				break;
+
+			case WJR_TYPE_STRING:
+				WJEString(*current, selector, WJE_SET,
+						WJEString(n, NULL, WJE_GET, NULL));
+				break;
+
+			case WJR_TYPE_NUMBER:
+				WJENumber(*current, selector, WJE_SET,
+						WJENumber(n, NULL, WJE_GET, 0));
+				break;
+
+			case WJR_TYPE_BOOL:
+			case WJR_TYPE_TRUE:
+			case WJR_TYPE_FALSE:
+				WJEBool(*current, selector, WJE_SET,
+						WJEBool(n, NULL, WJE_GET, FALSE));
+				break;
+
+			case WJR_TYPE_NULL:
+				WJENull(*current, selector, WJE_SET);
+				break;
+
+			default:
+				break;
+		}
+
+		WJECloseDocument(n);
+	}
+
+	return(r);
+}
+
 WJECLIcmd WJECLIcmds[] =
 {
 	{
@@ -460,6 +521,11 @@ WJECLIcmd WJECLIcmds[] =
 	{
 		"pwd",			"Print the path of the currently selected object.",
 		WJECLIpwd,		NULL
+	},
+
+	{
+		"set",			"Set a JSON value",
+		WJECLISet,		"<selector> <json>"
 	},
 
 	{ NULL, NULL, NULL, NULL }
