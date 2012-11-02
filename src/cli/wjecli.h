@@ -34,6 +34,8 @@ typedef struct
 {
 	XplBool			pretty;
 	int				base;
+
+	char			*filename;
 } WJECLIGlobals;
 
 /* wjecli.c */

@@ -91,6 +91,10 @@ static int WJECLILoad(WJElement *doc, WJElement *current, char *line)
 		}
 
 		*doc = *current = e;
+		if (file) {
+			MemRelease(&wje.filename);
+			wje.filename = MemStrdup(file);
+		}
 	}
 
 	return(r);
@@ -109,7 +113,11 @@ static int WJECLISave(WJElement *doc, WJElement *current, char *line)
 		return(1);
 	}
 
-	if (!(file = nextField(line, &line)) || nextField(line, &line)) {
+	if (!(file = nextField(line, &line))) {
+		file = wje.filename;
+	}
+
+	if (!file || nextField(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -128,6 +136,13 @@ static int WJECLISave(WJElement *doc, WJElement *current, char *line)
 		if (!WJEWriteDocument(e, writer, NULL)) {
 			fprintf(stderr, "Internal error, failed to save JSON document\n");
 			r = 5;
+		} else {
+			printf("Wrote JSON document to %s\n", file);
+
+			if (file != wje.filename) {
+				MemRelease(&wje.filename);
+				wje.filename = MemStrdup(file);
+			}
 		}
 
 		WJWCloseDocument(writer);
@@ -405,8 +420,10 @@ WJECLIcmd WJECLIcmds[] =
 	},
 	{
 		"save",			"Write the currently selected portion of the JSON "	\
-						"document to the specified file.",
-		WJECLISave,	"<filename>"
+						"document to the specified file. If a filename is " \
+						"not specified then the last loaded or saved "		\
+						"filename will be used.",
+		WJECLISave,		"[<filename>]"
 	},
 	{
 		"print",		"Print the currently selected portion of the JSON "	\

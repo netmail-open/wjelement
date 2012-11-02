@@ -234,6 +234,8 @@ int main(int argc, char **argv)
 			if ((reader = WJROpenFILEDocument(in, NULL, 0))) {
 				doc = WJEOpenDocument(reader, NULL, NULL, NULL);
 				WJRCloseDocument(reader);
+
+				wje.filename = MemStrdup(argv[1]);
 			}
 
 			fclose(in);
@@ -303,6 +305,10 @@ int main(int argc, char **argv)
 	if (in && in != stdin) {
 		fclose(in);
 		in = NULL;
+	}
+
+	if (wje.filename) {
+		MemRelease(&wje.filename);
 	}
 
 	MemoryManagerClose("wje-cli");
