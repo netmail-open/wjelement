@@ -36,7 +36,6 @@ add_executable(wjeunit
 )
 
 target_link_libraries(wjeunit
-	${AVOID_VERSION}
 	wjreader
 	wjwriter
 	wjelement

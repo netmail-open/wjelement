@@ -228,3 +228,17 @@ EXPORT char * _skipspace( char *source, const char *breakchars )
 	}
 	return source;
 }
+
+EXPORT char * strspace( char *source )
+{
+	while( source && *source )
+	{
+		if( isspace( *source ) )
+		{
+			return source;
+		}
+		source++;
+	}
+	return NULL;
+}
+

@@ -194,5 +194,7 @@ EXPORT size_t strprintf( char *buffer, size_t bufferSize, size_t *sizeNeeded, co
 EXPORT int stripat(char *str, char *pattern);
 EXPORT int stripatn(char *str, char *pattern, size_t len);
 
+EXPORT char * strspace( char *source );
+
 
 #endif
