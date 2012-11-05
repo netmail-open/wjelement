@@ -630,7 +630,7 @@ static int WJECheckCondition(WJElement e, char **condition, WJEAction action)
 {
 	char		*cond, *value, *tmp, *v, *s;
 	size_t		len;
-	int			r;
+	double		r;
 
 	if (!e || !condition || !*condition || !**condition) return(0);
 	cond = *condition;
@@ -659,9 +659,9 @@ static int WJECheckCondition(WJElement e, char **condition, WJEAction action)
 
 	value = skipspace(value);
 
-	r = strtol(value, &tmp, 0);
+	r = strtod(value, &tmp);
 	if (tmp > value) {
-		r -= WJENumber(e, NULL, WJE_GET, 0);
+		r -= WJEDouble(e, NULL, WJE_GET, 0);
 
 		if ((value = skipspace(tmp)) && *value) return(-1);
 	} else {

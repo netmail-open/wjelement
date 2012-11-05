@@ -692,7 +692,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 					fail = (dnum < dval);
 				}
 				if(fail && err) {
-					err(client, "%s: minimum value (%d) not met (%d).",
+					err(client, "%s: minimum value (%lf) not met (%lf).",
 						name, dval, dnum);
 				}
 				anyFail = anyFail || fail;
@@ -708,7 +708,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 					fail = (dnum > dval);
 				}
 				if(fail && err) {
-					err(client, "%s: maximum value (%d) not met (%d).",
+					err(client, "%s: maximum value (%lf) not met (%lf).",
 						name, dval, dnum);
 				}
 				anyFail = anyFail || fail;
