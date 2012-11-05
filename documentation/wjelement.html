@@ -327,6 +327,16 @@ uint64 _WJEUInt64(WJElement container, char *path, WJEAction action, WJElement *
 </pre></blockquote>
 </p>
 <p>
+<strong>WJEDouble</strong>
+ - Access a number element, as a double (as in double-precision floating point)
+</p>
+<p>
+<blockquote><pre>
+double WJEDouble(WJElement container, char *path, WJEAction action, double value);
+double _WJEDouble(WJElement container, char *path, WJEAction action, WJElement *last, double value);
+</pre></blockquote>
+</p>
+<p>
 <strong>WJEChild</strong>
  - Find, create or update an element by name instead of path.  This allows
 access to elements that would be difficult to reference by path.

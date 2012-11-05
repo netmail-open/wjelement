@@ -283,8 +283,9 @@ static XplBool ValidateType(WJElement value, char *type) {
 	} else if(!stricmp(type, "number")) {
 		return (value->type == WJR_TYPE_NUMBER);
 	} else if(!stricmp(type, "integer")) {
-		/* NOTE: WJElement doesn't do floats */
-		return (value->type == WJR_TYPE_NUMBER);
+		//return !WJRIntOrDouble(value, NULL, NULL);
+		return (WJEUInt64(value, NULL, WJE_GET, 0) ==
+				WJEDouble(value, NULL, WJE_GET, 1));
 	} else if(!stricmp(type, "boolean")) {
 		return (value->type == WJR_TYPE_BOOL ||
 				value->type == WJR_TYPE_TRUE ||
@@ -332,8 +333,8 @@ static int CompareJson(WJElement obj1, WJElement obj2) {
 					  WJEString(obj2, NULL, WJE_GET, ""));
 		break;
 	case WJR_TYPE_NUMBER:
-		return (WJENumber(obj1, NULL, WJE_GET, 0) -
-				WJENumber(obj2, NULL, WJE_GET, 0));
+		return (WJEDouble(obj1, NULL, WJE_GET, 0) -
+				WJEDouble(obj2, NULL, WJE_GET, 0));
 		break;
 	default:
 		break;
@@ -354,6 +355,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 	char *str2 = NULL;
 	int num = 0;
 	int val = 0;
+	double dnum = 0;
+	double dval = 0;
 	int i = 0;
 	XplBool schemaGiven = TRUE;
 	XplBool fail = FALSE;
@@ -437,22 +440,33 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				}
 			} else if(memb->type == WJR_TYPE_OBJECT) {
 				/* spec isn't clear here, but we do it for arrays, so... */
-				if(SchemaValidate(memb, document, err,
-								  loadcb, freecb, client, name)) {
-					fail = FALSE;
+				if(!SchemaValidate(memb, document, err,
+								   loadcb, freecb, client, name)) {
+					fail = TRUE;
 				}
 			}
 
 			if(!stricmp(memb->name, "disallow")) {
 				fail = !fail;
+				printf("NOT!\n");
 			}
 			if(err && fail) {
-				if(name) {
-					err(client, "%s is of incorrect type", name);
-				} else if(document) {
-					err(client, "%s is of incorrect type", document->name);
+				if(memb->type == WJR_TYPE_OBJECT) {
+					if(name) {
+						err(client, "%s failed validation", name);
+					} else if(document) {
+						err(client, "%s failed validation", document->name);
+					} else {
+						err(client, "failed validation");
+					}
 				} else {
-					err(client, "incorrect type");
+					if(name) {
+						err(client, "%s is of incorrect type", name);
+					} else if(document) {
+						err(client, "%s is of incorrect type", document->name);
+					} else {
+						err(client, "incorrect type");
+					}
 				}
 			}
 			anyFail = anyFail || fail;
@@ -670,32 +684,32 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 
 		} else if(!stricmp(memb->name, "minimum")) {
 			if(document && memb->type == WJR_TYPE_NUMBER) {
-				val = WJENumber(memb, NULL, WJE_GET, 0);
-				num = WJENumber(document, NULL, WJE_GET, 0);
+				dval = WJEDouble(memb, NULL, WJE_GET, 0);
+				dnum = WJEDouble(document, NULL, WJE_GET, 0);
 				if(WJEBool(schema, "exclusiveMinimum", WJE_GET, FALSE)) {
-					fail = (num < val && num != val);
+					fail = (dnum < dval && dnum != dval);
 				} else {
-					fail = (num < val);
+					fail = (dnum < dval);
 				}
 				if(fail && err) {
 					err(client, "%s: minimum value (%d) not met (%d).",
-						name, val, num);
+						name, dval, dnum);
 				}
 				anyFail = anyFail || fail;
 			}
 
 		} else if(!stricmp(memb->name, "maximum")) {
 			if(document && memb->type == WJR_TYPE_NUMBER) {
-				val = WJENumber(memb, NULL, WJE_GET, 0);
-				num = WJENumber(document, NULL, WJE_GET, 0);
+				dval = WJEDouble(memb, NULL, WJE_GET, 0);
+				dnum = WJEDouble(document, NULL, WJE_GET, 0);
 				if(WJEBool(schema, "exclusiveMaximum", WJE_GET, FALSE)) {
-					fail = (num > val && num != val);
+					fail = (dnum > dval && dnum != dval);
 				} else {
-					fail = (num > val);
+					fail = (dnum > dval);
 				}
 				if(fail && err) {
 					err(client, "%s: maximum value (%d) not met (%d).",
-						name, val, num);
+						name, dval, dnum);
 				}
 				anyFail = anyFail || fail;
 			}
