@@ -68,6 +68,12 @@ char * nextField(char *value, char **end)
 		d = s = value;
 		while (s) {
 			switch (*s) {
+				case '\0':
+				case '\n':
+				case '\r':
+					*d = '\0';
+					return(*value ? value : NULL);
+
 				case '"':
 					*d = '\0';
 					if (end) {
