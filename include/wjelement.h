@@ -95,6 +95,15 @@ extern "C" {
 		foo.bar <= 3
 		foo.bar != 'foo*'
 		foo.bar != "one"
+
+	A condition may be seperated from a path with a ; character.
+
+	In the following examples the object named "foo" will be returned if it has
+	a child named "bar" that matches the condition.
+		foo; bar <= 3
+		foo; bar != 'foo*'
+		foo; bar != "one"
+
 */
 
 typedef struct WJElementPublic {

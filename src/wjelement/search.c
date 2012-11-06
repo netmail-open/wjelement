@@ -439,7 +439,7 @@ DebugAssert(0);
 			if (len) *len = 0;
 			return(-1);
 
-		case '\0':
+		case ';': case '\0':
 		case '>': case '<':
 		case '!': case '=':
 			/* The last name has been found, but there is a condition */
@@ -636,7 +636,7 @@ static int WJECheckCondition(WJElement e, char **condition, WJEAction action)
 	cond = *condition;
 
 	switch (*cond) {
-		case '>': case '<': case '!': case '=':
+		case '>': case '<': case '!': case '=': case ';':
 			value = cond + 1;
 			if ('=' == *value) value++;
 			break;
@@ -658,6 +658,15 @@ static int WJECheckCondition(WJElement e, char **condition, WJEAction action)
 	}
 
 	value = skipspace(value);
+
+	if (';' == *cond) {
+		if (WJEGet(e, value, NULL)) {
+			if (condition) *condition = NULL;
+			return(0);
+		} else {
+			return(-1);
+		}
+	}
 
 	r = strtod(value, &tmp);
 	if (tmp > value) {
