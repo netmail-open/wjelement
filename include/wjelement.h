@@ -96,7 +96,7 @@ extern "C" {
 		foo.bar != 'foo*'
 		foo.bar != "one"
 
-	A condition may be seperated from a path with a ; character.
+	A condition may be separated from a path with a ; character.
 
 	In the following examples the object named "foo" will be returned if it has
 	a child named "bar" that matches the condition.

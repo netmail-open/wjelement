@@ -602,8 +602,18 @@ foo.bar <= 3
 foo.bar != 'foo*'
 foo.bar != "one"
 </pre></blockquote>
-
-
+<p>
+  A condition may be separated from a path with a ; character.
+</p>
+<p>
+  In the following examples the object named "foo" will be returned if it has
+  a child named "bar" that matches the condition.
+<blockquote><pre>
+foo; bar <= 3
+foo; bar != 'foo*'
+foo; bar != "one"
+</pre></blockquote>
+</p>
 
 </body>
 </html>
