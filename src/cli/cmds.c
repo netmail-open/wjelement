@@ -179,6 +179,8 @@ static int WJECLIPrint(WJElement *doc, WJElement *current, char *line)
 				fprintf(stderr, "Invalid arguments\n");
 				return(3);
 			}
+
+			selector = NULL;
 		} else if (!(e = WJEGet(*current, selector, NULL))) {
 			fprintf(stderr, "Could not find specified element: %s\n", selector);
 			return(4);
@@ -194,6 +196,15 @@ static int WJECLIPrint(WJElement *doc, WJElement *current, char *line)
 		if (!WJEWriteDocument(e, writer, NULL)) {
 			fprintf(stderr, "Internal error, failed to write JSON document\n");
 			r = 5;
+		}
+
+		while (!r && selector && (e = WJEGet(*current, selector, e))) {
+			fprintf(stdout, "\n");
+
+			if (!WJEWriteDocument(e, writer, NULL)) {
+				fprintf(stderr, "Internal error, failed to write JSON document\n");
+				r = 5;
+			}
 		}
 
 		WJWCloseDocument(writer);
