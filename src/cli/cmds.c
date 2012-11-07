@@ -497,6 +497,27 @@ static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 	return(r);
 }
 
+static int WJECLIRemove(WJElement *doc, WJElement *current, char *line)
+{
+	char		*selector;
+	WJElement	e, m;
+
+	e = *current;
+
+	if (!(selector = nextField(line, &line)) ||
+		nextField(line, &line)
+	) {
+		fprintf(stderr, "Invalid arguments\n");
+		return(2);
+	}
+
+	while ((m = WJEGet(e, selector, NULL))) {
+		WJECloseDocument(m);
+	}
+
+	return(0);
+}
+
 WJECLIcmd WJECLIcmds[] =
 {
 	{
@@ -554,6 +575,16 @@ WJECLIcmd WJECLIcmds[] =
 		"set",			"Set a JSON value",
 		WJECLISet,		"<selector> <json>"
 	},
+
+	{
+		"del",			"Delete a JSON value",
+		WJECLIRemove,	"<selector>"
+	},
+	{
+		"rm",			NULL,
+		WJECLIRemove,	NULL
+	},
+
 
 	{ NULL, NULL, NULL, NULL }
 };
