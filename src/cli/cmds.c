@@ -518,6 +518,38 @@ static int WJECLIRemove(WJElement *doc, WJElement *current, char *line)
 	return(0);
 }
 
+static int WJECLIEach(WJElement *doc, WJElement *current, char *line)
+{
+	char		*selector;
+	char		*command;
+	char		*args;
+	WJElement	e, m, c;
+	int			r = 0;
+
+	if (!(selector	= nextField(line, &line)) ||
+		!(command	= nextField(line, &line))
+	) {
+		fprintf(stderr, "Invalid arguments\n");
+		return(2);
+	}
+
+	e = *current;
+	m = NULL;
+	while ((m = WJEGet(e, selector, m))) {
+		c = m;
+
+		/*
+			Create a coppy of the args for each call, because some comamnd
+			command callbacks modify the line.
+		*/
+		args = MemStrdupWait(line);
+		r = runcmd(doc, &c, command, args);
+		MemRelease(&args);
+	}
+
+	return(r);
+}
+
 WJECLIcmd WJECLIcmds[] =
 {
 	{
@@ -585,6 +617,12 @@ WJECLIcmd WJECLIcmds[] =
 		WJECLIRemove,	NULL
 	},
 
+
+	{
+		"each",			"Run a command for each object matching the "		\
+						"specified selector.",
+		WJECLIEach,		"<selector> <command with arguments>"
+	},
 
 	{ NULL, NULL, NULL, NULL }
 };

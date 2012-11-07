@@ -40,4 +40,5 @@ typedef struct
 
 /* wjecli.c */
 char * nextField(char *value, char **end);
+int runcmd(WJElement *doc, WJElement *current, char *cmd, char *args);
 

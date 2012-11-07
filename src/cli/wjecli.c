@@ -112,7 +112,7 @@ char * nextField(char *value, char **end)
 	return(NULL);
 }
 
-static int runcmd(WJElement *doc, WJElement *current, char *cmd, char *args)
+int runcmd(WJElement *doc, WJElement *current, char *cmd, char *args)
 {
 	WJECLIcmd		*command;
 	int				i;
