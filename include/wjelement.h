@@ -155,6 +155,11 @@ EXPORT XplBool		WJEWriteDocument(WJElement document, WJWriter writer, char *name
 
 /* Destroy a WJElement object */
 EXPORT XplBool		WJECloseDocument(WJElement document);
+/*
+	WJECloseDocument is also used to delete/remove an item from a parent
+	document:
+	WJECloseDocument(WJEGet(...));
+*/
 
 /* Duplicate an existing WJElement */
 EXPORT WJElement	_WJECopyDocument(WJElement to, WJElement from, WJELoadCB loadcb, void *data, const char *file, const int line);

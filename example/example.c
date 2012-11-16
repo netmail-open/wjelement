@@ -26,16 +26,18 @@ var doc = {
 			"job": "public relations"
 			"born": 2485
 		}
-	]
+	],
+	"shiny": true
 };
 var person = null;
 
-for(i in doc.crew) {
+for(i in doc.crew) {  // note: tedious...
 	person = doc.crew[i];
 	if(person.born == 2468) {
 		person.born = 2486;
 	}
 }
+delete(doc.shiny);
 
 for(i in doc.crew) {
 	person = doc.crew[i];
@@ -73,7 +75,10 @@ int main(int argc, char **argv) {
 	WJEString(doc, "crew[-1].job", WJE_SET, "public relations");
 	WJEInt64(doc, "crew[-1].born", WJE_SET, 2485);
 
+	WJEBool(doc, "shiny", WJE_SET, TRUE);
+
 	WJEInt64(doc, "crew[].born == 2468", WJE_SET, 2486);  /* note: awesome! */
+	WJECloseDocument(WJEGet(doc, "shiny", NULL));
 
 	while((person = _WJEObject(doc, "crew[]", WJE_GET, &person))) {
 		printf("%s (%s) is %d\n",
