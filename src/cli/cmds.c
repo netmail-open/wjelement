@@ -494,6 +494,10 @@ static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 		WJECloseDocument(n);
 	}
 
+	if (reader) {
+		WJRCloseDocument(reader);
+	}
+
 	return(r);
 }
 
