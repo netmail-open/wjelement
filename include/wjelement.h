@@ -167,8 +167,8 @@ EXPORT WJElement	_WJECopyDocument(WJElement to, WJElement from, WJELoadCB loadcb
 
 
 /* Remove a WJElement from it's parent (and siblings) */
-EXPORT XplBool		_WJEDettach(WJElement document, const char *file, const int line);
-#define WJEDettach( d )	_WJEDettach( (d), __FILE__, __LINE__ )
+EXPORT XplBool		_WJEDetach(WJElement document, const char *file, const int line);
+#define WJEDetach( d )	_WJEDetach( (d), __FILE__, __LINE__ )
 
 /* Add a document to another document as a child */
 EXPORT XplBool		WJEAttach(WJElement container, WJElement document);
@@ -353,6 +353,8 @@ EXPORT void WJESchemaFreeBacklink(char *backlink);
 /* Debug function that will write a document to stdout */
 EXPORT void WJEDump(WJElement document);
 
+/* For compatibility with old code, due to a typo */
+#define WJEDettach( d )	_WJEDetach( (d), __FILE__, __LINE__ )
 
 #ifdef __cplusplus
 }

@@ -96,7 +96,7 @@ _WJElement * _WJEReset(_WJElement *e, WJRType type)
 	return(e);
 }
 
-EXPORT XplBool _WJEDettach(WJElement document, const char *file, const int line)
+EXPORT XplBool _WJEDetach(WJElement document, const char *file, const int line)
 {
 	if (!document) {
 		return(FALSE);
@@ -117,13 +117,14 @@ EXPORT XplBool _WJEDettach(WJElement document, const char *file, const int line)
 
 	if (document->prev) {
 		document->prev->next = document->next;
-		document->prev = NULL;
 	}
 
 	if (document->next) {
 		document->next->prev = document->prev;
-		document->next = NULL;
 	}
+
+	document->prev = NULL;
+	document->next = NULL;
 
 	return(TRUE);
 }
@@ -142,7 +143,7 @@ EXPORT XplBool WJEAttach(WJElement container, WJElement document)
 		}
 	}
 
-	WJEDettach(document);
+	WJEDetach(document);
 
 	/* Insert it into the new container */
 	document->parent = container;
