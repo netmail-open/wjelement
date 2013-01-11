@@ -146,6 +146,7 @@ int main(int argc, char **argv)
 	int			r			= 0;
 	WJReader	reader;
 	char		*cmd, *args;
+int i;
 	char		line[1024];
 
 	/* Print pretty documents by default */
@@ -180,7 +181,7 @@ int main(int argc, char **argv)
 			like a script, or a JSON document?
 		*/
 		if (fgets(line, sizeof(line), in) &&
-			!strncmp(line, "!#", 2)
+			!strncmp(line, "#!", 2)
 		) {
 			/* This looks like a script, read commands from this file */
 			;
