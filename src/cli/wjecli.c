@@ -146,7 +146,6 @@ int main(int argc, char **argv)
 	int			r			= 0;
 	WJReader	reader;
 	char		*cmd, *args;
-int i;
 	char		line[1024];
 
 	/* Print pretty documents by default */
