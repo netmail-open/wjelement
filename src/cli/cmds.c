@@ -48,6 +48,53 @@ static size_t JSONstdinCB(char *buffer, size_t length, size_t seen, void *data)
 	return(strlen(buffer));
 }
 
+/*
+	Using the provided selector find the correct starting container element and
+	return the remaining portion of the selector (if any).
+*/
+static char * _findElement(WJElement *e, char *selector)
+{
+	/* .. is considered a special case, and means the parent of the current object */
+	if (!strcmp(selector, "..")) {
+		*e = (*e)->parent;
+		return(NULL);
+	}
+
+	if ('.' == *selector) {
+		/*
+			A leading dot (since dot is the separator) indicates the root of the
+			document.
+		*/
+		selector++;
+
+		while ((*e)->parent) {
+			*e = (*e)->parent;
+		}
+	}
+
+	return(selector);
+}
+
+/*
+	Find the element that the provided selector argument is refering to. This
+	function applies all the wjecli specific logic, and then uses WJEGet to
+	actually find the element.
+*/
+static WJElement findElement(WJElement e, char *selector, WJElement last)
+{
+	selector = _findElement(&e, selector);
+
+	if (last && !selector) {
+		/*
+			If there is a NULL selector then we can't be looking for a second
+			match. It would find the same one it started with.
+		*/
+		return(NULL);
+	}
+
+	return(WJEGet(e, selector, last));
+}
+
 static int WJECLILoad(WJElement *doc, WJElement *current, char *line)
 {
 	WJReader	reader	= NULL;
@@ -156,13 +203,14 @@ static int WJECLIPrint(WJElement *doc, WJElement *current, char *line)
 {
 	WJWriter	writer	= NULL;
 	char		*selector;
-	WJElement	e;
+	WJElement	e, c;
 	int			r		= 0;
 
 	if (!(e = *current) && !(e = *doc)) {
 		fprintf(stderr, "No JSON document loaded\n");
 		return(1);
 	}
+	c = e;
 
 	selector = nextField(line, &line);
 
@@ -172,16 +220,7 @@ static int WJECLIPrint(WJElement *doc, WJElement *current, char *line)
 	}
 
 	if (selector) {
-		if (!stricmp(selector, "..")) {
-			if (e->parent) {
-				e = e->parent;
-			} else {
-				fprintf(stderr, "Invalid arguments\n");
-				return(3);
-			}
-
-			selector = NULL;
-		} else if (!(e = WJEGet(*current, selector, NULL))) {
+		if (!(e = findElement(c, selector, NULL))) {
 			fprintf(stderr, "Could not find specified element: %s\n", selector);
 			return(4);
 		}
@@ -198,7 +237,7 @@ static int WJECLIPrint(WJElement *doc, WJElement *current, char *line)
 			r = 5;
 		}
 
-		while (!r && selector && (e = WJEGet(*current, selector, e))) {
+		while (!r && selector && (e = findElement(c, selector, e))) {
 			fprintf(stdout, "\n");
 
 			if (!WJEWriteDocument(e, writer, NULL)) {
@@ -287,16 +326,7 @@ static int WJECLISelect(WJElement *doc, WJElement *current, char *line)
 		return(2);
 	}
 
-	if (!stricmp(selector, "..")) {
-		if (*current && (*current)->parent) {
-			*current = (*current)->parent;
-		} else {
-			*current = *doc;
-		}
-		return(0);
-	}
-
-	if (!(e = WJEGet(*current, selector, NULL))) {
+	if (!(e = findElement(*current, selector, NULL))) {
 		fprintf(stderr, "Could not find specified element: %s\n", selector);
 		return(3);
 	}
@@ -384,22 +414,17 @@ static int WJECLIList(WJElement *doc, WJElement *current, char *line)
 
 	e = *current;
 
-	if (!(selector = nextField(line, &line))) {
+	if ((selector = nextField(line, &line))) {
+		selector = _findElement(&e, selector);
+	}
+
+	if (!selector || !*selector) {
 		selector = "[]";
 	}
 
 	if (nextField(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
-	}
-
-	if (!stricmp(selector, "..")) {
-		selector = "[]";
-		if (e->parent) {
-			e = e->parent;
-		} else {
-			return(0);
-		}
 	}
 
 	m = NULL;
