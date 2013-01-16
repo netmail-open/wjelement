@@ -18,6 +18,7 @@ static WJElement schema_load(const char *name, void *client,
 							 const char *file, const int line) {
 	char *format;
 	char *path;
+	FILE *schemafile;
 	WJReader readschema;
 	WJElement schema;
 
@@ -25,8 +26,16 @@ static WJElement schema_load(const char *name, void *client,
 	if(client && name) {
 		format = (char *)client;
 		asprintf(&path, format, name);
-		if((readschema = WJROpenFILEDocument(path, NULL, 0))) {
-			schema = WJEOpenDocument(readschema, NULL, NULL, NULL);
+
+		if(schemafile = fopen(path, "r")) {
+			if((readschema = WJROpenFILEDocument(schemafile, NULL, 0))) {
+				schema = WJEOpenDocument(readschema, NULL, NULL, NULL);
+			} else {
+				fprintf(stderr, "json document failed to open: '%s'\n", path);
+			}
+			fclose(schemafile);
+		} else {
+			fprintf(stderr, "json file not found: '%s'\n", path);
 		}
 	}
 
@@ -103,5 +112,7 @@ int main(int argc, char **argv) {
 
 	WJECloseDocument(json);
 	WJECloseDocument(schema);
+	fclose(jsonfile);
+	fclose(schemafile);
 	return 0;
 }
