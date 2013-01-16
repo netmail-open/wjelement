@@ -579,6 +579,89 @@ static int WJECLIEach(WJElement *doc, WJElement *current, char *line)
 	return(r);
 }
 
+static WJElement schema_load(const char *name, void *client,
+							 const char *file, const int line) {
+	char *format;
+	char *path;
+	FILE *schemafile;
+	WJReader readschema;
+	WJElement schema;
+
+	schema = NULL;
+	if(client && name) {
+		format = (char *)client;
+		asprintf(&path, format, name);
+
+		if(schemafile = fopen(path, "r")) {
+			if((readschema = WJROpenFILEDocument(schemafile, NULL, 0))) {
+				schema = WJEOpenDocument(readschema, NULL, NULL, NULL);
+			} else {
+				fprintf(stderr, "json document failed to open: '%s'\n", path);
+			}
+			fclose(schemafile);
+		} else {
+			fprintf(stderr, "json file not found: '%s'\n", path);
+		}
+	}
+
+	return schema;
+}
+static void schema_error(void *client, const char *format, ...) {
+	va_list ap;
+	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+	fprintf(stderr, "\n");
+}
+static int WJECLIValidate(WJElement *doc, WJElement *current, char *line)
+{
+	WJReader reader = NULL;
+	WJElement e = NULL;
+	FILE *f = stdin;
+	char *file;
+	char *pat;
+	int r = 0;
+
+	if(!(file = nextField(line, &line))) {
+		fprintf(stderr, "Invalid arguments\n");
+		return(2);
+	}
+	pat = nextField(line, &line);
+
+	if(!(f = fopen(file, "rb"))) {
+		perror(NULL);
+		return(3);
+	}
+
+	if(f == stdin) {
+		fprintf(stdout, "Enter JSON document. " \
+				"Enter a . on it's own line when complete.\n");
+		reader = WJROpenDocument(JSONstdinCB, f, NULL, 0);
+	} else {
+		reader = WJROpenFILEDocument(f, NULL, 0);
+	}
+
+	if(!reader) {
+		fprintf(stderr, "Internal error, failed to open JSON reader\n");
+		r = 4;
+	} else if (!(e = WJEOpenDocument(reader, NULL, NULL, NULL))) {
+		fprintf(stderr, "Failed to parse JSON document\n");
+		r = 5;
+	}
+	WJRCloseDocument(reader);
+
+	if(e && *doc) {
+		if(WJESchemaValidate(e, *doc, schema_error, schema_load, NULL, pat)) {
+			fprintf(stdout, "Schema validation: PASS\n");
+		} else {
+			fprintf(stderr, "Schema validation: FAIL\n");
+			r = 6;
+		}
+	}
+
+	return(r);
+}
+
 WJECLIcmd WJECLIcmds[] =
 {
 	{
@@ -653,6 +736,11 @@ WJECLIcmd WJECLIcmds[] =
 		WJECLIEach,		"<selector> <command with arguments>"
 	},
 
+	{
+		"validate",		"Validate the current document against schema.  "	\
+						"pattern example: \"path/to/%s.json\" more schemas",
+		WJECLIValidate,	"<schema file> [<pattern>]"
+	},
+
 	{ NULL, NULL, NULL, NULL }
 };
-

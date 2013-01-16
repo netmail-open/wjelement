@@ -381,6 +381,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			if(freecb) {
 				freecb(sub, client);
 			}
+			WJECloseDocument(sub);
 			return fail;
 		}
 
@@ -931,8 +932,11 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 		}
 	}
 
-	if(schema && freecb && !schemaGiven) {
-		freecb(schema, client);
+	if(schema && !schemaGiven) {
+		if(freecb) {
+			freecb(schema, client);
+		}
+		WJECloseDocument(schema);
 		schema = NULL;
 	}
 
