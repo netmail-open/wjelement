@@ -374,12 +374,14 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 	}
 	if(schema && loadcb) {
 		/* swap in any $ref'erenced schema */
-		if((str = WJEString(schema, "$ref", WJE_GET, NULL))) {
-			if(schema && freecb) {
-				freecb(schema, client);
-				schema = NULL;
+		if((str = WJEString(schema, "[\"$ref\"]", WJE_GET, NULL))) {
+			sub = loadcb(str, client, __FILE__, __LINE__);
+			fail = SchemaValidate(sub, document, err, loadcb, freecb, client,
+								  name);
+			if(freecb) {
+				freecb(sub, client);
 			}
-			schema = loadcb(str, client, __FILE__, __LINE__);
+			return fail;
 		}
 
 		/* look through any "extends" schema(s) */
