@@ -19,6 +19,36 @@
 #include <xpl.h>
 #include <string.h>
 
+/* hack for aix, windows, and other asprintf-less systems */
+#include <stdio.h>
+#include <stdlib.h>
+#include "memmgr.h"
+#ifndef asprintf
+int asprintf(char **ret, const char *format, ...) {
+	va_list ap;
+	int count;
+	*ret = NULL;
+	va_start(ap, format);
+	count = vsnprintf(NULL, 0, format, ap);
+	va_end(ap);
+	if(count >= 0) {
+		char* buffer = MemMalloc(count + 1);
+		if(buffer == NULL) {
+			return -1;
+		}
+		va_start(ap, format);
+		count = vsnprintf(buffer, count + 1, format, ap);
+		va_end(ap);
+
+		if(count < 0) {
+			MemFree(buffer);
+		} else {
+			*ret = buffer;
+		}
+	}
+	return count;
+}
+#endif
 
 EXPORT size_t vstrcatf( char *buffer, size_t bufferSize, size_t *sizeNeeded, const char *format, va_list args )
 {

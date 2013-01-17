@@ -590,7 +590,7 @@ static WJElement schema_load(const char *name, void *client,
 	schema = NULL;
 	if(client && name) {
 		format = (char *)client;
-		asprintf(&path, format, name);
+		MemAsprintf(&path, format, name);
 
 		if(schemafile = fopen(path, "r")) {
 			if((readschema = WJROpenFILEDocument(schemafile, NULL, 0))) {
@@ -602,6 +602,7 @@ static WJElement schema_load(const char *name, void *client,
 		} else {
 			fprintf(stderr, "json file not found: '%s'\n", path);
 		}
+		MemRelease(&path);
 	}
 
 	return schema;
