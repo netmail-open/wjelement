@@ -87,7 +87,12 @@ static void ListSelectors(char *prefix, WJElement schema, WJElement document,
 		}
 
 		/* look through any "extends" schema(s) */
-		if((str = WJEString(schema, "extends", WJE_GET, NULL))) {
+		if((subSchema = WJEObject(schema, "extends", WJE_GET))) {
+			/* inline schema object */
+			ListSelectors(prefix, subSchema, document, type, format,
+						  loadcb, freecb, matchcb, client, exist);
+		} else if((str = WJEString(schema, "extends", WJE_GET, NULL))) {
+			/* string reference (MA extension of v3 spec) */
 			if((subSchema = loadcb(str, client, __FILE__, __LINE__))) {
 				ListSelectors(prefix, subSchema, document, type, format,
 							  loadcb, freecb, matchcb, client, exist);
@@ -97,11 +102,20 @@ static void ListSelectors(char *prefix, WJElement schema, WJElement document,
 				subSchema = NULL;
 			}
 		}
-		if(!str) {
+		if(!str && !subSchema) {
+			/* inline schema object */
+			last = NULL;
+			while((subSchema = _WJEObject(schema, "extends[]", WJE_GET,
+										  &last))) {
+				ListSelectors(prefix, subSchema, document, type, format,
+							  loadcb, freecb, matchcb, client, exist);
+			}
+
+			/* string reference (MA extension of v3 spec) */
 			last = NULL;
 			while((str = _WJEString(schema, "extends[]", WJE_GET, &last,
 									NULL))) {
-				if ((subSchema = loadcb(str, client, __FILE__, __LINE__))) {
+				if((subSchema = loadcb(str, client, __FILE__, __LINE__))) {
 					ListSelectors(prefix, subSchema, document, type, format,
 								  loadcb, freecb, matchcb, client, exist);
 				}
@@ -343,6 +357,10 @@ static int CompareJson(WJElement obj1, WJElement obj2) {
 	return 0;
 }
 
+static double Modulus(double a, double b) {
+	return a - (double)( (int64)(a / b) ) * b;
+}
+
 static XplBool SchemaValidate(WJElement schema, WJElement document,
 							  WJEErrCB err, WJESchemaLoadCB loadcb,
 							  WJESchemaFreeCB freecb, void *client,
@@ -372,9 +390,9 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			schema = loadcb(str, client, __FILE__, __LINE__);
 		}
 	}
-	if(schema && loadcb) {
+	if(schema) {
 		/* swap in any $ref'erenced schema */
-		if((str = WJEString(schema, "[\"$ref\"]", WJE_GET, NULL))) {
+		if(loadcb && (str = WJEString(schema, "[\"$ref\"]", WJE_GET, NULL))) {
 			sub = loadcb(str, client, __FILE__, __LINE__);
 			fail = SchemaValidate(sub, document, err, loadcb, freecb, client,
 								  name);
@@ -386,27 +404,47 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 		}
 
 		/* look through any "extends" schema(s) */
-		if((str = WJEString(schema, "extends", WJE_GET, NULL))) {
-			sub = loadcb(str, client, __FILE__, __LINE__);
-			anyFail = anyFail || SchemaValidate(sub, document, err,
-												loadcb, freecb, client, name);
+		if((sub = WJEObject(schema, "extends", WJE_GET))) {
+			/* inline schema object */
+			anyFail = anyFail || !SchemaValidate(sub, document, err, loadcb,
+												 freecb, client, name);
+		} else if(loadcb &&
+				  (str = WJEString(schema, "extends", WJE_GET, NULL))) {
+			/* string reference (MA extension of v3 spec) */
+			if((sub = loadcb(str, client, __FILE__, __LINE__))) {
+				anyFail = anyFail || !SchemaValidate(sub, document, err, loadcb,
+													 freecb, client, name);
+			}
 			if(sub && freecb) {
 				freecb(sub, client);
 				sub = NULL;
 			}
-		} else {
-			str = NULL;
+		}
+		if(!str && !sub) {
+			/* inline schema object */
 			last = NULL;
-			while((str = _WJEString(schema, "extends[]", WJE_GET, &last,
-									NULL))) {
-				sub = loadcb(str, client, __FILE__, __LINE__);
-				anyFail = anyFail || SchemaValidate(sub, document, err, loadcb,
-													freecb, client, name);
+			while((sub = _WJEObject(schema, "extends[]", WJE_GET, &last))) {
+				anyFail = anyFail || !SchemaValidate(sub, document, err, loadcb,
+													 freecb, client, name);
+			}
+
+			/* string reference (MA extension of v3 spec) */
+			last = NULL;
+			while(loadcb && (str = _WJEString(schema, "extends[]", WJE_GET,
+											  &last, NULL))) {
+				if((sub = loadcb(str, client, __FILE__, __LINE__))) {
+					anyFail = anyFail || !SchemaValidate(sub, document, err,
+														 loadcb, freecb,
+														client, name);
+				}
 				if(sub && freecb) {
 					freecb(sub, client);
 					sub = NULL;
 				}
 			}
+		}
+		if(anyFail) {
+			return FALSE;
 		}
 	} else {
 		return FALSE;
@@ -915,14 +953,14 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 		} else if(!stricmp(memb->name, "divisibleBy")) {
 			if(document && document->type == WJR_TYPE_NUMBER &&
 			   memb->type == WJR_TYPE_NUMBER) {
-				val = WJENumber(memb, NULL, WJE_GET, 0);
-				num = WJENumber(document, NULL, WJE_GET, 0);
-				if(val) {
-					fail = (num % val != 0);
+				dval = WJEDouble(memb, NULL, WJE_GET, 0);
+				dnum = WJEDouble(document, NULL, WJE_GET, 0);
+				if(dval) {
+					fail = (0 != Modulus(dnum, dval));
 				}
 				if(fail && err) {
-					err(client, "%s: %d not divisible evenly by %d.",
-						name, num, val);
+					err(client, "%s: %lf not divisible evenly by %lf.",
+						name, dnum, dval);
 				}
 				anyFail = anyFail || fail;
 			}
