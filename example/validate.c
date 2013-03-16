@@ -117,6 +117,8 @@ int main(int argc, char **argv) {
 
 	WJECloseDocument(json);
 	WJECloseDocument(schema);
+	WJRCloseDocument(readjson);
+	WJRCloseDocument(readschema);
 	fclose(jsonfile);
 	fclose(schemafile);
 	return 0;
