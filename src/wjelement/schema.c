@@ -297,10 +297,8 @@ static XplBool ValidateType(WJElement value, char *type) {
 	} else if(!stricmp(type, "number")) {
 		return (value->type == WJR_TYPE_NUMBER);
 	} else if(!stricmp(type, "integer")) {
-		//return !WJRIntOrDouble(value, NULL, NULL);
 		return (value->type == WJR_TYPE_NUMBER &&
-				WJEUInt64(value, NULL, WJE_GET, 0) ==
-				WJEDouble(value, NULL, WJE_GET, 1));
+				!((_WJElement *)value)->value.number.hasDecimalPoint);
 	} else if(!stricmp(type, "boolean")) {
 		return (value->type == WJR_TYPE_BOOL ||
 				value->type == WJR_TYPE_TRUE ||
