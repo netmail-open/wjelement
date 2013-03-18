@@ -356,7 +356,10 @@ static int CompareJson(WJElement obj1, WJElement obj2) {
 }
 
 static double Modulus(double a, double b) {
-	return a - (double)( (int64)(a / b) ) * b;
+	if((a / b) == (double)((int64)(a / b))) {
+		return 0;
+	}
+	return a - ((double)( (int64)(a / b) ) * b);
 }
 
 static XplBool SchemaValidate(WJElement schema, WJElement document,
