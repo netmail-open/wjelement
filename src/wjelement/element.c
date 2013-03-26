@@ -305,7 +305,7 @@ EXPORT WJElement _WJEOpenDocument(WJReader reader, char *where, WJELoadCB loadcb
 	return(element);
 }
 
-static WJElement _WJECopy(_WJElement *parent, WJElement original, WJELoadCB loadcb, void *data, const char *file, const int line)
+static WJElement _WJECopy(_WJElement *parent, WJElement original, WJECopyCB copycb, void *data, const char *file, const int line)
 {
 	_WJElement	*l = NULL;
 	_WJElement	*o;
@@ -315,7 +315,7 @@ static WJElement _WJECopy(_WJElement *parent, WJElement original, WJELoadCB load
 		return(NULL);
 	}
 
-	if (loadcb && !loadcb((WJElement) parent, original->name, data, file, line)) {
+	if (copycb && !copycb((WJElement) parent, (WJElement) original, data, file, line)) {
 		/* The consumer has rejected this item */
 		return(NULL);
 	}
@@ -330,7 +330,7 @@ static WJElement _WJECopy(_WJElement *parent, WJElement original, WJELoadCB load
 			case WJR_TYPE_OBJECT:
 			case WJR_TYPE_ARRAY:
 				for (c = original->child; c; c = c->next) {
-					_WJECopy(l, c, loadcb, data, file, line);
+					_WJECopy(l, c, copycb, data, file, line);
 				}
 				break;
 
@@ -356,16 +356,16 @@ static WJElement _WJECopy(_WJElement *parent, WJElement original, WJELoadCB load
 	return((WJElement) l);
 }
 
-EXPORT WJElement _WJECopyDocument(WJElement to, WJElement from, WJELoadCB loadcb, void *data, const char *file, const int line)
+EXPORT WJElement _WJECopyDocument(WJElement to, WJElement from, WJECopyCB copycb, void *data, const char *file, const int line)
 {
 	if (to) {
 		WJElement	c;
 
 		for (c = from->child; c; c = c->next) {
-			_WJECopy((_WJElement *) to, c, loadcb, data, file, line);
+			_WJECopy((_WJElement *) to, c, copycb, data, file, line);
 		}
 	} else {
-		if ((to = _WJECopy(NULL, from, loadcb, data, file, line))) {
+		if ((to = _WJECopy(NULL, from, copycb, data, file, line))) {
 			MemUpdateOwner(to, file, line);
 		}
 	}

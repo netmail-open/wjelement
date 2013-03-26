@@ -162,7 +162,8 @@ EXPORT XplBool		WJECloseDocument(WJElement document);
 */
 
 /* Duplicate an existing WJElement */
-EXPORT WJElement	_WJECopyDocument(WJElement to, WJElement from, WJELoadCB loadcb, void *data, const char *file, const int line);
+typedef XplBool		(* WJECopyCB)(WJElement destination, WJElement object, void *data, const char *file, const int line);
+EXPORT WJElement	_WJECopyDocument(WJElement to, WJElement from, WJECopyCB loadcb, void *data, const char *file, const int line);
 #define				WJECopyDocument(t, f, lcb, d) _WJECopyDocument((t), (f), (lcb), (d), __FILE__, __LINE__)
 
 
