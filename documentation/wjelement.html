@@ -181,8 +181,13 @@ XplBool WJECloseDocument(WJElement document);
 </p>
 <p>
 <blockquote><pre>
-WJElement WJECopyDocument(WJElement to, WJElement from, WJELoadCB loadcb, void *data);
+WJElement WJECopyDocument(WJElement to, WJElement from, WJECopyCB loadcb, void *data);
 </pre></blockquote>
+</p>
+<p>
+  If a copy callback is provided, then it will be called with each element in
+  order to allow filtered copying on an element-by-element basis, using any
+  criteria.
 </p>
 <p>
 <strong>WJEDetach</strong>
