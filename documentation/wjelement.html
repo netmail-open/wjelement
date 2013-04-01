@@ -12,10 +12,18 @@
   memory and to then access elements within it more easily.
 </p>
 <p>
-  WJElement is built atop
+  WJElement uses UTF-8 encoding internally, as do the underlying
   <a href="wjreader.html">WJReader</a>
   and
   <a href="wjwriter.html">WJWriter</a>.
+  libraries.
+  Adding other unicode support to WJR/WJW would not take too much work.
+</p>
+<p>
+  WJElement is thread-safe, though an individual WJElement document and its
+  children should not be used across threads without locking.  WJElement does
+  not provide locking, but its structure provides a handy client pointer which
+  you may use for this or any other purpose.
 </p>
 
 <h1>WJElement Data Types</h1>
