@@ -359,6 +359,7 @@ EXPORT char * __WJEString(WJElement container, char *path, WJEAction action, WJE
 					if (e->value.string) {
 						MemUpdateOwner(e->value.string, file, line);
 					}
+					e->pub.length = strlen(e->value.string);
 					return(e->value.string);
 				}
 			} else {

@@ -91,6 +91,7 @@ _WJElement * _WJEReset(_WJElement *e, WJRType type)
 		MemRelease(&(e->value.string));
 	}
 	e->value.string	= NULL;
+	e->pub.length	= 0;
 	e->pub.type		= type;
 
 	return(e);
@@ -247,6 +248,7 @@ static WJElement _WJELoad(_WJElement *parent, WJReader reader, char *where, WJEL
 				len				= 0;
 				complete		= FALSE;
 				l->value.string	= NULL;
+				l->pub.length	= 0;
 
 				do {
 					if ((value = WJRStringEx(&complete, &len, reader))) {
@@ -311,6 +313,7 @@ static WJElement _WJECopy(_WJElement *parent, WJElement original, WJECopyCB copy
 	_WJElement	*l = NULL;
 	_WJElement	*o;
 	WJElement	c;
+	char		*tmp;
 
 	if (!(o = (_WJElement *) original)) {
 		return(NULL);
@@ -336,7 +339,13 @@ static WJElement _WJECopy(_WJElement *parent, WJElement original, WJECopyCB copy
 				break;
 
 			case WJR_TYPE_STRING:
-				l->value.string = MemStrdup(WJEString(original, NULL, WJE_GET, ""));
+				if ((tmp = WJEString(original, NULL, WJE_GET, ""))) {
+					l->value.string = MemStrdup(tmp);
+					l->pub.length = original->length;
+				} else {
+					l->value.string = MemStrdup("");
+					l->pub.length = 0;
+				}
 				break;
 
 			case WJR_TYPE_NUMBER:
@@ -514,6 +523,7 @@ EXPORT XplBool WJECloseDocument(WJElement document)
 
 	if (current->pub.type == WJR_TYPE_STRING) {
 		MemFree(current->value.string);
+		current->pub.length = 0;
 	}
 
 	if (document->name && current->_name != document->name) {
