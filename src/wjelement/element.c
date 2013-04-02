@@ -244,12 +244,12 @@ static WJElement _WJELoad(_WJElement *parent, WJReader reader, char *where, WJEL
 			case WJR_TYPE_STRING:
 				actual			= 0;
 				used			= 0;
+				len				= 0;
 				complete		= FALSE;
 				l->value.string	= NULL;
 
 				do {
-					if ((value = WJRString(&complete, reader))) {
-						len = strlen(value);
+					if ((value = WJRStringEx(&complete, &len, reader))) {
 						if (used + len >= actual) {
 							l->value.string = MemMallocEx(l->value.string,
 								len + 1 + used, &actual, TRUE, TRUE);
@@ -259,6 +259,7 @@ static WJElement _WJELoad(_WJElement *parent, WJReader reader, char *where, WJEL
 						memcpy(l->value.string + used, value, len);
 						used += len;
 						l->value.string[used] = '\0';
+						l->pub.length = used;
 					}
 				} while (!complete);
 				break;
@@ -445,7 +446,7 @@ EXPORT XplBool WJEWriteDocument(WJElement document, WJWriter writer, char *name)
 			break;
 
 		case WJR_TYPE_STRING:
-			WJWString(name, current->value.string, TRUE, writer);
+			WJWStringN(name, current->value.string, current->pub.length, TRUE, writer);
 			break;
 
 		case WJR_TYPE_NUMBER:

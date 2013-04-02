@@ -994,7 +994,7 @@ EXPORT char * WJRStringEx(XplBool *complete, size_t *length, WJReader indoc)
 			while (*doc->read == '\0' && WJRFillBuffer(doc) > 0);
 		}
 
-		for (i = 0,utf8CharLen=1; ; i+=utf8CharLen,utf8CharLen=1) {
+		for (i = 0,utf8CharLen = 1; ; i += utf8CharLen, utf8CharLen = 1) {
 			switch (doc->read[i]) {
 				default: {
 					break;
@@ -1136,13 +1136,13 @@ EXPORT char * WJRStringEx(XplBool *complete, size_t *length, WJReader indoc)
 							// read so memmove works correctly
 							if (c < 0x80) {
 								/* The 4 hex digits took 1 space, move 5 */
-								doc->read[i+5]     = (char) c;
-								// utf8CharLen = 1; // one byte is all we used
+								doc->read[i + 5]	= (char) c;
+								// utf8CharLen = 1; /* one byte is all we used */
 							} else if (c < 0x800) {
 								/* The 4 hex digits took 2 spaces, move 4 */
-								doc->read[i+4] = (char) 0xC0 | (c >> 6);
-								doc->read[i+5]     = (char) 0x80 | (c & 0x3F);
-								utf8CharLen = 2; // we used two bytes
+								doc->read[i + 4]	= (char) 0xC0 | (c >> 6);
+								doc->read[i + 5]	= (char) 0x80 | (c & 0x3F);
+								utf8CharLen = 2; /* we used two bytes */
 							} else if ((c >= 0xD800) && (c <= 0xDBFF)) {
 								/* high surrogate codepoint */
 								utf8CharLen = 0;
@@ -1155,24 +1155,25 @@ EXPORT char * WJRStringEx(XplBool *complete, size_t *length, WJReader indoc)
 									if ((d >= 0xDC00) && (d <= 0xDFFF)) {
 										unsigned int	e = 0x10000 + ((c & 0x3ff) << 10) | (d & 0x3ff);
 										/* surrogate pair */
-										utf8CharLen = 4; // we used 4 bytes
+										utf8CharLen = 4; /* we used 4 bytes */
 										doc->read[i+3] = (char) 0xF0 | (e >> 18);
 										doc->read[i+4] = (char) 0x80 | ((e >> 12) & 0x3F);
 										doc->read[i+5] = (char) 0x80 | ((e >> 6) & 0x3F);
 										doc->read[i+6] = (char) 0x80 | (e & 0x3F);
+
 										move = sizeof("\\u0000\\u0000")-1 - utf8CharLen;
-										break; // don't use the normal exit from this case
+										break; /* don't use the normal exit from this case */
 									}
 								}
 							} else if ((c >= 0xDC00) && (c <= 0xDFFF)) {
-								/* low surrogate codepoint is invalid here*/
+								/* low surrogate codepoint is invalid here */
 								utf8CharLen = 0;
 							} else {
 								/* The 4 hex digits took 3 spaces, move 3 */
-								doc->read[i+3] = (char) 0xE0 | (c >> 12);
-								doc->read[i+4] = (char) 0x80 | ((c >> 6) & 0x3F);
-								doc->read[i+5]     = (char) 0x80 | (c & 0x3F);
-								utf8CharLen = 3; // we used three bytes
+								doc->read[i + 3]	= (char) 0xE0 | (c >> 12);
+								doc->read[i + 4]	= (char) 0x80 | ((c >> 6) & 0x3F);
+								doc->read[i + 5]	= (char) 0x80 | (c & 0x3F);
+								utf8CharLen = 3; /* we used three bytes */
 							}
 							move = sizeof("\\u0000")-1 - utf8CharLen;
 							break;
@@ -1182,18 +1183,25 @@ EXPORT char * WJRStringEx(XplBool *complete, size_t *length, WJReader indoc)
 							unsigned int	c = (HexDigit(doc->read[i + 2]) << 4)	+
 												(HexDigit(doc->read[i + 3]));
 
-							// We right-justify the bytes we output on top of the characters
-							// read so memmove works correctly
+							/*
+								We right-justify the bytes we output on top of
+								the characters read so memmove works correctly.
+							*/
+
 							/* The 2 hex digits took 1 space, move 3 */
 							doc->read[i+3] = (char) c;
-							// utf8CharLen = 1; // one byte is is all we used
-							move = sizeof("\\x00")-1 - utf8CharLen;
+							move = sizeof("\\x00") - 1 - utf8CharLen;
 							break;
 						}
 					}
 
 					WJRDocAssert(doc);
-					memmove(doc->read + i, doc->read + i + move, strlen(doc->read + i + move) + 1);
+					memmove(
+						doc->read + i,			/* to	*/
+						doc->read + i + move,	/* from	*/
+
+						/* Length, including terminator and at least 1 char */
+						strlen(doc->read + i + move + 1) + 2);
 					WJRDocAssert(doc);
 					break;
 				}

@@ -119,6 +119,9 @@ typedef struct WJElementPublic {
 	/* The number of children */
 	int								count;
 
+	/* The length if the type is WJR_TYPE_STRING */
+	size_t							length;
+
 	/*
 		A count of changes that have been performed on this element, which can
 		be reset by the consumer.
