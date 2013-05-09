@@ -223,6 +223,12 @@ static WJElement _WJELoad(_WJElement *parent, WJReader reader, char *where, WJEL
 	}
 
 	name = where[1] ? where + 1 : NULL;
+
+	if (name && (WJEChild((WJElement) parent, name, WJE_GET))) {
+		/* Do not load duplicate names */
+		return(NULL);
+	}
+
 	if (loadcb && !loadcb((WJElement)parent, name, data, file, line)) {
 		/* The consumer has rejected this item */
 		return(NULL);
