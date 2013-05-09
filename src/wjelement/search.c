@@ -892,7 +892,7 @@ EXPORT WJElement _WJEChild(WJElement container, char *name, WJEAction action, co
 	if (!container || !name) return(NULL);
 
 	for (e = container->child; e; e = e->next) {
-		if (e->name && !stricmp(e->name, name)) {
+		if (e->name && !strcmp(e->name, name)) {
 			break;
 		}
 	}
