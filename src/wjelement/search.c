@@ -669,6 +669,12 @@ static int WJECheckCondition(WJElement e, char **condition, WJEAction action)
 	}
 
 	r = strtod(value, &tmp);
+	tmp = skipspace(tmp);
+	if (r == 0 && *tmp) {
+		/* Let's assume this wasn't a double */
+		r = (double) strtol(value, &tmp, 0);
+	}
+
 	if (tmp > value) {
 		r -= WJEDouble(e, NULL, WJE_GET, 0);
 
