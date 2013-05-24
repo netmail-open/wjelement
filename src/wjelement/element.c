@@ -214,7 +214,7 @@ static WJElement _WJELoad(_WJElement *parent, WJReader reader, char *where, WJEL
 			A NULL poisition in a WJReader indicates the root of the document,
 			so we must read to find the first real object.
 		*/
-		where = WJRNext(NULL, 256, reader);
+		where = WJRNext(NULL, 2048, reader);
 	}
 
 	if (!where) {
@@ -243,7 +243,7 @@ static WJElement _WJELoad(_WJElement *parent, WJReader reader, char *where, WJEL
 
 			case WJR_TYPE_OBJECT:
 			case WJR_TYPE_ARRAY:
-				while (reader && (current = WJRNext(where, 256, reader))) {
+				while (reader && (current = WJRNext(where, 2048, reader))) {
 					_WJELoad(l, reader, current, loadcb, data, file, line);
 				}
 				break;
