@@ -518,7 +518,30 @@ EXPORT size_t WJRFileCallback(char *buffer, size_t length, size_t seen, void *da
 		return(0);
 	}
 
-	r = fread(buffer, sizeof(char), length, (FILE *) data);
+	for (;;) {
+		r = fread(buffer, sizeof(char), length, (FILE *) data);
+
+		if (seen == 0 && r >= 3 && buffer[0] == (char) 0xEF &&
+			buffer[1] == (char) 0xBB && buffer[2] == (char) 0xBF
+		) {
+			/*
+				Ignore the BOM (byte order marker) since it is pointless in
+				UTF-8.
+
+				http://unicode.org/faq/utf_bom.html#bom5
+			*/
+			r -= 3;
+			memmove(buffer, buffer + 3, r);
+
+			if (!r) {
+				/* If that was all we read then try the read one more time */
+				continue;
+			}
+		}
+
+		break;
+	}
+
 	DebugAssert(r || feof((FILE *) data));
 	return(r);
 }
