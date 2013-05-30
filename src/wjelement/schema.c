@@ -726,7 +726,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			}
 
 		} else if(!stricmp(memb->name, "minimum")) {
-			if(document && memb->type == WJR_TYPE_NUMBER) {
+			if(document && document->type == WJR_TYPE_NUMBER &&
+			   memb->type == WJR_TYPE_NUMBER) {
 				dval = WJEDouble(memb, NULL, WJE_GET, 0);
 				dnum = WJEDouble(document, NULL, WJE_GET, 0);
 				if(WJEBool(schema, "exclusiveMinimum", WJE_GET, FALSE)) {
@@ -742,7 +743,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			}
 
 		} else if(!stricmp(memb->name, "maximum")) {
-			if(document && memb->type == WJR_TYPE_NUMBER) {
+			if(document && document->type == WJR_TYPE_NUMBER &&
+			   memb->type == WJR_TYPE_NUMBER) {
 				dval = WJEDouble(memb, NULL, WJE_GET, 0);
 				dnum = WJEDouble(document, NULL, WJE_GET, 0);
 				if(WJEBool(schema, "exclusiveMaximum", WJE_GET, FALSE)) {
