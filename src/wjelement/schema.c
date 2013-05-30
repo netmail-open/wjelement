@@ -726,7 +726,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			}
 
 		} else if(!stricmp(memb->name, "minimum")) {
-			if(document && memb->type == WJR_TYPE_NUMBER) {
+			if(document && document->type == WJR_TYPE_NUMBER &&
+			   memb->type == WJR_TYPE_NUMBER) {
 				dval = WJEDouble(memb, NULL, WJE_GET, 0);
 				dnum = WJEDouble(document, NULL, WJE_GET, 0);
 				if(WJEBool(schema, "exclusiveMinimum", WJE_GET, FALSE)) {
@@ -742,7 +743,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			}
 
 		} else if(!stricmp(memb->name, "maximum")) {
-			if(document && memb->type == WJR_TYPE_NUMBER) {
+			if(document && document->type == WJR_TYPE_NUMBER &&
+			   memb->type == WJR_TYPE_NUMBER) {
 				dval = WJEDouble(memb, NULL, WJE_GET, 0);
 				dnum = WJEDouble(document, NULL, WJE_GET, 0);
 				if(WJEBool(schema, "exclusiveMaximum", WJE_GET, FALSE)) {
@@ -845,10 +847,11 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 #ifdef HAVE_REGEX_H
 			regex_t pat;
 			str = WJEString(memb, NULL, WJE_GET, NULL);
-			if(str && !regcomp(&pat, str, REG_EXTENDED | REG_NOSUB) &&
-			   regexec(&pat, WJEString(document, NULL, WJE_GET, ""),
-					   0, NULL, 0)) {
-				fail = TRUE;
+			if(str && !regcomp(&pat, str, REG_EXTENDED | REG_NOSUB)) {
+				if(regexec(&pat, WJEString(document, NULL, WJE_GET, ""),
+						   0, NULL, 0)) {
+					fail = TRUE;
+				}
 				regfree(&pat);
 			}
 			if(fail && err) {
@@ -938,10 +941,11 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				/* unknown or user-defined format, let it pass */
 			}
 			if(str2 && !regcomp(&freg, str2,
-								REG_ICASE | REG_EXTENDED | REG_NOSUB) &&
-			   regexec(&freg, WJEString(document, NULL, WJE_GET, ""),
-					   0, NULL, 0)) {
-				fail = TRUE;
+								REG_ICASE | REG_EXTENDED | REG_NOSUB)) {
+				if(regexec(&freg, WJEString(document, NULL, WJE_GET, ""),
+						   0, NULL, 0)) {
+					fail = TRUE;
+				}
 				regfree(&freg);
 			}
 			if(fail && err) {
