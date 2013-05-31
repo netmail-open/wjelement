@@ -554,12 +554,62 @@ static int WJECLIMove(WJElement *doc, WJElement *current, char *line)
 		return(4);
 	}
 
-	if (!(parent = findElement(e, selectorb, NULL))) {
+	if (!(parent = findElement(e, selectorb, NULL)) &&
+		!(parent = WJEObject(e, selectorb, WJE_NEW))
+	) {
 		fprintf(stderr, "Could not find specified element: %s\n", selectorb);
 		return(4);
 	}
 
 	WJEDetach(child);
+	if (name) {
+		WJERename(child, name);
+	}
+	WJEAttach(parent, child);
+
+	return(0);
+}
+
+static int WJECLICopy(WJElement *doc, WJElement *current, char *line)
+{
+	char		*selectora;
+	char		*selectorb;
+	char		*name;
+	WJElement	e;
+	WJElement	child;
+	WJElement	parent;
+
+	if (!(e = *current) && !(e = *doc)) {
+		fprintf(stderr, "No JSON document loaded\n");
+		return(1);
+	}
+
+	selectora	= nextField(line, &line);
+	selectorb	= nextField(line, &line);
+	name		= nextField(line, &line);
+
+	if (!selectora || !selectorb || nextField(line, &line)) {
+		fprintf(stderr, "Invalid arguments\n");
+		return(2);
+	}
+
+	if (!(child = findElement(e, selectora, NULL))) {
+		fprintf(stderr, "Could not find specified element: %s\n", selectora);
+		return(4);
+	}
+
+	if (!(parent = findElement(e, selectorb, NULL)) &&
+		!(parent = WJEObject(e, selectorb, WJE_NEW))
+	) {
+		fprintf(stderr, "Could not find specified element: %s\n", selectorb);
+		return(4);
+	}
+
+	if (!(child = WJECopyDocument(NULL, child, NULL, NULL))) {
+		fprintf(stderr, "Could not find copy element: %s\n", selectora);
+		return(5);
+	}
+
 	if (name) {
 		WJERename(child, name);
 	}
@@ -727,6 +777,11 @@ WJECLIcmd WJECLIcmds[] =
 		WJECLIPrint,	"[<selector>]"
 	},
 	{
+		"p",			NULL,
+		WJECLIPrint,	NULL
+	},
+
+	{
 		"pretty",		"Toggle pretty printing",
 		WJECLIPretty,	"[on|off]"
 	},
@@ -786,8 +841,20 @@ WJECLIcmd WJECLIcmds[] =
 	},
 
 	{
-		"move",			"Move an element from it's current parent to a new parent",
-		WJECLIMove,		"<selector> <selector> [<name>]"
+		"mv",			"Move an element from it's current parent to a new parent",
+		WJECLIMove,		"<selector> <selector> [<newname>]"
+	},
+	{
+		"move",			NULL,
+		WJECLIMove,		NULL
+	},
+	{
+		"cp",			"Copy an element from it's current parent to a new parent",
+		WJECLICopy,		"<selector> <selector> [<newname>]"
+	},
+	{
+		"copy",			NULL,
+		WJECLICopy,		NULL
 	},
 	{ NULL, NULL, NULL, NULL }
 };
