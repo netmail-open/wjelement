@@ -526,6 +526,48 @@ static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 	return(r);
 }
 
+static int WJECLIMove(WJElement *doc, WJElement *current, char *line)
+{
+	char		*selectora;
+	char		*selectorb;
+	char		*name;
+	WJElement	e;
+	WJElement	child;
+	WJElement	parent;
+
+	if (!(e = *current) && !(e = *doc)) {
+		fprintf(stderr, "No JSON document loaded\n");
+		return(1);
+	}
+
+	selectora	= nextField(line, &line);
+	selectorb	= nextField(line, &line);
+	name		= nextField(line, &line);
+
+	if (!selectora || !selectorb || nextField(line, &line)) {
+		fprintf(stderr, "Invalid arguments\n");
+		return(2);
+	}
+
+	if (!(child = findElement(e, selectora, NULL))) {
+		fprintf(stderr, "Could not find specified element: %s\n", selectora);
+		return(4);
+	}
+
+	if (!(parent = findElement(e, selectorb, NULL))) {
+		fprintf(stderr, "Could not find specified element: %s\n", selectorb);
+		return(4);
+	}
+
+	WJEDetach(child);
+	if (name) {
+		WJERename(child, name);
+	}
+	WJEAttach(parent, child);
+
+	return(0);
+}
+
 static int WJECLIRemove(WJElement *doc, WJElement *current, char *line)
 {
 	char		*selector;
@@ -743,5 +785,9 @@ WJECLIcmd WJECLIcmds[] =
 		WJECLIValidate,	"<schema file> [<pattern>]"
 	},
 
+	{
+		"move",			"Move an element from it's current parent to a new parent",
+		WJECLIMove,		"<selector> <selector> [<name>]"
+	},
 	{ NULL, NULL, NULL, NULL }
 };
