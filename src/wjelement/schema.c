@@ -845,20 +845,22 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 
 		} else if(!stricmp(memb->name, "pattern")) {
 #ifdef HAVE_REGEX_H
-			regex_t pat;
-			str = WJEString(memb, NULL, WJE_GET, NULL);
-			if(str && !regcomp(&pat, str, REG_EXTENDED | REG_NOSUB)) {
-				if(regexec(&pat, WJEString(document, NULL, WJE_GET, ""),
-						   0, NULL, 0)) {
-					fail = TRUE;
+			if(document && document->type == WJR_TYPE_STRING) {
+				regex_t pat;
+				str = WJEString(memb, NULL, WJE_GET, NULL);
+				if(str && !regcomp(&pat, str, REG_EXTENDED | REG_NOSUB)) {
+					if(regexec(&pat, WJEString(document, NULL, WJE_GET, ""),
+							   0, NULL, 0)) {
+						fail = TRUE;
+					}
+					regfree(&pat);
 				}
-				regfree(&pat);
+				if(fail && err) {
+					err(client, "%s: '%s' does not match '%s' format.",
+						name, WJEString(document, NULL, WJE_GET, ""), str);
+				}
+				anyFail = anyFail || fail;
 			}
-			if(fail && err) {
-				err(client, "%s: '%s' does not match '%s' format.",
-					name, WJEString(document, NULL, WJE_GET, ""), str);
-			}
-			anyFail = anyFail || fail;
 #endif
 
 		} else if(!stricmp(memb->name, "enum")) {
