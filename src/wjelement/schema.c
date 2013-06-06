@@ -900,12 +900,14 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				str = WJEString(memb, NULL, WJE_GET, NULL);
 				str2 = NULL;
 				if(!stricmp(str, "date-time")) {
-					str2 = "^[0-9][0-9][0-9][0-9](-[0-1][0-9](-[0-3][0-9]"
-						"(T[0-9][0-9](:[0-9][0-9](:[0-9][0-9])?)?)?)?)?Z?$";
+					str2 = "^([0-9]{4})-(1[0-2]|0[1-9])-"
+						"(3[0-1]|0[1-9]|[1-2][0-9])T"
+						"(2[0-3]|[0-1][0-9]):[0-5][0-9]:[0-5][0-9]Z$";
 				} else if(!stricmp(str, "date")) {
-					str2 = "^[0-9][0-9][0-9][0-9](-[0-1][0-9](-[0-3][0-9])?)?$";
+					str2 = "^([0-9]{4})-(1[0-2]|0[1-9])-"
+						"(3[0-1]|0[1-9]|[1-2][0-9])$";
 				} else if(!stricmp(str, "time")) {
-					str2 = "^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$";
+					str2 = "^(2[0-3]|[0-1][0-9]):[0-5][0-9]:[0-5][0-9]$";
 				} else if(!stricmp(str, "utc-millisec")) {
 					fail = (document->type != WJR_TYPE_NUMBER);
 				} else if(!stricmp(str, "regex")) {
