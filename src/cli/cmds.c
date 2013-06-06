@@ -253,6 +253,41 @@ static int WJECLIPrint(WJElement *doc, WJElement *current, char *line)
 	return(r);
 }
 
+static int WJECLIDump(WJElement *doc, WJElement *current, char *line)
+{
+	char		*selector;
+	char		*value;
+	WJElement	e, c;
+
+	if (!(e = *current) && !(e = *doc)) {
+		fprintf(stderr, "No JSON document loaded\n");
+		return(1);
+	}
+	c = e;
+
+	selector = nextField(line, &line);
+
+	if (nextField(line, &line)) {
+		fprintf(stderr, "Invalid arguments\n");
+		return(2);
+	}
+
+	if (selector) {
+		if (!(e = findElement(c, selector, NULL))) {
+			fprintf(stderr, "Could not find specified element: %s\n", selector);
+			return(4);
+		}
+	}
+
+	if ((value = WJEString(e, NULL, WJE_GET, NULL))) {
+		fprintf(stdout, "%s\n", value);
+		return(0);
+	} else {
+		fprintf(stderr, "Could not find a value for the specified element: %s\n", selector);
+		return(4);
+	}
+}
+
 static int WJECLIPretty(WJElement *doc, WJElement *current, char *line)
 {
 	char		*arg;
@@ -780,6 +815,17 @@ WJECLIcmd WJECLIcmds[] =
 		"p",			NULL,
 		WJECLIPrint,	NULL
 	},
+
+	{
+		"dump",			"Dump the value of the currently selected element of " \
+						"the JSON document.",
+		WJECLIDump,		"[<selector>]"
+	},
+	{
+		"d",			NULL,
+		WJECLIDump,		NULL
+	},
+
 
 	{
 		"pretty",		"Toggle pretty printing",
