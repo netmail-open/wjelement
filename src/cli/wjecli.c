@@ -146,17 +146,7 @@ int main(int argc, char **argv)
 	int			r			= 0;
 	WJReader	reader;
 	char		*cmd, *args;
-	XplBool		tty			= TRUE;
 	char		line[1024];
-
-	// TODO	Detect a tty on other platforms
-#ifdef LINUX
-	/* Is stdin a tty? */
-	if (!isatty(fileno(stdin))) {
-		tty = FALSE;
-	}
-#endif
-
 
 	/* Print pretty documents by default */
 	wje.pretty = TRUE;
@@ -229,7 +219,7 @@ int main(int argc, char **argv)
 
 	for (;;) {
 		/* Read the next command */
-		if (in == stdin && tty) {
+		if (in == stdin && isatty(fileno(stdin))) {
 			fprintf(stdout, "wje");
 
 			if (r) {
