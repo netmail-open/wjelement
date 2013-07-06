@@ -18,10 +18,10 @@ WJElement has grown into a generally-useful library, and is used across
 Messaging Architects' netmail and related projects.  It is loved enough by
 MA's developers that we desire to use it elsewhere too, and we think others
 will enjoy it as well.  So, here it is, ready to be consumed in any project,
-open or closed, as outlined by the GNU LGPL.  Include it as-is and link to it
-from your code, massage it into your own statically-linked package, or use it
-in ways we haven't thought of.  Read the docs/headers, have fun, and if you
-use it for something awesome, let us know about it!  :^)
+open or closed, as outlined by the GNU LGPL (any version).  Include it as-is
+and link to it from your code, massage it into your own statically-linked
+package, or use it in ways we haven't thought of.  Read the docs/headers, have
+fun, and if you use it for something awesome, let us know about it!  :^)
 
 
 * Owen Swerkstrom <<owens@netmail.com>> - community/repo front-man, WJESchema
