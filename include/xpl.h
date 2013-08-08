@@ -189,12 +189,12 @@ typedef signed char int8;
 
 EXPORT char *_skipspace( char *source, const char *breakchars );
 #define skipspace(s) _skipspace((s), "\r\n")
+EXPORT char *chopspace( char *value );
 
 EXPORT size_t strprintf( char *buffer, size_t bufferSize, size_t *sizeNeeded, const char *format, ... ) XplFormatString(4, 5);
 EXPORT int stripat(char *str, char *pattern);
 EXPORT int stripatn(char *str, char *pattern, size_t len);
 
 EXPORT char * strspace( char *source );
-
 
 #endif

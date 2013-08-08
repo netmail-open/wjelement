@@ -17,6 +17,7 @@
 
 
 #include "wjecli.h"
+#include <sys/stat.h>
 
 extern WJECLIGlobals wje;
 
@@ -483,8 +484,12 @@ static int WJECLIpwd(WJElement *doc, WJElement *current, char *line)
 static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 {
 	char		*selector;
-	WJElement	t, n;
-	WJReader	reader;
+	FILE		*file		= NULL;
+	char		*contents	= NULL;
+	WJReader	reader		= NULL;
+	WJElement	n			= NULL;
+	WJElement	t;
+	struct stat	sb;
 	int			r = 0;
 	uint64		u;
 	int64		i;
@@ -495,13 +500,60 @@ static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 		return(2);
 	}
 
-	if (!(reader = WJROpenMemDocument(line, NULL, 0))) {
-		fprintf(stderr, "Internal error, failed to open JSON reader\n");
-		r = 3;
-	} else if (!(n = WJEOpenDocument(reader, NULL, NULL, NULL))) {
-		fprintf(stderr, "Failed to parse JSON document\n");
-		r = 4;
-	} else {
+	line = chopspace(line);
+	switch (*line) {
+		case '#':
+			line++;
+
+			/* Treat the rest of the line as a path to a raw document */
+			if (stat(line, &sb) || !(file = fopen(line, "r"))) {
+				fprintf(stderr, "Could not open file: %s\n", line);
+				r = 3;
+			} else if (!(contents = MemMalloc(sb.st_size + 1))) {
+				fprintf(stderr, "Could not allocate memory\n");
+				r = 4;
+			} else if ((sb.st_size != (off_t) fread(contents, sizeof(char), sb.st_size, file))) {
+				fprintf(stderr, "Could not read file: %s\n", line);
+				r = 3;
+			} else if (!(n = WJEObject(NULL, NULL, WJE_SET))) {
+				fprintf(stderr, "Could not allocate memory\n");
+				r = 5;
+			} else {
+				WJEStringN(n, NULL, WJE_SET, contents, sb.st_size);
+			}
+
+			MemRelease(&contents);
+			break;
+
+		case '@':
+			line++;
+
+			/* Treat the rest of the line as a path to a JSON document */
+			if (!(file = fopen(line, "r"))) {
+				fprintf(stderr, "Could not open JSON document: %s\n", line);
+				r = 3;
+			} else if (!(reader = WJROpenFILEDocument(file, NULL, 0))) {
+				fprintf(stderr, "Internal error, failed to open JSON reader\n");
+				r = 3;
+			} else if (!(n = WJEOpenDocument(reader, NULL, NULL, NULL))) {
+				fprintf(stderr, "Failed to parse JSON document\n");
+				r = 4;
+			}
+			break;
+
+		default:
+			/* Treat the rest of the line as JSON */
+			if (!(reader = WJROpenMemDocument(line, NULL, 0))) {
+				fprintf(stderr, "Internal error, failed to open JSON reader\n");
+				r = 3;
+			} else if (!(n = WJEOpenDocument(reader, NULL, NULL, NULL))) {
+				fprintf(stderr, "Failed to parse JSON document\n");
+				r = 4;
+			}
+			break;
+	}
+
+	if (n) {
 		switch (n->type) {
 			case WJR_TYPE_OBJECT:
 				t = WJEObject(*current, selector, WJE_SET);
@@ -556,6 +608,10 @@ static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 
 	if (reader) {
 		WJRCloseDocument(reader);
+	}
+
+	if (file) {
+		fclose(file);
 	}
 
 	return(r);
@@ -861,7 +917,7 @@ WJECLIcmd WJECLIcmds[] =
 
 	{
 		"set",			"Set a JSON value",
-		WJECLISet,		"<selector> <json>"
+		WJECLISet,		"<selector> <json|@filename.json|#filename.txt>"
 	},
 
 	{

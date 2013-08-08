@@ -234,39 +234,42 @@ typedef enum {
 // TODO	Remove this.  WJE_PUT was renamed to WJE_MOD.
 #define WJE_PUT WJE_MOD
 
-#define _WJEString(	container, path, action, last,	value)	__WJEString(	(container), (path), (action), (last),	(value),	__FILE__, __LINE__)
-#define  WJEString(	container, path, action,		value)	__WJEString(	(container), (path), (action), NULL,	(value),	__FILE__, __LINE__)
-#define _WJEObject(	container, path, action, last)			__WJEObject(	(container), (path), (action), (last),				__FILE__, __LINE__)
-#define  WJEObject(	container, path, action)				__WJEObject(	(container), (path), (action), NULL,				__FILE__, __LINE__)
-#define _WJEBool(	container, path, action, last,	value)	__WJEBool(		(container), (path), (action), (last),	(value),	__FILE__, __LINE__)
-#define  WJEBool(	container, path, action,		value)	__WJEBool(		(container), (path), (action), NULL,	(value),	__FILE__, __LINE__)
-#define _WJEArray(	container, path, action, last)			__WJEArray(		(container), (path), (action), (last),				__FILE__, __LINE__)
-#define  WJEArray(	container, path, action)				__WJEArray(		(container), (path), (action), NULL,				__FILE__, __LINE__)
-#define _WJENull(	container, path, action, last)			__WJENull(		(container), (path), (action), (last),				__FILE__, __LINE__)
-#define  WJENull(	container, path, action)				__WJENull(		(container), (path), (action), NULL,				__FILE__, __LINE__)
-#define _WJEInt32(	container, path, action, last,	value)	__WJEInt32(		(container), (path), (action), (last),	(value),	__FILE__, __LINE__)
-#define  WJEInt32(	container, path, action,		value)	__WJEInt32(		(container), (path), (action), NULL,	(value),	__FILE__, __LINE__)
-#define _WJENumber(	container, path, action, last,	value)	__WJEInt32(		(container), (path), (action), (last),	(value),	__FILE__, __LINE__)
-#define  WJENumber(	container, path, action,		value)	__WJEInt32(		(container), (path), (action), NULL,	(value),	__FILE__, __LINE__)
-#define _WJEUInt32(	container, path, action, last,	value)	__WJEUInt32(	(container), (path), (action), (last),	(value),	__FILE__, __LINE__)
-#define  WJEUInt32(	container, path, action,		value)	__WJEUInt32(	(container), (path), (action), NULL,	(value),	__FILE__, __LINE__)
-#define _WJEInt64(	container, path, action, last,	value)	__WJEInt64(		(container), (path), (action), (last),	(value),	__FILE__, __LINE__)
-#define  WJEInt64(	container, path, action,		value)	__WJEInt64(		(container), (path), (action), NULL,	(value),	__FILE__, __LINE__)
-#define _WJEUInt64(	container, path, action, last,	value)	__WJEUInt64(	(container), (path), (action), (last),	(value),	__FILE__, __LINE__)
-#define  WJEUInt64(	container, path, action,		value)	__WJEUInt64(	(container), (path), (action), NULL,	(value),	__FILE__, __LINE__)
-#define _WJEDouble( container, path, action, last,	value)	__WJEDouble(	(container), (path), (action), (last),	(value),	__FILE__, __LINE__)
-#define  WJEDouble( container, path, action,		value)	__WJEDouble(	(container), (path), (action), NULL,	(value),	__FILE__, __LINE__)
+#define _WJEString(	container, path, action, last,	value)		__WJEString(	(container), (path), (action), (last),	(value),		__FILE__, __LINE__)
+#define  WJEString(	container, path, action,		value)		__WJEString(	(container), (path), (action), NULL,	(value),		__FILE__, __LINE__)
+#define _WJEStringN(container, path, action, last,	value, len)	__WJEStringN(	(container), (path), (action), (last),	(value), (len),	__FILE__, __LINE__)
+#define  WJEStringN(container, path, action,		value, len)	__WJEStringN(	(container), (path), (action), NULL,	(value), (len),	__FILE__, __LINE__)
+#define _WJEObject(	container, path, action, last)				__WJEObject(	(container), (path), (action), (last),					__FILE__, __LINE__)
+#define  WJEObject(	container, path, action)					__WJEObject(	(container), (path), (action), NULL,					__FILE__, __LINE__)
+#define _WJEBool(	container, path, action, last,	value)		__WJEBool(		(container), (path), (action), (last),	(value),		__FILE__, __LINE__)
+#define  WJEBool(	container, path, action,		value)		__WJEBool(		(container), (path), (action), NULL,	(value),		__FILE__, __LINE__)
+#define _WJEArray(	container, path, action, last)				__WJEArray(		(container), (path), (action), (last),					__FILE__, __LINE__)
+#define  WJEArray(	container, path, action)					__WJEArray(		(container), (path), (action), NULL,					__FILE__, __LINE__)
+#define _WJENull(	container, path, action, last)				__WJENull(		(container), (path), (action), (last),					__FILE__, __LINE__)
+#define  WJENull(	container, path, action)					__WJENull(		(container), (path), (action), NULL,					__FILE__, __LINE__)
+#define _WJEInt32(	container, path, action, last,	value)		__WJEInt32(		(container), (path), (action), (last),	(value),		__FILE__, __LINE__)
+#define  WJEInt32(	container, path, action,		value)		__WJEInt32(		(container), (path), (action), NULL,	(value),		__FILE__, __LINE__)
+#define _WJENumber(	container, path, action, last,	value)		__WJEInt32(		(container), (path), (action), (last),	(value),		__FILE__, __LINE__)
+#define  WJENumber(	container, path, action,		value)		__WJEInt32(		(container), (path), (action), NULL,	(value),		__FILE__, __LINE__)
+#define _WJEUInt32(	container, path, action, last,	value)		__WJEUInt32(	(container), (path), (action), (last),	(value),		__FILE__, __LINE__)
+#define  WJEUInt32(	container, path, action,		value)		__WJEUInt32(	(container), (path), (action), NULL,	(value),		__FILE__, __LINE__)
+#define _WJEInt64(	container, path, action, last,	value)		__WJEInt64(		(container), (path), (action), (last),	(value),		__FILE__, __LINE__)
+#define  WJEInt64(	container, path, action,		value)		__WJEInt64(		(container), (path), (action), NULL,	(value),		__FILE__, __LINE__)
+#define _WJEUInt64(	container, path, action, last,	value)		__WJEUInt64(	(container), (path), (action), (last),	(value),		__FILE__, __LINE__)
+#define  WJEUInt64(	container, path, action,		value)		__WJEUInt64(	(container), (path), (action), NULL,	(value),		__FILE__, __LINE__)
+#define _WJEDouble( container, path, action, last,	value)		__WJEDouble(	(container), (path), (action), (last),	(value),		__FILE__, __LINE__)
+#define  WJEDouble( container, path, action,		value)		__WJEDouble(	(container), (path), (action), NULL,	(value),		__FILE__, __LINE__)
 
-EXPORT XplBool		__WJEBool(		WJElement container, char *path, WJEAction action, WJElement *last, XplBool value,	const char *file, const int line);
-EXPORT char *		__WJEString(	WJElement container, char *path, WJEAction action, WJElement *last, char *value,	const char *file, const int line);
-EXPORT WJElement	__WJEObject(	WJElement container, char *path, WJEAction action, WJElement *last,					const char *file, const int line);
-EXPORT WJElement	__WJEArray(		WJElement container, char *path, WJEAction action, WJElement *last,					const char *file, const int line);
-EXPORT WJElement	__WJENull(		WJElement container, char *path, WJEAction action, WJElement *last,					const char *file, const int line);
-EXPORT int32		__WJEInt32(		WJElement container, char *path, WJEAction action, WJElement *last, int32 value,	const char *file, const int line);
-EXPORT uint32		__WJEUInt32(	WJElement container, char *path, WJEAction action, WJElement *last, uint32 value,	const char *file, const int line);
-EXPORT int64		__WJEInt64(		WJElement container, char *path, WJEAction action, WJElement *last, int64 value,	const char *file, const int line);
-EXPORT uint64		__WJEUInt64(	WJElement container, char *path, WJEAction action, WJElement *last, uint64 value,	const char *file, const int line);
-EXPORT double		__WJEDouble(	WJElement container, char *path, WJEAction action, WJElement *last, double value,	const char *file, const int line);
+EXPORT XplBool		__WJEBool(		WJElement container, char *path, WJEAction action, WJElement *last, XplBool value,				const char *file, const int line);
+EXPORT char *		__WJEString(	WJElement container, char *path, WJEAction action, WJElement *last, char *value,				const char *file, const int line);
+EXPORT char *		__WJEStringN(	WJElement container, char *path, WJEAction action, WJElement *last, char *value, size_t len,	const char *file, const int line);
+EXPORT WJElement	__WJEObject(	WJElement container, char *path, WJEAction action, WJElement *last,								const char *file, const int line);
+EXPORT WJElement	__WJEArray(		WJElement container, char *path, WJEAction action, WJElement *last,								const char *file, const int line);
+EXPORT WJElement	__WJENull(		WJElement container, char *path, WJEAction action, WJElement *last,								const char *file, const int line);
+EXPORT int32		__WJEInt32(		WJElement container, char *path, WJEAction action, WJElement *last, int32 value,				const char *file, const int line);
+EXPORT uint32		__WJEUInt32(	WJElement container, char *path, WJEAction action, WJElement *last, uint32 value,				const char *file, const int line);
+EXPORT int64		__WJEInt64(		WJElement container, char *path, WJEAction action, WJElement *last, int64 value,				const char *file, const int line);
+EXPORT uint64		__WJEUInt64(	WJElement container, char *path, WJEAction action, WJElement *last, uint64 value,				const char *file, const int line);
+EXPORT double		__WJEDouble(	WJElement container, char *path, WJEAction action, WJElement *last, double value,				const char *file, const int line);
 
 /*
 	Find, create or update an element by name instead of path.  This allows

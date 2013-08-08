@@ -239,6 +239,24 @@ EXPORT int stripat(char *str, char *pattern)
 	return(stripat_r(str, pattern, strlen(pattern), 1));
 }
 
+EXPORT char *chopspace( char *value )
+{
+    char    *p;
+
+    if( value )
+    {
+        for(p=value+strlen(value);p>value;p--)
+        {
+            if( !isspace( *(p-1) ) )
+            {
+                break;
+            }
+        }
+        *p = '\0';
+    }
+    return( skipspace( value ) );
+}
+
 EXPORT char * _skipspace( char *source, const char *breakchars )
 {
 	if( source )

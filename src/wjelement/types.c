@@ -279,6 +279,26 @@ static void _WJENum(WJElement container, char *path, WJEAction action, WJElement
 
 EXPORT char * __WJEString(WJElement container, char *path, WJEAction action, WJElement *last, char *value, const char *file, const int line)
 {
+	size_t		len;
+
+	switch (action) {
+		default:
+			break;
+
+		case WJE_SET:
+		case WJE_NEW:
+		case WJE_PUT:
+			if (value) {
+				len = strlen(value);
+			}
+			break;
+	}
+
+	return(__WJEStringN(container, path, action, last, value, len, file, line));
+}
+
+EXPORT char * __WJEStringN(WJElement container, char *path, WJEAction action, WJElement *last, char *value, size_t len, const char *file, const int line)
+{
 	_WJElement		*e;
 
 	/*
@@ -355,11 +375,12 @@ EXPORT char * __WJEString(WJElement container, char *path, WJEAction action, WJE
 				if (!value) {
 					return((e->value.string = NULL));
 				} else {
-					e->value.string = MemStrdupWait(value);
-					if (e->value.string) {
-						MemUpdateOwner(e->value.string, file, line);
-					}
-					e->pub.length = strlen(e->value.string);
+					e->value.string = MemMallocWait(len + 1);
+					strprintf(e->value.string, len + 1, NULL, "%.*s", (int) len, value);
+					e->value.string[len] = '\0';
+
+					MemUpdateOwner(e->value.string, file, line);
+					e->pub.length = len;
 					return(e->value.string);
 				}
 			} else {
