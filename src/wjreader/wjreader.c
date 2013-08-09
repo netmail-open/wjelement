@@ -16,6 +16,7 @@
 */
 
 
+#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -24,6 +25,11 @@
 #include <memmgr.h>
 
 #include <wjreader.h>
+
+#if defined(_MSC_VER)
+#define strtoull(nptr, endptr, base) _strtoui64(nptr, endptr, base)
+#define strtoll(nptr, endptr, base) _strtoi64(nptr, endptr, base)
+#endif
 
 /*
 	JSON syntax (http://www.json.org/)

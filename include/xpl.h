@@ -22,6 +22,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 
 #ifndef XPL_H
@@ -181,11 +182,19 @@ typedef signed char int8;
 
 # define DebugAssert( x )
 
+# if defined(_MSC_VER)
+# define XplStrCaseCmp(a,b) _stricmp(a,b)
+# define stricmp(a,b) _stricmp(a,b)
+
+# define XplStrNCaseCmp(a,b,c) _strnicmp(a,b,c)
+# define strnicmp(a,b,c) _strnicmp(a,b,c)
+#else
 # define XplStrCaseCmp(a,b) strcasecmp(a,b)
 # define stricmp(a,b) strcasecmp(a,b)
 
 # define XplStrNCaseCmp(a,b,c) strncasecmp(a,b,c)
 # define strnicmp(a,b,c) strncasecmp(a,b,c)
+#endif
 
 EXPORT char *_skipspace( char *source, const char *breakchars );
 #define skipspace(s) _skipspace((s), "\r\n")
@@ -196,5 +205,9 @@ EXPORT int stripat(char *str, char *pattern);
 EXPORT int stripatn(char *str, char *pattern, size_t len);
 
 EXPORT char * strspace( char *source );
+
+#if defined(_WIN32)
+EXPORT char * strndup(char* p, size_t maxlen);
+#endif
 
 #endif
