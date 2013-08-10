@@ -17,6 +17,7 @@
 
 
 #include "element.h"
+#include <ctype.h>
 
 /*
 	Return the element that would be 'next' if the 'root' element was flattened

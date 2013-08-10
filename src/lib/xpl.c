@@ -17,6 +17,7 @@
 
 
 #include <xpl.h>
+#include <ctype.h>
 #include <string.h>
 
 /* hack for aix, windows, and other asprintf-less systems */
@@ -290,3 +291,21 @@ EXPORT char * strspace( char *source )
 	return NULL;
 }
 
+#if defined(_WIN32)
+EXPORT char * strndup( char *p, size_t maxlen )
+{
+	if( p )
+	{
+		char *r = malloc( maxlen + 1 );
+		if( !r )
+		{
+			return r;	
+		}
+		strncpy( r, p, maxlen );
+		r[maxlen] = '\0';
+		return r;
+	}
+
+	return NULL;
+}
+#endif

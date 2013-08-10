@@ -17,6 +17,7 @@
 
 
 #include "element.h"
+#include <ctype.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #ifdef HAVE_REGEX_H
