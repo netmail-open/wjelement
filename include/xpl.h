@@ -183,16 +183,10 @@ typedef signed char int8;
 # define DebugAssert( x )
 
 # if defined(_MSC_VER)
-# define XplStrCaseCmp(a,b) _stricmp(a,b)
 # define stricmp(a,b) _stricmp(a,b)
-
-# define XplStrNCaseCmp(a,b,c) _strnicmp(a,b,c)
 # define strnicmp(a,b,c) _strnicmp(a,b,c)
 #else
-# define XplStrCaseCmp(a,b) strcasecmp(a,b)
 # define stricmp(a,b) strcasecmp(a,b)
-
-# define XplStrNCaseCmp(a,b,c) strncasecmp(a,b,c)
 # define strnicmp(a,b,c) strncasecmp(a,b,c)
 #endif
 
