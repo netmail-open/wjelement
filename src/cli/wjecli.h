@@ -23,6 +23,7 @@ typedef int			(* cmdcb)(WJElement *document, WJElement *current, char *line);
 
 typedef struct
 {
+	char			letter;
 	char			*name;
 	char			*description;
 	cmdcb			cb;
@@ -35,9 +36,12 @@ typedef struct
 	int				base;
 
 	char			*filename;
+
+	XplBool			exiting;
 } WJECLIGlobals;
 
 /* wjecli.c */
 char * nextField(char *value, char **end);
-int runcmd(WJElement *doc, WJElement *current, char *cmd, char *args);
+int runcmd(WJElement *doc, WJElement *current, char *line);
+void usage(char *arg0);
 

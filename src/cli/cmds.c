@@ -732,13 +732,11 @@ static int WJECLIRemove(WJElement *doc, WJElement *current, char *line)
 static int WJECLIEach(WJElement *doc, WJElement *current, char *line)
 {
 	char		*selector;
-	char		*command;
-	char		*args;
 	WJElement	e, m, c;
 	int			r = 0;
 
 	if (!(selector	= nextField(line, &line)) ||
-		!(command	= nextField(line, &line))
+		!line
 	) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
@@ -753,9 +751,9 @@ static int WJECLIEach(WJElement *doc, WJElement *current, char *line)
 			Create a coppy of the args for each call, because some comamnd
 			command callbacks modify the line.
 		*/
-		args = MemStrdupWait(line);
-		r = runcmd(doc, &c, command, args);
-		MemRelease(&args);
+		line = MemStrdupWait(line);
+		r = runcmd(doc, &c, line);
+		MemRelease(&line);
 	}
 
 	return(r);
@@ -845,49 +843,68 @@ static int WJECLIValidate(WJElement *doc, WJElement *current, char *line)
 	return(r);
 }
 
+static int WJECLIHelp(WJElement *doc, WJElement *current, char *line)
+{
+	usage(NULL);
+	return(0);
+}
+
+static int WJECLINoop(WJElement *doc, WJElement *current, char *line)
+{
+	/* This is used for handling comments */
+	return(0);
+}
+
+static int WJECLIExit(WJElement *doc, WJElement *current, char *line)
+{
+	wje.exiting = TRUE;
+	return(0);
+}
+
 WJECLIcmd WJECLIcmds[] =
 {
 	{
-		"load",			"Load a new JSON document, replacing the document "	\
-						"that is currently loaded. If a filename is not "	\
-						"specified then the document will be read from "	\
-						"standard in.",
-		WJECLILoad,		"[<filename>]"
-	},
-	{
-		"save",			"Write the currently selected portion of the JSON "	\
-						"document to the specified file. If a filename is " \
-						"not specified then the last loaded or saved "		\
-						"filename will be used.",
-		WJECLISave,		"[<filename>]"
-	},
-	{
-		"print",		"Print the currently selected portion of the JSON "	\
+		'?', "print",	"Print the currently selected portion of the JSON "	\
 						"document.",
 		WJECLIPrint,	"[<selector>]"
 	},
 	{
-		"p",			NULL,
+		'p', "print",	NULL,
 		WJECLIPrint,	NULL
+	},
+	{
+		'+', "set",		"Set a JSON value",
+		WJECLISet,		"<selector> <json|@filename.json|#filename.txt>"
 	},
 
 	{
-		"dump",			"Dump the value of the currently selected element of " \
+		'-', "del",		"Delete a JSON value",
+		WJECLIRemove,	"<selector>"
+	},
+	{
+		'\0', "rm",		NULL,
+		WJECLIRemove,	NULL
+	},
+
+
+
+	{
+		'\0', "dump",	"Dump the value of the currently selected element of " \
 						"the JSON document.",
 		WJECLIDump,		"[<selector>]"
 	},
 	{
-		"d",			NULL,
+		'\0', "d",		NULL,
 		WJECLIDump,		NULL
 	},
 
 
 	{
-		"pretty",		"Toggle pretty printing",
+		'\0', "pretty",	"Toggle pretty printing",
 		WJECLIPretty,	"[on|off]"
 	},
 	{
-		"base",			"Change the base to use for numbers when printing "	\
+		'\0', "base",	"Change the base to use for numbers when printing "	\
 						"a JSON document. A base other than 10 will result "\
 						"in a non standard JSON document which may not be "	\
 						"readable by all parser.",
@@ -895,7 +912,7 @@ WJECLIcmd WJECLIcmds[] =
 	},
 
 	{
-		"cd",			"Select a child of the currently selected element." \
+		'\0', "cd",		"Select a child of the currently selected element." \
 						"If a selector is not specified then the top of "	\
 						"document will be selected. A special case "		\
 						"selector of \"..\" will select the parent of the "	\
@@ -904,58 +921,78 @@ WJECLIcmd WJECLIcmds[] =
 	},
 
 	{
-		"ls",			"List the names of all children of the currently "	\
+		'\0', "ls",		"List the names of all children of the currently "	\
 						"selected element, if it is an object.",
 		WJECLIList,		"[<selector>]"
 	},
 
 	{
-		"pwd",			"Print the path of the currently selected object.",
+		'\0', "pwd",	"Print the path of the currently selected object.",
 		WJECLIpwd,		NULL
 	},
 
 	{
-		"set",			"Set a JSON value",
-		WJECLISet,		"<selector> <json|@filename.json|#filename.txt>"
-	},
-
-	{
-		"del",			"Delete a JSON value",
-		WJECLIRemove,	"<selector>"
-	},
-	{
-		"rm",			NULL,
-		WJECLIRemove,	NULL
-	},
-
-
-	{
-		"each",			"Run a command for each object matching the "		\
+		'\0', "each",	"Run a command for each object matching the "		\
 						"specified selector.",
 		WJECLIEach,		"<selector> <command with arguments>"
 	},
 
 	{
-		"validate",		"Validate the current document against schema.  "	\
+		'\0', "validate","Validate the current document against schema.  "	\
 						"pattern example: \"path/to/%s.json\" more schemas",
 		WJECLIValidate,	"<schema file> [<pattern>]"
 	},
 
 	{
-		"mv",			"Move an element from it's current parent to a new parent",
+		'\0', "mv",		"Move an element from it's current parent to a new parent",
 		WJECLIMove,		"<selector> <selector> [<newname>]"
 	},
 	{
-		"move",			NULL,
+		'\0', "move",	NULL,
 		WJECLIMove,		NULL
 	},
 	{
-		"cp",			"Copy an element from it's current parent to a new parent",
+		'\0', "cp",		"Copy an element from it's current parent to a new parent",
 		WJECLICopy,		"<selector> <selector> [<newname>]"
 	},
 	{
-		"copy",			NULL,
+		'\0', "copy",	NULL,
 		WJECLICopy,		NULL
 	},
-	{ NULL, NULL, NULL, NULL }
+
+	{
+		'\0', "load",	"Load a new JSON document, replacing the document "	\
+						"that is currently loaded. If a filename is not "	\
+						"specified then the document will be read from "	\
+						"standard in.",
+		WJECLILoad,		"[<filename>]"
+	},
+	{
+		'\0', "save",	"Write the currently selected portion of the JSON "	\
+						"document to the specified file. If a filename is " \
+						"not specified then the last loaded or saved "		\
+						"filename will be used.",
+		WJECLISave,		"[<filename>]"
+	},
+
+	{
+		'\0', "help",	NULL,
+		WJECLIHelp,		NULL
+	},
+
+	{
+		'\0', "quit",	NULL,
+		WJECLIExit,		NULL
+	},
+	{
+		'\0', "exit",	NULL,
+		WJECLIExit,		NULL
+	},
+
+	{
+		'#', "noop",	NULL,
+		WJECLINoop,		NULL
+	},
+	{ '\0', NULL, NULL, NULL, NULL }
 };
+

@@ -21,7 +21,7 @@ WJECLIGlobals wje;
 
 extern WJECLIcmd WJECLIcmds[];
 
-static void usage(char *arg0)
+void usage(char *arg0)
 {
 	WJECLIcmd	*cmd;
 	int			i;
@@ -38,7 +38,13 @@ static void usage(char *arg0)
 			continue;
 		}
 
-		printf("\t%s %s\n", cmd->name, cmd->args ? cmd->args : "");
+		printf("\t");
+
+		if (cmd->letter != '\0') {
+			printf("%c|", cmd->letter);
+		}
+
+		printf("%s %s\n", cmd->name, cmd->args ? cmd->args : "");
 		printf("\t\t%s\n\n", cmd->description);
 	}
 }
@@ -111,14 +117,31 @@ char * nextField(char *value, char **end)
 	return(NULL);
 }
 
-int runcmd(WJElement *doc, WJElement *current, char *cmd, char *args)
+int runcmd(WJElement *doc, WJElement *current, char *line)
 {
 	WJECLIcmd		*command;
+	char			*cmd	= line;
+	char			*args	= NULL;
 	int				i;
 
+	// cmd = nextField(line, &args);
+
+	/* Look for a command using the letter, which does NOT require a space */
 	for (i = 0; (command = &WJECLIcmds[i]) && command->name; i++) {
-		if (!stricmp(cmd, command->name)) {
+		if (command->letter != '\0' && *cmd == command->letter) {
+			args = skipspace(++cmd);
 			break;
+		}
+	}
+
+	/* Look for a full command */
+	if (!command || !command->name) {
+		cmd = nextField(line, &args);
+
+		for (i = 0; (command = &WJECLIcmds[i]) && command->name; i++) {
+			if (!stricmp(cmd, command->name)) {
+				break;
+			}
 		}
 	}
 
@@ -128,9 +151,6 @@ int runcmd(WJElement *doc, WJElement *current, char *cmd, char *args)
 
 	if (command && command->name) {
 		return(command->cb(doc, current, args));
-	} else if (!stricmp(cmd, "help")) {
-		usage(NULL);
-		return(0);
 	} else {
 		fprintf(stderr, "Unknown command: %s\n", cmd);
 		return(3);
@@ -231,23 +251,19 @@ int main(int argc, char **argv)
 
 		args = NULL;
 		if (fgets(line, sizeof(line), in)) {
-			cmd = nextField(line, &args);
+			cmd = skipspace(line);
 		} else {
 			cmd = NULL;
 		}
 
-		if (!cmd) {
+		if (!cmd || !*cmd) {
 			/* Ignore blank lines */
-		} else if (!stricmp(cmd, "exit") || !stricmp(cmd, "quit")) {
-			break;
-		} else if (!*cmd || '#' == *cmd) {
-			/* Just ignore an empty line, and comments */
 		} else {
-			r = runcmd(&doc, &current, cmd, args);
+			r = runcmd(&doc, &current, cmd);
 		}
 		cmd = NULL;
 
-		if (feof(in)) {
+		if (feof(in) || wje.exiting) {
 			break;
 		}
 	}
