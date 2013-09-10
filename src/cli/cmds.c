@@ -870,7 +870,7 @@ WJECLIcmd WJECLIcmds[] =
 		WJECLIPrint,	"[<selector>]"
 	},
 	{
-		'p', "print",	NULL,
+		'\0', "p",		NULL,
 		WJECLIPrint,	NULL
 	},
 	{
