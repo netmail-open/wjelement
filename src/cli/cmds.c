@@ -732,6 +732,7 @@ static int WJECLIRemove(WJElement *doc, WJElement *current, char *line)
 static int WJECLIEach(WJElement *doc, WJElement *current, char *line)
 {
 	char		*selector;
+	char		*tmpline;
 	WJElement	e, m, c;
 	int			r = 0;
 
@@ -751,9 +752,9 @@ static int WJECLIEach(WJElement *doc, WJElement *current, char *line)
 			Create a coppy of the args for each call, because some comamnd
 			command callbacks modify the line.
 		*/
-		line = MemStrdupWait(line);
-		r = runcmd(doc, &c, line);
-		MemRelease(&line);
+		tmpline = MemStrdupWait(line);
+		r = runcmd(doc, &c, tmpline);
+		MemRelease(&tmpline);
 	}
 
 	return(r);
