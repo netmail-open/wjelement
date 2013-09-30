@@ -258,6 +258,7 @@ static int WJECLIDump(WJElement *doc, WJElement *current, char *line)
 	char		*selector;
 	char		*value;
 	WJElement	e, c;
+	long		num;
 
 	if (!(e = *current) && !(e = *doc)) {
 		fprintf(stderr, "No JSON document loaded\n");
@@ -282,10 +283,17 @@ static int WJECLIDump(WJElement *doc, WJElement *current, char *line)
 	if ((value = WJEString(e, NULL, WJE_GET, NULL))) {
 		fprintf(stdout, "%s\n", value);
 		return(0);
-	} else {
-		fprintf(stderr, "Could not find a value for the specified element: %s\n", selector);
-		return(4);
 	}
+
+	if (WJR_TYPE_NUMBER == e->type) {
+		num = WJENumber(e, NULL, WJE_GET, 0);
+		fprintf(stdout, "%ld\n", num);
+		return(0);
+
+	}
+
+	fprintf(stderr, "Could not find a value for the specified element: %s\n", selector);
+	return(4);
 }
 
 static int WJECLIPretty(WJElement *doc, WJElement *current, char *line)
