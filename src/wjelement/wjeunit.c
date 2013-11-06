@@ -67,6 +67,7 @@ char *json = \
 "		'and so is this',													\n"
 "		'and this',															\n"
 "	],																		\n"
+"	'string': 'This is a single string',									\n"
 "	'sender':{																\n"
 "		'address':'foo@bar.com'												\n"
 "	}																		\n"
@@ -476,6 +477,39 @@ static int ConditionsTest(WJElement doc)
 	return(0);
 }
 
+/*
+	A | may be used to indicate that the remaining portion of the selector is
+	optional if the match up to that point is valid and has no children.
+*/
+static int OptionalsTest(WJElement doc)
+{
+	/* Make sure simple things behave as expected */
+	if (!WJEString(doc, "string",		WJE_GET, NULL))		return(__LINE__);
+	if ( WJEString(doc, "strings",		WJE_GET, NULL))		return(__LINE__);
+
+	if (!WJEString(doc, "strings[0]",	WJE_GET, NULL))		return(__LINE__);
+	if (!WJEString(doc, "strings[$]",	WJE_GET, NULL))		return(__LINE__);
+	if (!WJEString(doc, "strings[]",	WJE_GET, NULL))		return(__LINE__);
+
+	if ( WJEString(doc, "string[0]",	WJE_GET, NULL))		return(__LINE__);
+	if ( WJEString(doc, "string[$]",	WJE_GET, NULL))		return(__LINE__);
+	if ( WJEString(doc, "string[]",		WJE_GET, NULL))		return(__LINE__);
+
+	/*
+		Now for the fun part, add the | to get the same results for an array of
+		strings as we get for a single string.
+	*/
+	if (!WJEString(doc, "strings|[0]",	WJE_GET, NULL))		return(__LINE__);
+	if (!WJEString(doc, "strings|[$]",	WJE_GET, NULL))		return(__LINE__);
+	if (!WJEString(doc, "strings|[]",	WJE_GET, NULL))		return(__LINE__);
+
+	if (!WJEString(doc, "string|[0]",	WJE_GET, NULL))		return(__LINE__);
+	if (!WJEString(doc, "string|[$]",	WJE_GET, NULL))		return(__LINE__);
+	if (!WJEString(doc, "string|[]",	WJE_GET, NULL))		return(__LINE__);
+
+	return(0);
+}
+
 
 
 /*
@@ -503,6 +537,7 @@ struct {
 	{ "putvalue",	PutValueTest	},
 	{ "append",		AppendTest		},
 	{ "conditions",	ConditionsTest	},
+	{ "optionals",	OptionalsTest	},
 
 	/*
 		TODO: Write the following tests

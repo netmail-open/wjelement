@@ -77,6 +77,14 @@ extern "C" {
 	the item after the end of an array.  This allows appending to an array.
 		[$]
 
+	A subscript may be prefixed by an | character to indicate that the subscript
+	is optional. The portion of the selector from the | on will be ignored if
+	there is a match and that match has no children.
+
+	For example, if an element named foo may either be a string or an array of
+	strings you can enumerate all values using a selector of:
+		foo|[]
+
 	A NULL path refers to the container itself.
 
 	A path may end in a condition.  The condition consists of an operator and a

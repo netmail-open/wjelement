@@ -414,9 +414,10 @@ static int WJENextNameCheck(char *path, char *name, size_t *len, char **end)
 #ifdef DEBUG_WJE
 	char	*originalpath = path;
 #endif
-
 	path = skipspace(path);
+
 	switch (*path) {
+		case '|':
 		case '[':
 			if (end) *end = path;
 			break;
@@ -489,7 +490,12 @@ static char * WJENextName(char *path, size_t *len, char **end, WJEMatchCB *match
 
 	if (!path || !*path) return(NULL);
 
-	if (*path == '[') {
+	if ('|' == *path) {
+		/* Part of the path was marked as optional, continue */
+		path++;
+	}
+
+	if ('[' == *path) {
 		/*
 			subscript
 
@@ -874,8 +880,18 @@ WJElement WJESearch(WJElement container, char *path, WJEAction *action, WJElemen
 			continue;
 		}
 
-		/* We have a match! */
-		if (!end || !*end) return(n);
+		if (!end || !*end) {
+			/* We have a matched the whole selector */
+			return(n);
+		}
+
+		if (n && !n->child && '|' == *end) {
+			/*
+				The rest of the selector is marked as optional, and we have no
+				children, so consider this a match
+			*/
+			return(n);
+		}
 
 		/* But there is more to check */
 		continue;

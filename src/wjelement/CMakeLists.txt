@@ -61,3 +61,5 @@ add_test(WJElement:PutValues			${EXECUTABLE_OUTPUT_PATH}/wjeunit putvalue		)
 add_test(WJElement:PutMultipleValues	${EXECUTABLE_OUTPUT_PATH}/wjeunit putvalues		)
 add_test(WJElement:Append				${EXECUTABLE_OUTPUT_PATH}/wjeunit append		)
 add_test(WJElement:Conditions			${EXECUTABLE_OUTPUT_PATH}/wjeunit conditions	)
+add_test(WJElement:Optionals			${EXECUTABLE_OUTPUT_PATH}/wjeunit optionals		)
+
