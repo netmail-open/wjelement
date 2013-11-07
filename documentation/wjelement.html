@@ -592,6 +592,18 @@ foo[2,4:6,'bar.*', "smeg"]
 </pre></blockquote>
 </p>
 <p>
+A subscript may be prefixed by an | character to indicate that the subscript
+is optional. The portion of the selector from the | on will be ignored if
+there is a match and that match has no children.
+</p>
+<p>
+For example, if an element named foo may either be a string or an array of
+strings you can enumerate all values using a selector of:
+<blockquote><pre>
+foo|[]
+</pre></blockquote>
+</p>
+<p>
   A NULL path refers to the container itself.
 </p>
 <p>
