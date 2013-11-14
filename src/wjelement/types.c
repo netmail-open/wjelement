@@ -278,7 +278,7 @@ static void _WJENum(WJElement container, char *path, WJEAction action, WJElement
 
 EXPORT char * __WJEString(WJElement container, char *path, WJEAction action, WJElement *last, char *value, const char *file, const int line)
 {
-	size_t		len;
+	size_t		len = 0;
 
 	switch (action) {
 		default:
