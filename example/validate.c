@@ -3,11 +3,12 @@
   thanks to xiaoping.x.liu@intel.com
 
   after installing libwjelement (and running ldconfig if needed)...
-  gcc -o validate -lwjelement validate.c
+  gcc -o validate -lwjelement -lwjreader validate.c
 */
 
 
 #include <wjelement.h>
+#include <wjreader.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
