@@ -1,0 +1,12 @@
+{
+      "type": "layout",
+          "headers": {
+                    "msg_id": "DSCS1385112923586"
+                        },
+                            "obj": {
+                                      "name": "test",
+                                              "status      ": "draft",
+                                                      "orientation": "landscape",
+                                                              "widget": []
+                                                                  }
+}

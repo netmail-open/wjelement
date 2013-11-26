@@ -1,0 +1,99 @@
+{
+    name: "layout",
+    type: "object",
+    additionalProperties: false,
+    properties: {
+        name: {
+            type: "string",
+            optional: true
+        },
+        template: {
+            type: "string",
+            required: true
+        },
+        orientation: {
+            type: "string",
+            enum: [
+                "portrait",
+                "landscape"
+            ],
+            optional: true
+        },
+        status: {
+            type: "string",
+            enum: [
+                "draft",
+                "ready"
+            ],
+            optional: true,
+            default: "ready"
+        },
+        widgets: {
+            type: "array",
+            items: {
+                name: "widget setting",
+                type: "object",
+                optional: true,
+                additionalProperties: false,
+                properties: {
+                    widget: {
+                        type: "string",
+                        format: "mongodbid",
+                        description: "Must be a valid widget ID",
+                        required: true
+                    },
+                    name: {
+                        type: "string",
+                        description: "Must be the widget name( package name )",
+                        required: true
+                    },
+                    h: {
+                        type: "number",
+                        description: " 0.0 ~ 1.0",
+                        required: true
+                    },
+                    w: {
+                        type: "number",
+                        description: " 0.0 ~ 1.0",
+                        required: true
+                    },
+                    top: {
+                        type: "number",
+                        description: " 0.0 ~ 1.0",
+                        required: true
+                    },
+                    left: {
+                        type: "number",
+                        description: " 0.0 ~ 1.0",
+                        required: true
+                    },
+                    param: {
+                        type: "array",
+                        optional: true,
+                        items: {
+                            type: "object",
+                            optional: true,
+                            additionalProperties: false,
+                            properties: {
+                                name: {
+                                    type: "string",
+                                    optional: true
+                                },
+                                val: {
+                                    type: "string",
+                                    optional: true
+                                }
+                            }
+                        }
+                    },
+                    configurable: {
+                        type: "boolean",
+                        optional: false,
+                        default: false
+                    }
+                }
+            },
+            optional: true
+        }
+    }
+}

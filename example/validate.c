@@ -44,7 +44,7 @@ static WJElement schema_load(const char *name, void *client,
 		}
 		free(path);
 	}
-
+  WJEDump(schema);
 	return schema;
 }
 
