@@ -1,88 +1,115 @@
 {
-    "name": "layout",
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
+  "name": "layout schema check",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "required": true
+    },
+    "headers": {
+      "name": "headers",
+      "type": "object",
+        "properties": {
+        "msg_id": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "required": true
+    },
+    "obj": {
+      "name": "layout",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
         "name": {
-            "type": "string",
+          "type": "string"
         },
         "template": {
-            "type": "string",
+          "type": "string",
+          
         },
         "orientation": {
-            "type": "string",
-            "enum": [
-                "portrait",
-                "landscape"
-            ],
+          "type": "string",
+          "enum": [
+            "portrait",
+            "landscape"
+          ],
+          
         },
         "status": {
-            "type": "string",
-            "enum": [
-                "draft",
-                "ready"
-            ],
-            "default": "ready"
+          "type": "string",
+          "enum": [
+            "draft",
+            "ready"
+          ],
+          "default": "ready"
         },
-        "widgets": {
-            "type": "array",
-            "items": {
-                "name": "widget setting",
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "widget": {
-                        "type": "string",
-                        "format": "mongodbid",
-                        "description": "Must be a valid widget ID",
-                        "required": true
-                    },
+        "widget": {
+          "type": "array",
+          "items": {
+            "name": "widget setting",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "widget": {
+                "type": "string",
+                "format": "mongodbid",
+                "description": "Must be a valid widget ID",
+                "required": true
+              },
+              "name": {
+                "type": "string",
+                "description": "Must be the widget name( package name )",
+                "required": true
+              },
+              "h": {
+                "type": "number",
+                "description": " 0.0 ~ 1.0",
+                "required": true
+              },
+              "w": {
+                "type": "number",
+                "description": " 0.0 ~ 1.0",
+                "required": true
+              },
+              "top": {
+                "type": "number",
+                "description": " 0.0 ~ 1.0",
+                "required": true
+              },
+              "left": {
+                "type": "number",
+                "description": " 0.0 ~ 1.0",
+                "required": true
+              },
+              "param": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
                     "name": {
-                        "type": "string",
-                        "description": "Must be the widget name( package name )",
-                        "required": true
+                      "type": "string",
+                      
                     },
-                    "h": {
-                        "type": "number",
-                        "description": " 0.0 ~ 1.0",
-                        "required": true
-                    },
-                    "w": {
-                        "type": "number",
-                        "description": " 0.0 ~ 1.0",
-                        "required": true
-                    },
-                    "top": {
-                        "type": "number",
-                        "description": " 0.0 ~ 1.0",
-                        "required": true
-                    },
-                    "left": {
-                        "type": "number",
-                        "description": " 0.0 ~ 1.0",
-                        "required": true
-                    },
-                    "param": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "name": {
-                                    "type": "string",
-                                },
-                                "val": {
-                                    "type": "string",
-                                }
-                            }
-                        }
-                    },
-                    "configurable": {
-                        "type": "boolean",
-                        "default": false
+                    "val": {
+                      "type": "string",
+                      
                     }
+                  }
                 }
+              },
+              "configurable": {
+                "type": "boolean",
+                "default": false
+              }
             }
+          },
+          "required": true
         }
-    }
+      }
+    },
+    "required": true
+  }
 }
