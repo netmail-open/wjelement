@@ -5,7 +5,7 @@
        },
        "obj": {
          "name": "test",
-         "status      ": "draft",
+         "status": "draft",
          "orientation": "landscape",
          "widget": []
        }

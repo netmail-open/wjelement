@@ -4,6 +4,9 @@
   "properties": {
     "type": {
       "type": "string",
+      "enum": [
+        "layout"
+      ],
       "required": true
     },
     "headers": {
@@ -20,14 +23,14 @@
     "obj": {
       "name": "layout",
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "required": true
         },
         "template": {
           "type": "string",
-          
         },
         "orientation": {
           "type": "string",
@@ -35,7 +38,7 @@
             "portrait",
             "landscape"
           ],
-          
+          "required": true
         },
         "status": {
           "type": "string",
@@ -43,21 +46,17 @@
             "draft",
             "ready"
           ],
-          "default": "ready"
+          "default": "ready",
+          "required": true
         },
         "widget": {
           "type": "array",
+          "required": true,
           "items": {
             "name": "widget setting",
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "widget": {
-                "type": "string",
-                "format": "mongodbid",
-                "description": "Must be a valid widget ID",
-                "required": true
-              },
               "name": {
                 "type": "string",
                 "description": "Must be the widget name( package name )",
@@ -91,25 +90,23 @@
                   "properties": {
                     "name": {
                       "type": "string",
-                      
+                      "required": true
                     },
                     "val": {
-                      "type": "string",
-                      
+                      "required": true
                     }
                   }
                 }
               },
               "configurable": {
                 "type": "boolean",
-                "default": false
+                "default": false,
+                "required": true
               }
             }
-          },
-          "required": true
+          }
         }
       }
-    },
-    "required": true
+    }
   }
 }
