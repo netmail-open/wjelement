@@ -5,11 +5,9 @@
     "properties": {
         "name": {
             "type": "string",
-            "optional": true
         },
         "template": {
             "type": "string",
-            "optional": true
         },
         "orientation": {
             "type": "string",
@@ -17,7 +15,6 @@
                 "portrait",
                 "landscape"
             ],
-            "optional": true
         },
         "status": {
             "type": "string",
@@ -25,7 +22,6 @@
                 "draft",
                 "ready"
             ],
-            "optional": true,
             "default": "ready"
         },
         "widgets": {
@@ -33,7 +29,6 @@
             "items": {
                 "name": "widget setting",
                 "type": "object",
-                "optional": true,
                 "additionalProperties": false,
                 "properties": {
                     "widget": {
@@ -69,31 +64,25 @@
                     },
                     "param": {
                         "type": "array",
-                        "optional": true,
                         "items": {
                             "type": "object",
-                            "optional": true,
                             "additionalProperties": false,
                             "properties": {
                                 "name": {
                                     "type": "string",
-                                    "optional": true
                                 },
                                 "val": {
                                     "type": "string",
-                                    "optional": true
                                 }
                             }
                         }
                     },
                     "configurable": {
                         "type": "boolean",
-                        "optional": false,
                         "default": false
                     }
                 }
-            },
-            "optional": true
+            }
         }
     }
 }
