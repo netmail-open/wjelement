@@ -22,12 +22,12 @@ target_link_libraries(wjelement
 SET_TARGET_PROPERTIES(
 	wjelement
 	PROPERTIES
-	VERSION 0.0.0
-	SOVERSION 0
+	VERSION 1.0.0
+	SOVERSION 1
 	INSTALL_NAME_DIR "${LIB_DEST_DIR}"
 )
 
-install(TARGETS wjelement DESTINATION ${LIB_DEST_DIR})
+install(TARGETS wjelement LIBRARY DESTINATION ${LIB_DEST_DIR})
 
 
 # unit tests
@@ -62,4 +62,3 @@ add_test(WJElement:PutMultipleValues	${EXECUTABLE_OUTPUT_PATH}/wjeunit putvalues
 add_test(WJElement:Append				${EXECUTABLE_OUTPUT_PATH}/wjeunit append		)
 add_test(WJElement:Conditions			${EXECUTABLE_OUTPUT_PATH}/wjeunit conditions	)
 add_test(WJElement:Optionals			${EXECUTABLE_OUTPUT_PATH}/wjeunit optionals		)
-
