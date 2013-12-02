@@ -59,7 +59,7 @@
 typedef int XplBool;
 
 #ifndef WIN32
-typedef unsigned long LONG;
+typedef long LONG;
 #endif
 
 #ifndef FALSE
