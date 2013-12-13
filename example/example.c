@@ -50,6 +50,11 @@ console.log(JSON.stringify(doc));
 
 #include <wjelement.h>
 
+WJRType
+WJE_GET_TYPE(WJElement parent)
+{
+  return parent->child->next->type;
+}
 
 int main(int argc, char **argv) {
 	WJElement doc = NULL;
@@ -81,10 +86,7 @@ int main(int argc, char **argv) {
 	WJECloseDocument(WJEGet(doc, "shiny", NULL));
 
 	while((person = _WJEObject(doc, "crew[]", WJE_GET, &person))) {
-		printf("%s (%s) is %d\n",
-			   WJEString(person, "name", WJE_GET, ""),
-			   WJEString(person, "job", WJE_GET, ""),
-			   2517 - WJEInt64(person, "born", WJE_GET, 0));
+		printf("person Type is %c\n", WJE_GET_TYPE(person));
 	}
 
 	WJEDump(doc);
