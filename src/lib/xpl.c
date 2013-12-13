@@ -298,7 +298,7 @@ EXPORT char * strndup( char *p, size_t maxlen )
 		char *r = malloc( maxlen + 1 );
 		if( !r )
 		{
-			return r;	
+			return r;
 		}
 		strncpy( r, p, maxlen );
 		r[maxlen] = '\0';
@@ -308,3 +308,41 @@ EXPORT char * strndup( char *p, size_t maxlen )
 	return NULL;
 }
 #endif
+
+EXPORT void * MemMallocEx(void *ptr, size_t size, size_t *actual, XplBool wait, XplBool zero)
+{
+	void	*result;
+
+	do {
+		if (ptr) {
+			result = realloc(ptr, size);
+
+			/*
+				This implementation doesn't currently have any way to know how
+				big the existing allocation is, and so it can't zero the new
+				data without writing over the old data.
+			*/
+			zero = FALSE;
+		} else {
+			result = malloc(size);
+		}
+
+		if (result) {
+			if (actual) {
+				/*
+					In this implementation we aren't actually pulling from a
+					pool so the allocation size will be exactly what the
+					consumer asked for.
+				*/
+				*actual = size;
+			}
+
+			if (zero) {
+				memset(result, 0, size);
+			}
+		}
+	} while (wait && !result);
+
+	return(result);
+}
+

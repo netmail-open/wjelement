@@ -594,7 +594,7 @@ EXPORT double __WJEDouble(WJElement container, char *path, WJEAction action, WJE
 			case WJR_TYPE_NUMBER:
 				if (e->value.number.hasDecimalPoint) {
 					if (e->value.number.negative) {
-						if (-e->value.number.d == value) {
+						if (e->value.number.d * -1.0 == value) {
 							break;
 						}
 					} else {
@@ -604,7 +604,7 @@ EXPORT double __WJEDouble(WJElement container, char *path, WJEAction action, WJE
 					}
 				} else {
 					if (e->value.number.negative) {
-						if ((double) -e->value.number.i == value) {
+						if ((double) e->value.number.i * -1.0 == value) {
 							break;
 						}
 					} else {
@@ -633,13 +633,13 @@ EXPORT double __WJEDouble(WJElement container, char *path, WJEAction action, WJE
 				case WJR_TYPE_NUMBER:
 					if (e->value.number.hasDecimalPoint) {
 						if (e->value.number.negative) {
-							return(-e->value.number.d);
+							return(e->value.number.d * -1.0);
 						} else {
 							return(e->value.number.d);
 						}
 					} else {
 						if (e->value.number.negative) {
-							return((double) -e->value.number.i);
+							return((double) e->value.number.i * -1.0);
 						} else {
 							return((double) e->value.number.i);
 						}

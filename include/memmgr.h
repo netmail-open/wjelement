@@ -35,7 +35,6 @@
 #define MemUpdateOwner( p, f, l )
 #define MemCopyOwner( d, s )
 #define MemGetOwner( p, f, l )
-#define MemMallocEx( p, s, a, w, z )			malloc( (s) ); if( (a) ) { (*a) = (s); } if( (z) ) { memset( (p), 0, (s) ); }
 #define MemMalloc( s )							malloc( (s) )
 #define MemMallocWait( s )						malloc( (s) )
 #define MemFree( p )							free( (p) )
@@ -57,5 +56,6 @@
 #define MemDumpPools( f )
 #define MemConsumer()
 
+EXPORT void * MemMallocEx(void *ptr, size_t size, size_t *actual, XplBool wait, XplBool zero);
 
 #endif // MEMMGR_H
