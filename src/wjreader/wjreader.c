@@ -1181,7 +1181,7 @@ EXPORT char * WJRStringEx(XplBool *complete, size_t *length, WJReader indoc)
 														(HexDigit(doc->read[i + 10]) << 4)	+
 														(HexDigit(doc->read[i + 11]));
 									if ((d >= 0xDC00) && (d <= 0xDFFF)) {
-										unsigned int	e = 0x10000 + ((c & 0x3ff) << 10) | (d & 0x3ff);
+										unsigned int	e = 0x10000 + (((c & 0x3ff) << 10) | (d & 0x3ff));
 										/* surrogate pair */
 										utf8CharLen = 4; /* we used 4 bytes */
 										doc->read[i+3] = (char) 0xF0 | (e >> 18);

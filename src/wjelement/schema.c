@@ -381,7 +381,9 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 	XplBool schemaGiven = TRUE;
 	XplBool fail = FALSE;
 	XplBool anyFail = FALSE;
+#ifdef HAVE_REGEX_H
 	struct addrinfo *ip;
+#endif
 
 	if(!schema) {
 		schemaGiven = FALSE;
