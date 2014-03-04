@@ -782,7 +782,7 @@ static WJElement schema_load(const char *name, void *client,
 		format = (char *)client;
 		MemAsprintf(&path, format, name);
 
-		if((schemafile = fopen(path, "r")) != NULL) {
+		if ((schemafile = fopen(path, "r"))) {
 			if((readschema = WJROpenFILEDocument(schemafile, NULL, 0))) {
 				schema = WJEOpenDocument(readschema, NULL, NULL, NULL);
 			} else {
