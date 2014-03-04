@@ -49,6 +49,7 @@ console.log(JSON.stringify(doc));
 
 
 #include <wjelement.h>
+#include <inttypes.h>
 
 
 int main(int argc, char **argv) {
@@ -81,10 +82,10 @@ int main(int argc, char **argv) {
 	WJECloseDocument(WJEGet(doc, "shiny", NULL));
 
 	while((person = _WJEObject(doc, "crew[]", WJE_GET, &person))) {
-		printf("%s (%s) is %d\n",
+		printf("%s (%s) is %"PRId64"\n",
 			   WJEString(person, "name", WJE_GET, ""),
 			   WJEString(person, "job", WJE_GET, ""),
-			   2517 - WJEInt64(person, "born", WJE_GET, 0));
+			   (2517 - WJEInt64(person, "born", WJE_GET, 0)));
 	}
 
 	WJEDump(doc);
