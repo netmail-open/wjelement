@@ -70,7 +70,8 @@ char *json = \
 "	'string': 'This is a single string',									\n"
 "	'sender':{																\n"
 "		'address':'foo@bar.com'												\n"
-"	}																		\n"
+"	},																		\n"
+"	'empty': null															\n"
 "}";
 
 typedef int (* wjetest)(WJElement doc);
@@ -252,15 +253,25 @@ static int GetDefaultValueTest(WJElement doc)
 	if (-1 != WJENumber(doc, "absent",		WJE_GET, -1))	return(__LINE__);
 	if (0 != WJENumber(doc,	"absent",		WJE_GET, 0))	return(__LINE__);
 	if (1 != WJENumber(doc,	"absent",		WJE_GET, 1))	return(__LINE__);
-	
+	if (-1 != WJENumber(doc, "empty",		WJE_GET, -1))	return(__LINE__);
+	if (0 != WJENumber(doc,	"empty",		WJE_GET, 0))	return(__LINE__);
+	if (1 != WJENumber(doc,	"empty",		WJE_GET, 1))	return(__LINE__);
+
 	/* WJEDouble */
 	if (-1.0 != WJEDouble(doc, "absent",	WJE_GET, -1.0)) return(__LINE__);
 	if (0.0 != WJEDouble(doc, "absent",		WJE_GET, 0.0))	return(__LINE__);
 	if (1.0 != WJEDouble(doc, "absent",		WJE_GET, 1.0))	return(__LINE__);
+	if (-1.0 != WJEDouble(doc, "empty",		WJE_GET, -1.0)) return(__LINE__);
+	if (0.0 != WJEDouble(doc, "empty",		WJE_GET, 0.0))	return(__LINE__);
+	if (1.0 != WJEDouble(doc, "empty",		WJE_GET, 1.0))	return(__LINE__);
 
 	/* WJEBool */
 	if (1 != WJEBool(doc, "absent",			WJE_GET, 1))	return(__LINE__);
 	if (0 != WJEBool(doc, "absent",			WJE_GET, 0))	return(__LINE__);
+
+	/* NULL is treated as false */
+	if (0 != WJEBool(doc, "empty",			WJE_GET, 1))	return(__LINE__);
+	if (0 != WJEBool(doc, "empty",			WJE_GET, 0))	return(__LINE__);
 
 	/* WJEString */
 	if (!(v = WJEString(doc, "absent",		WJE_GET, "")) ||
@@ -270,6 +281,15 @@ static int GetDefaultValueTest(WJElement doc)
 		strcmp(v, "foo") != 0)								return(__LINE__);
 
 	if (NULL != WJEString(doc, "absent",	WJE_GET, NULL))	return(__LINE__);
+
+	if (!(v = WJEString(doc, "empty",		WJE_GET, "")) ||
+		strcmp(v, "") != 0)									return(__LINE__);
+
+	if (!(v = WJEString(doc, "empty",		WJE_GET, "foo")) ||
+		strcmp(v, "foo") != 0)								return(__LINE__);
+
+	if (NULL != WJEString(doc, "empty",	WJE_GET, NULL))		return(__LINE__);
+
 
 	/*
 		TODO:
