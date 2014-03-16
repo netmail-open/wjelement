@@ -244,64 +244,6 @@ static int GetValueTest(WJElement doc)
 	return(0);
 }
 
-/* Test that default values are returned if property is missing */
-static int GetDefaultValueTest(WJElement doc)
-{
-	char	*v;
-
-	/* WJENumber */
-	if (-1 != WJENumber(doc, "absent",		WJE_GET, -1))	return(__LINE__);
-	if (0 != WJENumber(doc,	"absent",		WJE_GET, 0))	return(__LINE__);
-	if (1 != WJENumber(doc,	"absent",		WJE_GET, 1))	return(__LINE__);
-	if (-1 != WJENumber(doc, "empty",		WJE_GET, -1))	return(__LINE__);
-	if (0 != WJENumber(doc,	"empty",		WJE_GET, 0))	return(__LINE__);
-	if (1 != WJENumber(doc,	"empty",		WJE_GET, 1))	return(__LINE__);
-
-	/* WJEDouble */
-	if (-1.0 != WJEDouble(doc, "absent",	WJE_GET, -1.0)) return(__LINE__);
-	if (0.0 != WJEDouble(doc, "absent",		WJE_GET, 0.0))	return(__LINE__);
-	if (1.0 != WJEDouble(doc, "absent",		WJE_GET, 1.0))	return(__LINE__);
-	if (-1.0 != WJEDouble(doc, "empty",		WJE_GET, -1.0)) return(__LINE__);
-	if (0.0 != WJEDouble(doc, "empty",		WJE_GET, 0.0))	return(__LINE__);
-	if (1.0 != WJEDouble(doc, "empty",		WJE_GET, 1.0))	return(__LINE__);
-
-	/* WJEBool */
-	if (1 != WJEBool(doc, "absent",			WJE_GET, 1))	return(__LINE__);
-	if (0 != WJEBool(doc, "absent",			WJE_GET, 0))	return(__LINE__);
-
-	/* NULL is treated as false */
-	if (0 != WJEBool(doc, "empty",			WJE_GET, 1))	return(__LINE__);
-	if (0 != WJEBool(doc, "empty",			WJE_GET, 0))	return(__LINE__);
-
-	/* WJEString */
-	if (!(v = WJEString(doc, "absent",		WJE_GET, "")) ||
-		strcmp(v, "") != 0)									return(__LINE__);
-
-	if (!(v = WJEString(doc, "absent",		WJE_GET, "foo")) ||
-		strcmp(v, "foo") != 0)								return(__LINE__);
-
-	if (NULL != WJEString(doc, "absent",	WJE_GET, NULL))	return(__LINE__);
-
-	if (!(v = WJEString(doc, "empty",		WJE_GET, "")) ||
-		strcmp(v, "") != 0)									return(__LINE__);
-
-	if (!(v = WJEString(doc, "empty",		WJE_GET, "foo")) ||
-		strcmp(v, "foo") != 0)								return(__LINE__);
-
-	if (NULL != WJEString(doc, "empty",	WJE_GET, NULL))		return(__LINE__);
-
-
-	/*
-		TODO:
-		- WJEInt32
-		- WJEUInt32 
-		- WJEInt64
-		- WJEUInt64
-	*/
-
-	return(0);
-}
-
 static int GetValuesTest(WJElement doc)
 {
 	char		*v;
@@ -571,6 +513,64 @@ static int OptionalsTest(WJElement doc)
 
 
 
+/* Test that default values are returned if property is missing */
+static int GetDefaultTest(WJElement doc)
+{
+	char	*v;
+
+	/* WJENumber */
+	if (-1 != WJENumber(doc, "absent",		WJE_GET, -1))	return(__LINE__);
+	if (0 != WJENumber(doc,	"absent",		WJE_GET, 0))	return(__LINE__);
+	if (1 != WJENumber(doc,	"absent",		WJE_GET, 1))	return(__LINE__);
+	if (-1 != WJENumber(doc, "empty",		WJE_GET, -1))	return(__LINE__);
+	if (0 != WJENumber(doc,	"empty",		WJE_GET, 0))	return(__LINE__);
+	if (1 != WJENumber(doc,	"empty",		WJE_GET, 1))	return(__LINE__);
+
+	/* WJEDouble */
+	if (-1.0 != WJEDouble(doc, "absent",	WJE_GET, -1.0)) return(__LINE__);
+	if (0.0 != WJEDouble(doc, "absent",		WJE_GET, 0.0))	return(__LINE__);
+	if (1.0 != WJEDouble(doc, "absent",		WJE_GET, 1.0))	return(__LINE__);
+	if (-1.0 != WJEDouble(doc, "empty",		WJE_GET, -1.0)) return(__LINE__);
+	if (0.0 != WJEDouble(doc, "empty",		WJE_GET, 0.0))	return(__LINE__);
+	if (1.0 != WJEDouble(doc, "empty",		WJE_GET, 1.0))	return(__LINE__);
+
+	/* WJEBool */
+	if (1 != WJEBool(doc, "absent",			WJE_GET, 1))	return(__LINE__);
+	if (0 != WJEBool(doc, "absent",			WJE_GET, 0))	return(__LINE__);
+
+	/* NULL is treated as false */
+	if (0 != WJEBool(doc, "empty",			WJE_GET, 1))	return(__LINE__);
+	if (0 != WJEBool(doc, "empty",			WJE_GET, 0))	return(__LINE__);
+
+	/* WJEString */
+	if (!(v = WJEString(doc, "absent",		WJE_GET, "")) ||
+		strcmp(v, "") != 0)									return(__LINE__);
+
+	if (!(v = WJEString(doc, "absent",		WJE_GET, "foo")) ||
+		strcmp(v, "foo") != 0)								return(__LINE__);
+
+	if (NULL != WJEString(doc, "absent",	WJE_GET, NULL))	return(__LINE__);
+
+	if (!(v = WJEString(doc, "empty",		WJE_GET, "")) ||
+		strcmp(v, "") != 0)									return(__LINE__);
+
+	if (!(v = WJEString(doc, "empty",		WJE_GET, "foo")) ||
+		strcmp(v, "foo") != 0)								return(__LINE__);
+
+	if (NULL != WJEString(doc, "empty",	WJE_GET, NULL))		return(__LINE__);
+
+
+	/*
+		TODO:
+		- WJEInt32
+		- WJEUInt32 
+		- WJEInt64
+		- WJEUInt64
+	*/
+
+	return(0);
+}
+
 /*
 	----------------------------------------------------------------------------
 	End of tests
@@ -597,7 +597,7 @@ struct {
 	{ "append",		AppendTest		},
 	{ "conditions",	ConditionsTest	},
 	{ "optionals",	OptionalsTest	},
-	{ "defaults",   GetDefaultValueTest },
+	{ "defaults",   GetDefaultTest  },
 
 	/*
 		TODO: Write the following tests
