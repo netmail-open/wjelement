@@ -82,6 +82,7 @@ typedef enum {
 
 	WJR_TYPE_STRING			= 'S',
 	WJR_TYPE_NUMBER			= 'N',
+	WJR_TYPE_INTEGER		= 'I',
 
 	WJR_TYPE_BOOL			= 'B',
 	WJR_TYPE_TRUE			= 'T',

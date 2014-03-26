@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "memmgr.h"
-#ifndef asprintf
+#ifndef HAS_ASPRINTF
 int asprintf(char **ret, const char *format, ...) {
 	va_list ap;
 	int count;

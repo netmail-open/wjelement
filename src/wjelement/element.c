@@ -272,10 +272,15 @@ static WJElement _WJELoad(_WJElement *parent, WJReader reader, char *where, WJEL
 				break;
 
 			case WJR_TYPE_NUMBER:
+			case WJR_TYPE_INTEGER:
 				l->value.number.hasDecimalPoint = WJRIntOrDouble(reader,
 								&l->value.number.i,
 								&l->value.number.d);
 
+				if (l->value.number.hasDecimalPoint)
+					l->pub.type = WJR_TYPE_NUMBER;
+				else
+					l->pub.type = WJR_TYPE_INTEGER;
 
 				if (WJRNegative(reader)) {
 					/*
@@ -354,10 +359,17 @@ static WJElement _WJECopy(_WJElement *parent, WJElement original, WJECopyCB copy
 				break;
 
 			case WJR_TYPE_NUMBER:
+			case WJR_TYPE_INTEGER:
 				l->value.number.negative		= o->value.number.negative;
 				l->value.number.i				= o->value.number.i;
 				l->value.number.d				= o->value.number.d;
 				l->value.number.hasDecimalPoint	= o->value.number.hasDecimalPoint;
+
+				if (l->value.number.hasDecimalPoint)
+					l->pub.type = WJR_TYPE_NUMBER;
+				else
+					l->pub.type = WJR_TYPE_INTEGER;
+
 				break;
 
 			case WJR_TYPE_TRUE:
@@ -470,13 +482,16 @@ EXPORT XplBool _WJEWriteDocument(WJElement document, WJWriter writer, char *name
 				break;
 
 			case WJR_TYPE_NUMBER:
+			case WJR_TYPE_INTEGER:
 				if (current->value.number.hasDecimalPoint) {
+					current->pub.type = WJR_TYPE_NUMBER;
 					if (!current->value.number.negative) {
 						WJWDouble(name, current->value.number.d, writer);
 					} else {
 						WJWDouble(name, -current->value.number.d, writer);
 					}
 				} else {
+					current->pub.type = WJR_TYPE_INTEGER;
 					if (!current->value.number.negative) {
 						WJWUInt64(name, current->value.number.i, writer);
 					} else {
