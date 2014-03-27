@@ -165,6 +165,8 @@ typedef XplBool		(* WJEWriteCB)(WJElement node, WJWriter writer, void *data);
 EXPORT XplBool		_WJEWriteDocument(WJElement document, WJWriter writer, char *name,
 						WJEWriteCB precb, WJEWriteCB postcb, void *data);
 #define				WJEWriteDocument(d, w, n) _WJEWriteDocument((d), (w), (n), NULL, NULL, NULL)
+/* Write a WJElement object to the provided FILE* */
+EXPORT void WJEWriteFILE(WJElement document, FILE* fd);
 
 /* Destroy a WJElement object */
 EXPORT XplBool		WJECloseDocument(WJElement document);
@@ -368,8 +370,7 @@ EXPORT void WJESchemaFreeBacklink(char *backlink);
 
 
 /* Debug function that will write a document to stdout */
-EXPORT void _WJEDump(WJElement document, FILE* fd);
-#define WJEDump(d)  _WJEDump(d, stdout)
+EXPORT void WJEDump(WJElement document);
 
 /* For compatibility with old code, due to a typo */
 #define WJEDettach( d )	_WJEDetach( (d), __FILE__, __LINE__ )
