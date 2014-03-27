@@ -368,7 +368,8 @@ EXPORT void WJESchemaFreeBacklink(char *backlink);
 
 
 /* Debug function that will write a document to stdout */
-EXPORT void WJEDump(WJElement document);
+EXPORT void _WJEDump(WJElement document, FILE* fd);
+#define WJEDump(d)  _WJEDump(d, stdout)
 
 /* For compatibility with old code, due to a typo */
 #define WJEDettach( d )	_WJEDetach( (d), __FILE__, __LINE__ )
