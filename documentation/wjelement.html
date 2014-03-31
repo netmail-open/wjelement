@@ -171,6 +171,17 @@ XplBool WJEWriteDocument(WJElement document, WJWriter writer, char *name);
 </pre></blockquote>
 </p>
 <p>
+<strong>WJEWriteFILE</strong>
+ - Write a WJElement object to the provided FILE*
+<blockquote><pre>
+void WJEWriteFILE(WJElement document, FILE* fd);
+</pre></blockquote>
+</p>
+<p>
+  WJEWriteFILE() requires an already opened FILE* to write to.
+  It is also used internally by <a href="#WJEDump">WJEDump()</a>
+</p>
+<p>
 <strong>WJECloseDocument</strong>
  - Destroy a WJElement object
 </p>
@@ -512,7 +523,7 @@ void WJESchemaFreeBacklink(char *backlink);
 </pre></blockquote>
 </p>
 <h2>Debug</h2>
-<p>
+<p><a name="WJEDump" />
 <strong>WJEDump</strong>
  - write a document to stdout
 </p>
