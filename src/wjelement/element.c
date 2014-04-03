@@ -553,11 +553,16 @@ EXPORT XplBool WJECloseDocument(WJElement document)
 
 EXPORT void WJEDump(WJElement document)
 {
+    WJEWriteFILE(document, stdout);
+}
+
+EXPORT void WJEWriteFILE(WJElement document, FILE* fd)
+{
 	WJWriter		dumpWriter;
 
-	if ((dumpWriter = WJWOpenFILEDocument(TRUE, stdout))) {
+	if ((dumpWriter = WJWOpenFILEDocument(TRUE, fd))) {
 		WJEWriteDocument(document, dumpWriter, NULL);
 		WJWCloseDocument(dumpWriter);
 	}
-	fprintf(stdout, "\n");
+	fprintf(fd, "\n");
 }
