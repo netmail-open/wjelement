@@ -272,7 +272,9 @@ static WJElement _WJELoad(_WJElement *parent, WJReader reader, char *where, WJEL
 				break;
 
 			case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
 			case WJR_TYPE_INTEGER:
+#endif
 				l->value.number.hasDecimalPoint = WJRIntOrDouble(reader,
 								&l->value.number.i,
 								&l->value.number.d);
@@ -359,7 +361,9 @@ static WJElement _WJECopy(_WJElement *parent, WJElement original, WJECopyCB copy
 				break;
 
 			case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
 			case WJR_TYPE_INTEGER:
+#endif
 				l->value.number.negative		= o->value.number.negative;
 				l->value.number.i				= o->value.number.i;
 				l->value.number.d				= o->value.number.d;
@@ -482,7 +486,9 @@ EXPORT XplBool _WJEWriteDocument(WJElement document, WJWriter writer, char *name
 				break;
 
 			case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
 			case WJR_TYPE_INTEGER:
+#endif
 				if (current->value.number.hasDecimalPoint) {
 					current->pub.type = WJR_TYPE_NUMBER;
 					if (!current->value.number.negative) {

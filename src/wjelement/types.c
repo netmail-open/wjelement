@@ -68,8 +68,10 @@ EXPORT XplBool __WJEBool(WJElement container, char *path, WJEAction action, WJEl
 				case WJR_TYPE_NUMBER:
 					return(e->value.number.d != 0);
 
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
 				case WJR_TYPE_INTEGER:
 					return(e->value.number.i != 0);
+#endif
 
 /*
 				case WJR_TYPE_NUMBER:
@@ -204,7 +206,9 @@ static void _WJENum(WJElement container, char *path, WJEAction action, WJElement
 				break;
 
 			case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
 			case WJR_TYPE_INTEGER:
+#endif
 				negative = FALSE;
 
 				if ((e->value.number.i == _WJEGetNum(value, size, issigned, &negative)) &&
@@ -233,7 +237,9 @@ static void _WJENum(WJElement container, char *path, WJEAction action, WJElement
 
 			switch (e->pub.type) {
 				case WJR_TYPE_INTEGER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
 				case WJR_TYPE_NUMBER:
+#endif
 					_WJESetNum(value, size, issigned, e->value.number.i, e->value.number.negative);
 					return;
 
@@ -369,7 +375,9 @@ EXPORT char * __WJEStringN(WJElement container, char *path, WJEAction action, WJ
 
 				default:
 				case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
 				case WJR_TYPE_INTEGER:
+#endif
 				case WJR_TYPE_UNKNOWN:
 				case WJR_TYPE_NULL:
 				case WJR_TYPE_OBJECT:
@@ -604,7 +612,9 @@ EXPORT double __WJEDouble(WJElement container, char *path, WJEAction action, WJE
 				break;
 
 			case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
 			case WJR_TYPE_INTEGER:
+#endif
 				if (e->pub.type	== WJR_TYPE_NUMBER)
 				{		
 					if (e->value.number.negative) {
@@ -654,6 +664,7 @@ EXPORT double __WJEDouble(WJElement container, char *path, WJEAction action, WJE
 					}
 					break;
 
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
 				case WJR_TYPE_INTEGER:
 					if (e->value.number.negative) {
 						return((double) e->value.number.i * -1.0);
@@ -661,6 +672,7 @@ EXPORT double __WJEDouble(WJElement container, char *path, WJEAction action, WJE
 						return((double) e->value.number.i);
 					}
 					break;
+#endif
 
 				case WJR_TYPE_BOOL:
 				case WJR_TYPE_TRUE:
