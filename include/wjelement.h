@@ -123,12 +123,6 @@ typedef struct WJElementPublic {
 	struct WJElementPublic			*child;
 	struct WJElementPublic			*parent;
 
-	/* HugP: 
-		Introduced a *usr member that can be used by clients to store user specific details
-		This member is NULL by default
-	*/
-	void							*usr;
-
 	/* The number of children */
 	int								count;
 
