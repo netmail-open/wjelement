@@ -127,6 +127,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
