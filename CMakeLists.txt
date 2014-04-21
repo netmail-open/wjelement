@@ -63,7 +63,7 @@ add_subdirectory(include)
 
 SET(MAJOR_VERSION 1)
 SET(MINOR_VERSION 0)
-SET(PATCH_VERSION 0)
+SET(PATCH_VERSION 1)
 IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
 
 INCLUDE (InstallRequiredSystemLibraries)

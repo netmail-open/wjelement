@@ -161,7 +161,12 @@ EXPORT WJElement	_WJEOpenDocument(WJReader reader, char *where, WJELoadCB loadcb
 #define				WJEOpenDocument(r, w, lcb, d) _WJEOpenDocument((r), (w), (lcb), (d), __FILE__, __LINE__)
 
 /* Write a WJElement object to the provided WJWriter */
-EXPORT XplBool		WJEWriteDocument(WJElement document, WJWriter writer, char *name);
+typedef XplBool		(* WJEWriteCB)(WJElement node, WJWriter writer, void *data);
+EXPORT XplBool		_WJEWriteDocument(WJElement document, WJWriter writer, char *name,
+						WJEWriteCB precb, WJEWriteCB postcb, void *data);
+#define				WJEWriteDocument(d, w, n) _WJEWriteDocument((d), (w), (n), NULL, NULL, NULL)
+/* Write a WJElement object to the provided FILE* */
+EXPORT void WJEWriteFILE(WJElement document, FILE* fd);
 
 /* Destroy a WJElement object */
 EXPORT XplBool		WJECloseDocument(WJElement document);

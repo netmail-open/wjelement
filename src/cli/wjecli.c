@@ -16,6 +16,7 @@
 
 
 #include "wjecli.h"
+#include <unistd.h>
 
 WJECLIGlobals wje;
 
@@ -164,7 +165,7 @@ int main(int argc, char **argv)
 	WJElement	current		= NULL;
 	int			r			= 0;
 	WJReader	reader;
-	char		*cmd, *args;
+	char		*cmd;
 	char		line[1024];
 
 	/* Print pretty documents by default */
@@ -249,7 +250,6 @@ int main(int argc, char **argv)
 			fflush(stdout);
 		}
 
-		args = NULL;
 		if (fgets(line, sizeof(line), in)) {
 			cmd = skipspace(line);
 		} else {

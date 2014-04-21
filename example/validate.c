@@ -32,7 +32,7 @@ static WJElement schema_load(const char *name, void *client,
 		path = malloc(strlen(format) + strlen(name));
 		sprintf(path, format, name);
 
-		if(schemafile = fopen(path, "r")) {
+		if ((schemafile = fopen(path, "r"))) {
 			if((readschema = WJROpenFILEDocument(schemafile, NULL, 0))) {
 				schema = WJEOpenDocument(readschema, NULL, NULL, NULL);
 			} else {
@@ -67,7 +67,6 @@ int main(int argc, char **argv) {
 	WJReader readschema;
 	WJElement json;
 	WJElement schema;
-	XplBool succ;
 	char *format;
 
 	if(argc != 3 && argc != 4) {

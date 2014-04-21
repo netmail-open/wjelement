@@ -18,10 +18,11 @@
 /****************************************************************************
  * stub replacement for Messaging Architects' internal Xpl library
  ****************************************************************************/
-#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <stdint.h>
 
 
 #ifndef XPL_H
@@ -74,6 +75,8 @@ typedef long LONG;
 #define _UNSIGNED_INT_64
 #ifdef __WATCOMC__
 typedef unsigned __int64 uint64;
+#elif UINT64_MAX == 18446744073709551615ULL
+typedef uint64_t uint64;
 #elif ULLONG_MAX == 18446744073709551615ULL
 typedef unsigned long long uint64;
 #elif ULONG_MAX == 18446744073709551615ULL
@@ -91,6 +94,8 @@ typedef unsigned short uint64;
 #define _SIGNED_INT_64
 #ifdef __WATCOMC__
 typedef signed __int64 int64;
+#elif INT64_MAX == 9223372036854775807LL
+typedef int64_t int64;
 #elif LLONG_MAX == 9223372036854775807LL
 typedef signed long long int64;
 #elif LONG_MAX == 9223372036854775807LL
@@ -185,8 +190,12 @@ typedef signed char int8;
 # define stricmp(a,b) _stricmp(a,b)
 # define strnicmp(a,b,c) _strnicmp(a,b,c)
 #else
-# define stricmp(a,b) strcasecmp(a,b)
-# define strnicmp(a,b,c) strncasecmp(a,b,c)
+# ifndef stricmp
+#  define stricmp(a,b) strcasecmp(a,b)
+# endif
+# ifndef strnicmp
+#  define strnicmp(a,b,c) strncasecmp(a,b,c)
+# endif
 #endif
 
 EXPORT char *_skipspace( char *source, const char *breakchars );

@@ -49,6 +49,7 @@ console.log(JSON.stringify(doc));
 
 
 #include <wjelement.h>
+#include <inttypes.h>
 
 WJRType
 WJE_GET_TYPE(WJElement parent)

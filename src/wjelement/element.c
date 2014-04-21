@@ -421,69 +421,80 @@ EXPORT XplBool WJEMergeObjects(WJElement to, WJElement from, XplBool overwrite)
 	return(TRUE);
 }
 
-EXPORT XplBool WJEWriteDocument(WJElement document, WJWriter writer, char *name)
+EXPORT XplBool _WJEWriteDocument(WJElement document, WJWriter writer, char *name,
+						WJEWriteCB precb, WJEWriteCB postcb, void *data)
 {
 	_WJElement	*current = (_WJElement *) document;
 	WJElement	child;
 
-	if (!document) {
+	if (precb && !precb(document, writer, data)) {
 		return(FALSE);
 	}
 
-	switch (current->pub.type) {
-		default:
-		case WJR_TYPE_UNKNOWN:
-			break;
+	if (document) {
+		switch (current->pub.type) {
+			default:
+			case WJR_TYPE_UNKNOWN:
+				break;
 
-		case WJR_TYPE_NULL:
-			WJWNull(name, writer);
-			break;
+			case WJR_TYPE_NULL:
+				WJWNull(name, writer);
+				break;
 
-		case WJR_TYPE_OBJECT:
-			WJWOpenObject(name, writer);
+			case WJR_TYPE_OBJECT:
+				WJWOpenObject(name, writer);
 
-			for (child = current->pub.child; child; child = child->next) {
-				WJEWriteDocument(child, writer, child->name);
-			}
+				child = current->pub.child;
+				do {
+					_WJEWriteDocument(child, writer, child ? child->name : NULL,
+						precb, postcb, data);
+				} while (child && (child = child->next));
 
-			WJWCloseObject(writer);
-			break;
+				WJWCloseObject(writer);
+				break;
 
-		case WJR_TYPE_ARRAY:
-			WJWOpenArray(name, writer);
+			case WJR_TYPE_ARRAY:
+				WJWOpenArray(name, writer);
 
-			for (child = current->pub.child; child; child = child->next) {
-				WJEWriteDocument(child, writer, child->name);
-			}
+				child = current->pub.child;
+				do {
+					_WJEWriteDocument(child, writer, child ? child->name : NULL,
+						precb, postcb, data);
+				} while (child && (child = child->next));
 
-			WJWCloseArray(writer);
-			break;
+				WJWCloseArray(writer);
+				break;
 
-		case WJR_TYPE_STRING:
-			WJWStringN(name, current->value.string, current->pub.length, TRUE, writer);
-			break;
+			case WJR_TYPE_STRING:
+				WJWStringN(name, current->value.string, current->pub.length, TRUE, writer);
+				break;
 
-		case WJR_TYPE_NUMBER:
-			if (current->value.number.hasDecimalPoint) {
-				if (!current->value.number.negative) {
-					WJWDouble(name, current->value.number.d, writer);
+			case WJR_TYPE_NUMBER:
+				if (current->value.number.hasDecimalPoint) {
+					if (!current->value.number.negative) {
+						WJWDouble(name, current->value.number.d, writer);
+					} else {
+						WJWDouble(name, -current->value.number.d, writer);
+					}
 				} else {
-					WJWDouble(name, -current->value.number.d, writer);
+					if (!current->value.number.negative) {
+						WJWUInt64(name, current->value.number.i, writer);
+					} else {
+						WJWInt64(name, -current->value.number.i, writer);
+					}
 				}
-			} else {
-				if (!current->value.number.negative) {
-					WJWUInt64(name, current->value.number.i, writer);
-				} else {
-					WJWInt64(name, -current->value.number.i, writer);
-				}
-			}
-			break;
+				break;
 
-		case WJR_TYPE_TRUE:
-		case WJR_TYPE_BOOL:
-		case WJR_TYPE_FALSE:
-			WJWBoolean(name, current->value.boolean, writer);
-			break;
+			case WJR_TYPE_TRUE:
+			case WJR_TYPE_BOOL:
+			case WJR_TYPE_FALSE:
+				WJWBoolean(name, current->value.boolean, writer);
+				break;
+		}
+	}
+
+	if (postcb && !postcb(document, writer, data)) {
+		return(FALSE);
 	}
 
 	return(TRUE);
@@ -542,11 +553,16 @@ EXPORT XplBool WJECloseDocument(WJElement document)
 
 EXPORT void WJEDump(WJElement document)
 {
+    WJEWriteFILE(document, stdout);
+}
+
+EXPORT void WJEWriteFILE(WJElement document, FILE* fd)
+{
 	WJWriter		dumpWriter;
 
-	if ((dumpWriter = WJWOpenFILEDocument(TRUE, stdout))) {
+	if ((dumpWriter = WJWOpenFILEDocument(TRUE, fd))) {
 		WJEWriteDocument(document, dumpWriter, NULL);
 		WJWCloseDocument(dumpWriter);
 	}
-	fprintf(stdout, "\n");
+	fprintf(fd, "\n");
 }

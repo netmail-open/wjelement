@@ -657,7 +657,7 @@ EXPORT double __WJEDouble(WJElement container, char *path, WJEAction action, WJE
 					break;
 
 				default:
-					return(0);
+					return(value);
 			}
 
 		case WJE_SET:

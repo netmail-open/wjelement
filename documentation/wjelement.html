@@ -171,6 +171,17 @@ XplBool WJEWriteDocument(WJElement document, WJWriter writer, char *name);
 </pre></blockquote>
 </p>
 <p>
+<strong>WJEWriteFILE</strong>
+ - Write a WJElement object to the provided FILE*
+<blockquote><pre>
+void WJEWriteFILE(WJElement document, FILE* fd);
+</pre></blockquote>
+</p>
+<p>
+  WJEWriteFILE() requires an already opened FILE* to write to.
+  It is also used internally by <a href="#WJEDump">WJEDump()</a>
+</p>
+<p>
 <strong>WJECloseDocument</strong>
  - Destroy a WJElement object
 </p>
@@ -252,6 +263,11 @@ specified path.
 <blockquote><pre>
 WJElement WJEGet(WJElement container, char *path, WJElement last);
 </pre></blockquote>
+</p>
+<p>
+  In cases where a direct child of the WJElement is needed,
+  <strong>WJEChild</strong> may be more suitable, especially if the child's
+  name begins with a non-alphanumeric character.
 </p>
 <p>
 <strong>WJEBool</strong>
@@ -356,7 +372,8 @@ double _WJEDouble(WJElement container, char *path, WJEAction action, WJElement *
 <p>
 <strong>WJEChild</strong>
  - Find, create or update an element by name instead of path.  This allows
-access to elements that would be difficult to reference by path.
+access to elements that would be difficult to reference by path.  No selector
+syntax is used, so only direct children of the element can be found.
 </p>
 <p>
 <blockquote><pre>
@@ -506,7 +523,7 @@ void WJESchemaFreeBacklink(char *backlink);
 </pre></blockquote>
 </p>
 <h2>Debug</h2>
-<p>
+<p><a name="WJEDump" />
 <strong>WJEDump</strong>
  - write a document to stdout
 </p>
@@ -524,10 +541,12 @@ void WJEDump(WJElement document);
   functions that take a path argument.
 </p>
 <p>
-  A child may be referenced with a alpha-numeric name, or a subscript within
+  A child may be referenced with an alpha-numeric name, or a subscript within
   square brackets:
 <blockquote><pre>
+foo
 ["foo"]
+["$foo"]
 </pre></blockquote>
 </p>
 <p>

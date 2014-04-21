@@ -381,7 +381,9 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 	XplBool schemaGiven = TRUE;
 	XplBool fail = FALSE;
 	XplBool anyFail = FALSE;
+#ifdef HAVE_REGEX_H
 	struct addrinfo *ip;
+#endif
 
 	if(!schema) {
 		schemaGiven = FALSE;
@@ -491,7 +493,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 
 			if(!stricmp(memb->name, "disallow")) {
 				fail = !fail;
-				printf("NOT!\n");
+				//printf("NOT!\n");
 			}
 			if(err && fail) {
 				if(memb->type == WJR_TYPE_OBJECT) {
@@ -518,7 +520,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			if(document && memb->type == WJR_TYPE_OBJECT) {
 				arr = NULL;
 				while((arr = WJEGet(memb, "[]", arr))) {
-					data = WJEGet(document, arr->name, NULL);
+					data = WJEChild(document, arr->name, WJE_GET);
 					if(!SchemaValidate(arr, data, err, loadcb, freecb, client,
 									   arr->name)) {
 						fail = TRUE;
@@ -583,7 +585,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				} else if(memb->type == WJR_TYPE_OBJECT) {
 					data = NULL;
 					while((data = WJEGet(document, "[]", data))) {
-						if(!WJEGet(sub, data->name, NULL)) {
+						if(!WJEChild(sub, data->name, WJE_GET)) {
 							if(!SchemaValidate(memb, data, err, loadcb, freecb,
 											   client, data->name)) {
 								fail = TRUE;
@@ -699,8 +701,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 						}
 					} else if(arr->type == WJR_TYPE_STRING) {
 						str = WJEString(arr, NULL, WJE_GET, NULL);
-						if(WJEGet(document, arr->name, NULL) &&
-						   !WJEGet(document, str, NULL)) {
+						if(WJEChild(document, arr->name, WJE_GET) &&
+						   !WJEChild(document, str, WJE_GET)) {
 							fail = TRUE;
 							if(err) {
 								err(client, "%s: dependency '%s' not found",
@@ -711,8 +713,8 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 						sub = NULL;
 						while((sub = WJEGet(arr, "[]", sub))) {
 							str = WJEString(sub, NULL, WJE_GET,NULL);
-							if(str && WJEGet(document, arr->name, NULL) &&
-							   !WJEGet(document, str, NULL)) {
+							if(str && WJEChild(document, arr->name, WJE_GET) &&
+							   !WJEChild(document, str, WJE_GET)) {
 								fail = TRUE;
 							}
 							if(err) {
@@ -1104,7 +1106,7 @@ EXPORT char * WJESchemaNameFindBacklink(char *describedby, const char *format,
 	}
 
 	/* Does this type have a backlink that matches the format specified? */
-	if ((link = WJEGet(sub, "backlinks", NULL))) {
+	if ((link = WJEChild(sub, "backlinks", WJE_GET))) {
 		for (link = link->child; link; link = link->next) {
 			if ((str = WJEString(link, NULL, WJE_GET, NULL)) &&
 				!strcmp(format, str)
@@ -1121,7 +1123,8 @@ EXPORT char * WJESchemaNameFindBacklink(char *describedby, const char *format,
 			type has a backlink with the same name though then that name is not
 			valid.
 		*/
-		if ((link = WJEGet(sub, "backlinks", NULL)) && WJEGet(link, result, NULL)) {
+		if ((link = WJEChild(sub, "backlinks", WJE_GET)) &&
+			WJEGet(link, result, NULL)) {
 			MemRelease(&result);
 		}
 	}
