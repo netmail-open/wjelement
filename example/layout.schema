@@ -7,7 +7,6 @@
       "enum": [
         "layout"
       ],
-      "required": true
     },
     "headers": {
       "name": "headers",
@@ -18,7 +17,6 @@
           "required": true
         }
       },
-      "required": true
     },
     "obj": {
       "name": "layout",
