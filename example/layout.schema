@@ -2,104 +2,97 @@
   "name": "layout schema check",
   "type": "object",
   "properties": {
-    "type": {
+    "_id": {
+      "type": "string",
+      "required": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "template": {
+      "type": "string",
+    },
+    "orientation": {
       "type": "string",
       "enum": [
-        "layout"
+        "portrait",
+        "landscape"
       ],
+      "required": true
     },
-    "headers": {
-      "name": "headers",
-      "type": "object",
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "ready"
+      ],
+      "default": "ready",
+      "required": true
+    },
+    "ts": {
+      "type": "string",
+      "required": true
+    },
+    "widgets": {
+      "type": "array",
+      "required": true,
+      "items": {
+        "name": "widget setting",
+        "type": "object",
+        "additionalProperties": false,
         "properties": {
-        "msg_id": {
-          "type": "string",
-          "required": true
-        }
-      },
-    },
-    "obj": {
-      "name": "layout",
-      "type": "object",
-      "additionalProperties": true,
-      "properties": {
-        "name": {
-          "type": "string",
-          "required": true
-        },
-        "template": {
-          "type": "string",
-        },
-        "orientation": {
-          "type": "string",
-          "enum": [
-            "portrait",
-            "landscape"
-          ],
-          "required": true
-        },
-        "status": {
-          "type": "string",
-          "enum": [
-            "draft",
-            "ready"
-          ],
-          "default": "ready",
-          "required": true
-        },
-        "widget": {
-          "type": "array",
-          "required": true,
-          "items": {
-            "name": "widget setting",
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "Must be the widget name( package name )",
-                "required": true
-              },
-              "h": {
-                "type": "number",
-                "description": " 0.0 ~ 1.0",
-                "required": true
-              },
-              "w": {
-                "type": "number",
-                "description": " 0.0 ~ 1.0",
-                "required": true
-              },
-              "top": {
-                "type": "number",
-                "description": " 0.0 ~ 1.0",
-                "required": true
-              },
-              "left": {
-                "type": "number",
-                "description": " 0.0 ~ 1.0",
-                "required": true
-              },
-              "param": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "name": {
-                      "type": "string",
-                      "required": true
-                    },
-                    "val": {
-                      "required": true
-                    }
-                  }
+          "widget": {
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "type": "string",
+            "description": "Must be the widget name( package name )",
+            "required": true
+          },
+          "h": {
+            "type": "number",
+            "description": " 0.0 ~ 1.0",
+            "required": true
+          },
+          "w": {
+            "type": "number",
+            "description": " 0.0 ~ 1.0",
+            "required": true
+          },
+          "top": {
+            "type": "number",
+            "description": " 0.0 ~ 1.0",
+            "required": true
+          },
+          "left": {
+            "type": "number",
+            "description": " 0.0 ~ 1.0",
+            "required": true
+          },
+          "_id": {
+            "type": "string",
+            "required": true
+          },
+          "param": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "val": {
+                  "required": true
+                },
+
+                "_id": {
+                  "type": "string",
+                  "required": true
                 }
-              },
-              "configurable": {
-                "type": "boolean",
-                "default": false,
-                "required": true
               }
             }
           }
