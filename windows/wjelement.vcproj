@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).lib"
+				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName)d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
