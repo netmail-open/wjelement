@@ -1448,6 +1448,7 @@ EXPORT XplBool WJRIntOrDouble(WJReader doc, uint64 *i, double *d)
 {
 	WJRMixedNumber result;
 
+	memset(&result, 0, sizeof(result));
 	WJRNumber(&result, WJR_TYPE_MIXED, doc);
 
 	if (result.hasDecimalPoint) {
