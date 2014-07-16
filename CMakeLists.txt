@@ -36,9 +36,6 @@ else(HAVE_REGEX_H)
 	message("     WJESchemaValidate() will not support patternProperties")
 endif(HAVE_REGEX_H)
 
-set(OPENSSL_LIBS ssl crypto)
-set(PTHREAD_LIBS pthread)
-
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # when building, don't use the install RPATH already

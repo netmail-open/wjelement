@@ -16,7 +16,11 @@
 
 
 #include "wjecli.h"
+#ifdef _WINDOWS
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 WJECLIGlobals wje;
 

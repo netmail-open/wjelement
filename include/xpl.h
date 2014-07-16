@@ -29,7 +29,7 @@
 #define XPL_H
 
 
-#ifdef WINDOWS
+#ifdef _WINDOWS
 # define		WIN_CDECL		__cdecl
 # define		WIN_STDCALL		__stdcall
 # define		EXPORT			__declspec(dllexport)
