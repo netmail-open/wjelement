@@ -1,4 +1,4 @@
-add_library(xpl SHARED
+add_library(xpl
 	xpl.c
 )
 

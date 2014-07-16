@@ -1,4 +1,4 @@
-add_library(wjelement SHARED
+add_library(wjelement
 	element.c
 	element.h
 	search.c

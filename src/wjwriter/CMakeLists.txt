@@ -1,4 +1,4 @@
-add_library(wjwriter SHARED
+add_library(wjwriter
 	wjwriter.c
 )
 

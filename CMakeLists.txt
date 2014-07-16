@@ -3,6 +3,15 @@ cmake_minimum_required(VERSION 2.6)
 include(CheckIncludeFiles)
 include(CheckSymbolExists)
 
+option(STATIC_LIB "Compile as static libraries" OFF)
+
+if(STATIC_LIB)
+  set(BUILD_SHARED_LIBS OFF)
+  add_definitions(-DCOMPILE_AS_STATIC)
+else(STATIC_LIB)
+  set(BUILD_SHARED_LIBS ON)
+endif(STATIC_LIB)
+
 if(NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr/local)
 endif(NOT CMAKE_INSTALL_PREFIX)

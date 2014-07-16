@@ -32,8 +32,13 @@
 #ifdef _WINDOWS
 # define		WIN_CDECL		__cdecl
 # define		WIN_STDCALL		__stdcall
+#ifndef COMPILE_AS_STATIC
 # define		EXPORT			__declspec(dllexport)
 # define		IMPORT			__declspec(dllimport)
+#else
+# define		EXPORT			
+# define		IMPORT			
+#endif
 # define		INLINE			__inline
 #else
 # define		WIN_CDECL

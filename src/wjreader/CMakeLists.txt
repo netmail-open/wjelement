@@ -1,4 +1,4 @@
-add_library(wjreader SHARED
+add_library(wjreader
 	wjreader.c
 )
 
