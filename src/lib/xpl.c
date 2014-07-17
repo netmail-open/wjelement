@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include "memmgr.h"
 #ifndef asprintf
-int asprintf(char **ret, const char *format, ...) {
+EXPORT int asprintf(char **ret, const char *format, ...) {
 	va_list ap;
 	int count;
 	*ret = NULL;

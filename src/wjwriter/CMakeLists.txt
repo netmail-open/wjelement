@@ -1,9 +1,8 @@
-add_library(wjwriter SHARED
+add_library(wjwriter
 	wjwriter.c
 )
 
 target_link_libraries(wjwriter
-#	hulamemmgr
 	xpl
 	${ALL_LIBS}
 )
@@ -18,4 +17,7 @@ SET_TARGET_PROPERTIES(
 )
 
 
-install(TARGETS wjwriter LIBRARY DESTINATION ${LIB_DEST_DIR})
+install(TARGETS wjwriter
+    LIBRARY DESTINATION ${LIB_DEST_DIR}
+    ARCHIVE DESTINATION ${LIB_DEST_DIR}
+    )

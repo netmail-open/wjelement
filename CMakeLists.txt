@@ -3,6 +3,15 @@ cmake_minimum_required(VERSION 2.6)
 include(CheckIncludeFiles)
 include(CheckSymbolExists)
 
+option(STATIC_LIB "Compile as static libraries" OFF)
+
+if(STATIC_LIB)
+  set(BUILD_SHARED_LIBS OFF)
+  add_definitions(-DCOMPILE_AS_STATIC)
+else(STATIC_LIB)
+  set(BUILD_SHARED_LIBS ON)
+endif(STATIC_LIB)
+
 if(NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr/local)
 endif(NOT CMAKE_INSTALL_PREFIX)
@@ -35,9 +44,6 @@ else(HAVE_REGEX_H)
 	message("***  WARNING: GNU C regex library not found.")
 	message("     WJESchemaValidate() will not support patternProperties")
 endif(HAVE_REGEX_H)
-
-set(OPENSSL_LIBS ssl crypto)
-set(PTHREAD_LIBS pthread)
 
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
