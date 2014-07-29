@@ -738,7 +738,7 @@ static int WJECheckCondition(WJElement e, char **condition, WJEAction action)
 }
 
 /* Find a child WJElement by name.  See description in wjelement.h */
-WJElement WJESearch(WJElement container, char *path, WJEAction *action, WJElement last, const char *file, const int line)
+WJElement WJESearch(WJElement container, const char *path, WJEAction *action, WJElement last, const char *file, const int line)
 {
 	WJElement	e, n;
 	WJElement	match		= NULL;
@@ -803,7 +803,7 @@ WJElement WJESearch(WJElement container, char *path, WJEAction *action, WJElemen
 			it to allow matching it to an element or to create a new match.
 		*/
 		cb	= NULL;
-		end	= path;
+		end	= (char *) path;
 		for (; depth; depth--) {
 			if (!(name = WJENextName(end, &len, &end, &cb, &specific))) {
 				break;
