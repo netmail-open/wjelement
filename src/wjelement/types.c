@@ -17,7 +17,7 @@
 
 #include "element.h"
 
-EXPORT XplBool __WJEBool(WJElement container, char *path, WJEAction action, WJElement *last, XplBool value, const char *file, const int line)
+EXPORT XplBool __WJEBool(WJElement container, const char *path, WJEAction action, WJElement *last, XplBool value, const char *file, const int line)
 {
 	_WJElement		*e;
 	char			*s;
@@ -171,7 +171,7 @@ static uint64 _WJEGetNum(void *value, size_t size, XplBool issigned, XplBool *ne
 	return(num);
 }
 
-static void _WJENum(WJElement container, char *path, WJEAction action, WJElement *last, void *value, size_t size, XplBool issigned, const char *file, const int line)
+static void _WJENum(WJElement container, const char *path, WJEAction action, WJElement *last, void *value, size_t size, XplBool issigned, const char *file, const int line)
 {
 	_WJElement		*e;
 	char			*s, *end;
@@ -276,7 +276,7 @@ static void _WJENum(WJElement container, char *path, WJEAction action, WJElement
 	}
 }
 
-EXPORT char * __WJEString(WJElement container, char *path, WJEAction action, WJElement *last, char *value, const char *file, const int line)
+EXPORT char * __WJEString(WJElement container, const char *path, WJEAction action, WJElement *last, const char *value, const char *file, const int line)
 {
 	size_t		len = 0;
 
@@ -296,7 +296,7 @@ EXPORT char * __WJEString(WJElement container, char *path, WJEAction action, WJE
 	return(__WJEStringN(container, path, action, last, value, len, file, line));
 }
 
-EXPORT char * __WJEStringN(WJElement container, char *path, WJEAction action, WJElement *last, char *value, size_t len, const char *file, const int line)
+EXPORT char * __WJEStringN(WJElement container, const char *path, WJEAction action, WJElement *last, const char *value, size_t len, const char *file, const int line)
 {
 	_WJElement		*e;
 
@@ -337,7 +337,7 @@ EXPORT char * __WJEStringN(WJElement container, char *path, WJEAction action, WJ
 	switch (action) {
 		default:
 		case WJE_GET:
-			if (!e) return(value);
+			if (!e) return((char *) value);
 
 			switch (e->pub.type) {
 				case WJR_TYPE_STRING:
@@ -365,7 +365,7 @@ EXPORT char * __WJEStringN(WJElement container, char *path, WJEAction action, WJ
 					break;
 			}
 
-			return(value);
+			return((char *) value);
 
 		case WJE_SET:
 		case WJE_NEW:
@@ -388,7 +388,7 @@ EXPORT char * __WJEStringN(WJElement container, char *path, WJEAction action, WJ
 	}
 }
 
-EXPORT WJElement __WJEObject(WJElement container, char *path, WJEAction action, WJElement *last, const char *file, const int line)
+EXPORT WJElement __WJEObject(WJElement container, const char *path, WJEAction action, WJElement *last, const char *file, const int line)
 {
 	WJElement	e;
 	WJEAction	a;
@@ -440,7 +440,7 @@ EXPORT WJElement __WJEObject(WJElement container, char *path, WJEAction action, 
 	}
 }
 
-EXPORT WJElement __WJEArray(WJElement container, char *path, WJEAction action, WJElement *last, const char *file, const int line)
+EXPORT WJElement __WJEArray(WJElement container, const char *path, WJEAction action, WJElement *last, const char *file, const int line)
 {
 	WJElement	e;
 	WJEAction	a;
@@ -492,7 +492,7 @@ EXPORT WJElement __WJEArray(WJElement container, char *path, WJEAction action, W
 	}
 }
 
-EXPORT WJElement __WJENull(WJElement container, char *path, WJEAction action, WJElement *last, const char *file, const int line)
+EXPORT WJElement __WJENull(WJElement container, const char *path, WJEAction action, WJElement *last, const char *file, const int line)
 {
 	WJElement	e;
 	WJEAction	a;
@@ -544,14 +544,14 @@ EXPORT WJElement __WJENull(WJElement container, char *path, WJEAction action, WJ
 	}
 }
 
-EXPORT int32 __WJEInt32(WJElement container, char *path, WJEAction action, WJElement *last, int32 value, const char *file, const int line)
+EXPORT int32 __WJEInt32(WJElement container, const char *path, WJEAction action, WJElement *last, int32 value, const char *file, const int line)
 {
 	_WJENum(container, path, action, last, &value, sizeof(value), TRUE, file, line);
 
 	return(value);
 }
 
-EXPORT uint32 __WJEUInt32(WJElement container, char *path, WJEAction action, WJElement *last, uint32 value, const char *file, const int line)
+EXPORT uint32 __WJEUInt32(WJElement container, const char *path, WJEAction action, WJElement *last, uint32 value, const char *file, const int line)
 {
 	_WJENum(container, path, action, last, &value, sizeof(value), FALSE, file, line);
 
@@ -559,21 +559,21 @@ EXPORT uint32 __WJEUInt32(WJElement container, char *path, WJEAction action, WJE
 }
 
 
-EXPORT int64 __WJEInt64(WJElement container, char *path, WJEAction action, WJElement *last, int64 value, const char *file, const int line)
+EXPORT int64 __WJEInt64(WJElement container, const char *path, WJEAction action, WJElement *last, int64 value, const char *file, const int line)
 {
 	_WJENum(container, path, action, last, &value, sizeof(value), TRUE, file, line);
 
 	return(value);
 }
 
-EXPORT uint64 __WJEUInt64(WJElement container, char *path, WJEAction action, WJElement *last, uint64 value, const char *file, const int line)
+EXPORT uint64 __WJEUInt64(WJElement container, const char *path, WJEAction action, WJElement *last, uint64 value, const char *file, const int line)
 {
 	_WJENum(container, path, action, last, &value, sizeof(value), FALSE, file, line);
 
 	return(value);
 }
 
-EXPORT double __WJEDouble(WJElement container, char *path, WJEAction action, WJElement *last, double value, const char *file, const int line)
+EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction action, WJElement *last, double value, const char *file, const int line)
 {
 	_WJElement		*e;
 

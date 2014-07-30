@@ -53,7 +53,7 @@ _WJElement * _WJEReset(_WJElement *e, WJRType type);
 
 /* search.c */
 typedef int (* WJEMatchCB)(WJElement root, WJElement parent, WJElement e, WJEAction action, char *name, size_t len);
-WJElement WJESearch(WJElement container, char *path, WJEAction *action, WJElement last, const char *file, const int line);
+WJElement WJESearch(WJElement container, const char *path, WJEAction *action, WJElement last, const char *file, const int line);
 
 /*
 	Allow a few extra characters in dot seperated alpha numeric names for the
