@@ -458,7 +458,7 @@ EXPORT XplBool _WJEWriteDocument(WJElement document, WJWriter writer, char *name
 
 				child = current->pub.child;
 				do {
-					_WJEWriteDocument(child, writer, child ? child->name : NULL,
+					_WJEWriteDocument(child, writer, NULL,
 						precb, postcb, data);
 				} while (child && (child = child->next));
 
