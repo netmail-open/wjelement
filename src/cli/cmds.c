@@ -145,6 +145,63 @@ static int WJECLILoad(WJElement *doc, WJElement *current, char *line)
 		}
 	}
 
+	if (f && f != stdin) {
+		fclose(f);
+	}
+
+	return(r);
+}
+
+static int WJECLIMerge(WJElement *doc, WJElement *current, char *line)
+{
+	WJReader	reader	= NULL;
+	WJElement	e		= NULL;
+	FILE		*f		= stdin;
+	char		*file;
+	int			r		= 0;
+
+	file = nextField(line, &line);
+
+	if (nextField(line, &line)) {
+		fprintf(stderr, "Invalid arguments\n");
+		return(2);
+	}
+
+	if (file && !(f = fopen(file, "rb"))) {
+		perror(NULL);
+		return(3);
+	}
+
+	if (f == stdin) {
+		fprintf(stdout, "Enter JSON document. Enter a . on it's own line when complete.\n");
+		reader = WJROpenDocument(JSONstdinCB, f, NULL, 0);
+	} else {
+		reader = WJROpenFILEDocument(f, NULL, 0);
+	}
+
+	if (!reader) {
+		fprintf(stderr, "Internal error, failed to open JSON reader\n");
+		r = 4;
+	} else if (!(e = WJEOpenDocument(reader, NULL, NULL, NULL))) {
+		fprintf(stderr, "Failed to parse JSON document\n");
+		r = 5;
+	}
+
+	WJRCloseDocument(reader);
+
+	if (e) {
+		if (*doc) {
+			WJEMergeObjects(*doc, e, TRUE);
+			WJECloseDocument(e);
+		} else {
+			*doc = *current = e;
+		}
+	}
+
+	if (f && f != stdin) {
+		fclose(f);
+	}
+
 	return(r);
 }
 
@@ -974,8 +1031,15 @@ WJECLIcmd WJECLIcmds[] =
 		'\0', "load",	"Load a new JSON document, replacing the document "	\
 						"that is currently loaded. If a filename is not "	\
 						"specified then the document will be read from "	\
-						"standard in.",
+						"stdin.",
 		WJECLILoad,		"[<filename>]"
+	},
+	{
+		'\0', "merge",	"Load a new JSON document, and merge it into the "	\
+						"document that is currently loaded. If a filename "	\
+						"is not specified then the document will be read "	\
+						"from stdin.",
+		WJECLIMerge,	"[<filename>]"
 	},
 	{
 		'\0', "save",	"Write the currently selected portion of the JSON "	\
