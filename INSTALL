@@ -1,6 +1,6 @@
 Compile and install WJElement:
 
-$ ccmake .  #(chance settings if desired, 'c'onfigure and 'g'enerate)
+$ ccmake .  #change settings if desired, 'c'onfigure and 'g'enerate
 $ make
 # make install
 
