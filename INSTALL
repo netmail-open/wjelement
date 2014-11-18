@@ -1,8 +1,12 @@
 Compile and install WJElement:
 
-$ cmake -i  #(and answer the prompts)
+$ ccmake .  #(chance settings if desired, 'c'onfigure and 'g'enerate)
 $ make
 # make install
+
+You may also use:
+$ cmake-gui .
+instead of ccmake.
 
 
 Use it in your program:
@@ -13,6 +17,9 @@ Use it in your program:
 Link against it in your project:
 
 -lwjelement
+  (simple usage)
+-lwjelement -lwjreader -lwjwriter
+  (advanced and lower-level functionality)
 
 
 By default, WJElement will install to /usr/local.  If linking fails to find
