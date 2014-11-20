@@ -76,8 +76,12 @@ static void ListSelectors(char *prefix, WJElement schema, WJElement document,
 		/* swap in any $ref'erenced schema */
 		if((str = WJEString(schema, "[\"$ref\"]", WJE_GET, NULL))) {
 			if ((last = loadcb(str, client, __FILE__, __LINE__))) {
-				if(schema && freecb && !schemaGiven) {
-					freecb(schema, client);
+				if(schema && !schemaGiven) {
+					if(freecb) {
+						freecb(schema, client);
+					} else {
+						WJECloseDocument(schema);
+					}
 					schema = NULL;
 				}
 
@@ -97,8 +101,12 @@ static void ListSelectors(char *prefix, WJElement schema, WJElement document,
 				ListSelectors(prefix, subSchema, document, type, format,
 							  loadcb, freecb, matchcb, client, exist);
 			}
-			if(subSchema && freecb) {
-				freecb(subSchema, client);
+			if(subSchema) {
+				if(freecb) {
+					freecb(subSchema, client);
+				} else {
+					WJECloseDocument(subSchema);
+				}
 				subSchema = NULL;
 			}
 		}
@@ -119,8 +127,12 @@ static void ListSelectors(char *prefix, WJElement schema, WJElement document,
 					ListSelectors(prefix, subSchema, document, type, format,
 								  loadcb, freecb, matchcb, client, exist);
 				}
-				if(subSchema && freecb) {
-					freecb(subSchema, client);
+				if(subSchema) {
+					if(freecb) {
+						freecb(subSchema, client);
+					} else {
+						WJECloseDocument(subSchema);
+					}
 					subSchema = NULL;
 				}
 			}
@@ -256,8 +268,12 @@ static void ListSelectors(char *prefix, WJElement schema, WJElement document,
 
 	}
 
-	if(schema && freecb && !schemaGiven) {
-		freecb(schema, client);
+	if(schema && !schemaGiven) {
+		if(freecb) {
+			freecb(schema, client);
+		} else {
+			WJECloseDocument(schema);
+		}
 		schema = NULL;
 	}
 }
@@ -416,8 +432,9 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 								  name, version);
 			if(freecb) {
 				freecb(sub, client);
+			} else {
+				WJECloseDocument(sub);
 			}
-			WJECloseDocument(sub);
 			return fail;
 		}
 
@@ -434,8 +451,12 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 													 freecb, client, name,
 													 version);
 			}
-			if(sub && freecb) {
-				freecb(sub, client);
+			if(sub) {
+				if(freecb) {
+					freecb(sub, client);
+				} else {
+					WJECloseDocument(sub);
+				}
 				sub = NULL;
 			}
 		}
@@ -457,8 +478,12 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 														 loadcb, freecb,
 														 client, name, version);
 				}
-				if(sub && freecb) {
-					freecb(sub, client);
+				if(sub) {
+					if(freecb) {
+						freecb(sub, client);
+					} else {
+						WJECloseDocument(sub);
+					}
 					sub = NULL;
 				}
 			}
@@ -1026,8 +1051,9 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 	if(schema && !schemaGiven) {
 		if(freecb) {
 			freecb(schema, client);
+		} else {
+			WJECloseDocument(schema);
 		}
-		WJECloseDocument(schema);
 		schema = NULL;
 	}
 
@@ -1058,6 +1084,8 @@ static XplBool ExtendsType(WJElement schema, const char *type,
 
 			if (freecb) {
 				freecb(sub, client);
+			} else {
+				WJECloseDocument(sub);
 			}
 		}
 	} else {
@@ -1072,6 +1100,8 @@ static XplBool ExtendsType(WJElement schema, const char *type,
 
 				if (freecb) {
 					freecb(sub, client);
+				} else {
+					WJECloseDocument(sub);
 				}
 
 				if (match) {
@@ -1101,6 +1131,8 @@ EXPORT XplBool WJESchemaIsType(WJElement document, const char *type,
 
 		if (freecb) {
 			freecb(schema, client);
+		} else {
+			WJECloseDocument(schema);
 		}
 	}
 
@@ -1122,6 +1154,8 @@ EXPORT XplBool WJESchemaNameIsType(const char *describedby, const char *type,
 
 		if(freecb) {
 			freecb(schema, client);
+		} else {
+			WJECloseDocument(schema);
 		}
 	}
 
@@ -1169,6 +1203,8 @@ EXPORT char * WJESchemaNameFindBacklink(char *describedby, const char *format,
 
 	if (freecb) {
 		freecb(sub, client);
+	} else {
+		WJECloseDocument(sub);
 	}
 
 	return(result);
