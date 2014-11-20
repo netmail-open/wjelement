@@ -428,6 +428,10 @@ Additional schema will be loaded
 via the load callback if needed.  Any validation errors will be reported,
 printf-style, to errcb.</p>
 <p>
+If a the load callback is used to acquire schema but a NULL free callback is
+provided, WJECloseDocument will be used internally to release it.
+</p>
+<p>
 <strong>WJESchemaIsType</strong>
  - Determine if a document implements a specific schema.
 </p>
