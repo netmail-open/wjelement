@@ -745,6 +745,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 								name, str);
 						}
 					}
+					MemRelease(&str);
 				}
 			}
 			anyFail = anyFail || fail;
