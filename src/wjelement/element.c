@@ -80,10 +80,13 @@ _WJElement * _WJENew(_WJElement *parent, char *name, size_t len, const char *fil
 
 _WJElement * _WJEReset(_WJElement *e, WJRType type)
 {
+	WJElement	child;
+
 	if (!e) return(NULL);
 
-	while (e->pub.child) {
-		WJECloseDocument(e->pub.child);
+	while ((child = e->pub.child)) {
+		WJEDetach(child);
+		WJECloseDocument(child);
 	}
 
 	if (WJR_TYPE_STRING == e->pub.type && e->value.string) {
@@ -139,6 +142,7 @@ EXPORT XplBool WJEAttach(WJElement container, WJElement document)
 
 	if (document->name) {
 		while ((prev = WJEChild(container, document->name, WJE_GET))) {
+			WJEDetach(prev);
 			WJECloseDocument(prev);
 		}
 	}
@@ -503,10 +507,13 @@ EXPORT XplBool _WJEWriteDocument(WJElement document, WJWriter writer, char *name
 EXPORT XplBool WJECloseDocument(WJElement document)
 {
 	_WJElement	*current = (_WJElement *) document;
+	WJElement	child;
 
 	if (!document) {
 		return(FALSE);
 	}
+
+	WJEDetach(document);
 
 	if (document->freecb && !document->freecb(document)) {
 		/* The callback has prevented free'ing the document */
@@ -533,8 +540,9 @@ EXPORT XplBool WJECloseDocument(WJElement document)
 
 
 	/* Destroy all children */
-	while (document->child) {
-		WJECloseDocument(document->child);
+	while ((child = document->child)) {
+		WJEDetach(child);
+		WJECloseDocument(child);
 	}
 
 	if (current->pub.type == WJR_TYPE_STRING) {
