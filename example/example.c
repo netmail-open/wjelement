@@ -3,6 +3,8 @@
 
   after installing libwjelement (and running ldconfig if needed)...
   gcc -o example -lwjelement example.c
+    or
+  gcc -o example `pkg-config --libs wjelement` example.c
 
   the JSON operations performed in this example are parallel to the following
   javascript code.  notice how similar the code is in both size and clarity:

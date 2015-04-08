@@ -51,7 +51,7 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # (but later on when installing)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 # the RPATH to be used when installing
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+SET(CMAKE_INSTALL_RPATH ${LIB_DEST_DIR})
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -65,6 +65,27 @@ INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/documentation/
 include_directories(include)
 add_subdirectory(src)
 add_subdirectory(include)
+
+# pkg-config .pc
+SET(PKG_CONFIG_REQUIRES glib-2.0)
+SET(PKG_CONFIG_LIBDIR
+    ${LIB_DEST_DIR}
+)
+SET(PKG_CONFIG_INCLUDEDIR
+	${INC_DEST_DIR}
+)
+SET(PKG_CONFIG_LIBS
+    "-L\${libdir} -lwjelement -lwjreader -lwjwriter"
+)
+SET(PKG_CONFIG_CFLAGS
+    "-I\${includedir}"
+)
+CONFIGURE_FILE(
+  "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config.pc.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/wjelement.pc"
+)
+INSTALL(FILES "${CMAKE_BINARY_DIR}/wjelement.pc"
+        DESTINATION ${LIB_DEST_DIR}/pkgconfig)
 
 # uninstall target
 configure_file(

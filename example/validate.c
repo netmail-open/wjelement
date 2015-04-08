@@ -4,6 +4,8 @@
 
   after installing libwjelement (and running ldconfig if needed)...
   gcc -o validate -lwjelement -lwjreader validate.c
+    or
+  gcc -o validate `pkg-config --libs wjelement` validate.c
 */
 
 
