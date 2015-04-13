@@ -29,9 +29,16 @@ var doc = {
 			"born": 2485
 		}
 	],
+	"cameo" : [
+		"Battlestar Galactica",
+		"Star Wars Evasive Action",
+		"Dr. Horrible's Sing-Along Blog",
+		"Ready Player One"
+	],
 	"shiny": true
 };
 var person = null;
+var cameo = null;
 
 for(i in doc.crew) {  // note: tedious...
 	person = doc.crew[i];
@@ -45,6 +52,10 @@ for(i in doc.crew) {
 	person = doc.crew[i];
 	console.log(person.name +" ("+ person.job +") is "+ (2517 - person.born));
 }
+for(i in doc.cameo) {
+	cameo = doc.cameo[i];
+	console.log("Cameo: " + cameo);
+}
 
 console.log(JSON.stringify(doc));
 */
@@ -57,6 +68,7 @@ console.log(JSON.stringify(doc));
 int main(int argc, char **argv) {
 	WJElement doc = NULL;
 	WJElement person = NULL;
+	WJElement cameo = NULL;
 
 	doc = WJEObject(NULL, NULL, WJE_NEW);
 	WJEString(doc, "name", WJE_SET, "Serenity");
@@ -78,6 +90,12 @@ int main(int argc, char **argv) {
 	WJEString(doc, "crew[-1].job", WJE_SET, "public relations");
 	WJEInt64(doc, "crew[-1].born", WJE_SET, 2485);
 
+	WJEArray(doc, "cameo", WJE_SET);
+	WJEString(doc, "cameo[$]", WJE_NEW, "Battlestar Galactica");
+	WJEString(doc, "cameo[$]", WJE_NEW, "Star Wars Evasive Action");
+	WJEString(doc, "cameo[$]", WJE_NEW, "Dr. Horrible's Sing-Along Blog");
+	WJEString(doc, "cameo[$]", WJE_NEW, "Ready Player One");
+
 	WJEBool(doc, "shiny", WJE_SET, TRUE);
 
 	WJEInt64(doc, "crew[].born == 2468", WJE_SET, 2486);  /* note: awesome! */
@@ -88,6 +106,9 @@ int main(int argc, char **argv) {
 			   WJEString(person, "name", WJE_GET, ""),
 			   WJEString(person, "job", WJE_GET, ""),
 			   (2517 - WJEInt64(person, "born", WJE_GET, 0)));
+	}
+	while((cameo = WJEGet(doc, "cameo[]", cameo))) {
+		printf("Cameo: %s\n", WJEString(cameo, NULL, WJE_GET, ""));
 	}
 
 	WJEDump(doc);
