@@ -426,7 +426,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 		}
 
 		/* swap in any $ref'erenced schema */
-		if(loadcb && (str = WJEString(schema, "[\"$ref\"]", WJE_GET, NULL))) {
+		if(str = WJEString(schema, "[\"$ref\"]", WJE_GET, NULL)) {
 
          // Johan: Add Inline dereferencing. Looking for definitions
          const char* inline_dereferencing = "#/definitions/";
@@ -446,12 +446,13 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
                      fail = SchemaValidate (sub, document, err, loadcb, freecb, client,
                                             name,
                                             version);
+                     return fail;
                   }
                }
             }
          }
 
-         if (!sub) {
+         if (loadcb) {
             sub = loadcb (str, client, __FILE__, __LINE__);
 
             fail = SchemaValidate (sub, document, err, loadcb, freecb, client,
