@@ -1,0 +1,196 @@
+<html>
+<head>
+<title>WJElement Documentation: wjwriter</title>
+</head>
+<body>
+
+<a href="index.html">Index</a>
+
+<h1>WJWriter Synopsis</h1>
+<p>
+  The WARP JSON Writer provides the ability to easily write a JSON document to
+  a stream.	All data formatting is done automatically.
+</p>
+
+<h1>WJWriter Data Types</h1>
+<p>
+<strong>WJWriter</strong>
+is The WJWriter document, the library's primary structure
+</p>
+<p>
+From wjwriter.h:
+<blockquote><pre>
+typedef struct {
+    XplBool                pretty;
+
+    /*
+        Base may be set to 8, 10 (default), or 16.  Using a base other than 10
+        will result in a non standard JSON document which may not be read
+        properly by all parsers.
+    */
+    int                    base;
+
+    struct {
+        void               *data;
+        WJWriteCallback    cb;
+    } write;
+
+    struct {
+        void               *data;
+        void               (* freecb)(void *data);
+    } user;
+} WJWriterPublic;
+typedef WJWriterPublic*    WJWriter;
+</pre></blockquote>
+</p>
+<p>
+<strong>WJWriteCallback</strong>
+ - Generic data writer (to file, socket, encoder, etc.)
+</p>
+<p>
+<blockquote><pre>
+typedef size_t (* WJWriteCallback)(char *data, size_t size, void *writedata);
+</pre></blockquote>
+</p>
+
+<h1>WJWriter Interfaces</h1>
+<h2>Document/Writer Management</h2>
+<p>
+<strong>WJWOpenDocument</strong>
+ - Open a stream that is ready to accept a JSON document.
+</p>
+<p>
+<blockquote><pre>
+WJWriter WJWOpenDocument(XplBool pretty, WJWriteCallback callback,
+                         void *writeData);
+WJWriter _WJWOpenDocument(XplBool pretty, WJWriteCallback callback,
+                          void *writedata, size_t buffersize);
+</pre></blockquote>
+</p>
+<p>
+  A callback function
+  must be provided which will be used to write data as it is ready.
+</p>
+<p>
+  A buffersize of 0 will disable write buffering entirely.  The write buffer
+  used will be at least the size requested, but may be larger.
+</p>
+<p>
+<strong>WJWOpenFILEDocument</strong>
+ - helper to write to an open FILE *.
+</p>
+<p>
+<blockquote><pre>
+WJWriter WJOpenFILEDocument(XplBool pretty, FILE *file);
+</pre></blockquote>
+</p>
+<p>
+    An alternative method of opening a JSON document for writing, which will
+    provide a proper callback for writing the data to an open FILE *.
+</p>
+<p>
+<strong>WJWCloseDocument</strong>
+ - Close a WJWriter document
+</p>
+<p>
+<blockquote><pre>
+XplBool WJWCloseDocument(WJWriter doc);
+</pre></blockquote>
+</p>
+<h2>JSON Structures</h2>
+<p>
+<strong>WJWOpenArray</strong>
+ - Open an array.
+</p>
+<p>
+<blockquote><pre>
+XplBool WJWOpenArray(char *name, WJWriter doc);
+</pre></blockquote>
+</p>
+<p>
+  All objects that are direct children of the array MUST NOT
+  be named.  A value of NULL should be passed as name for any such values.
+</p>
+<p>
+  When all values of the array have been written it can be closed with
+  WJWCloseArray().
+</p>
+<p>
+<strong>WJWCloseArray</strong>
+ - Close an array.
+</p>
+<p>
+<blockquote><pre>
+XplBool WJWCloseArray(WJWriter doc);
+</pre></blockquote>
+</p>
+<p>
+<strong>WJWOpenObject</strong>
+ - Open an object.
+</p>
+<p>
+<blockquote><pre>
+XplBool WJWOpenObject(char *name, WJWriter doc);
+</pre></blockquote>
+</p>
+<p>
+  Open an object.  All objects that are direct children of the object MUST be
+  named.    A value of NULL should NOT be passed as name for any such values.
+</p>
+<p>
+  When all values of the object have been written it can be closed with
+  WJWCloseObject().
+</p>
+<p>
+<strong>WJWCloseObject</strong>
+ - Close an object.
+</p>
+<p>
+<blockquote><pre>
+XplBool WJWCloseObject(WJWriter doc);
+</pre></blockquote>
+</p>
+<h2>JSON Values</h2>
+<p>
+  These WJWriter functions
+  write a value to the document.    If any values are written that are a direct
+  child of an object then a non-NULL name MUST be provided.  If any values are
+  written that are a direct child of an array then a non-NULL name MUST NOT be
+  provided.
+</p>
+<p>
+  A string value may be written in multiple pieces. A JSON string will be
+  started with the first call to WJWString, or WJWStringN and the string will
+  not be completed until the "done" argument is set to TRUE or there is a call
+  to write a non-string type value.
+</p>
+<p>
+<blockquote><pre>
+XplBool WJWStringN(char *name, char *value, size_t length, XplBool done, WJWriter doc);
+XplBool WJWString(char *name, char *value, XplBool done, WJWriter doc);
+XplBool WJWBoolean(char *name, XplBool value, WJWriter doc);
+XplBool WJWNull(char *name, WJWriter doc);
+
+XplBool WJWInt32(char *name, int32 value, WJWriter doc);
+XplBool WJWUInt32(char *name, uint32 value, WJWriter doc);
+XplBool WJWInt64(char *name, int64 value, WJWriter doc);
+XplBool WJWUInt64(char *name, uint64 value, WJWriter doc);
+XplBool WJWDouble(char *name, double value, WJWriter doc);
+</pre></blockquote>
+</p>
+<p>
+<strong>WJWRawValue</strong>
+ - Write a raw, pre-formatted value to the document.
+</p>
+<p>
+<blockquote><pre>
+XplBool WJWRawValue(char *name, char *value, XplBool done, WJWriter doc);
+</pre></blockquote>
+</p>
+<p>
+  It is up to the caller to
+  ensure that the data is properly formatted and complete.
+</p>
+
+</body>
+</html>

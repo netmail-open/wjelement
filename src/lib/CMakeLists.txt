@@ -1,0 +1,20 @@
+add_library(xpl
+	xpl.c
+)
+
+target_link_libraries(xpl
+	${ALL_LIBS}
+)
+
+SET_TARGET_PROPERTIES(
+	xpl
+	PROPERTIES
+	VERSION 1.0.0
+	SOVERSION 1
+	INSTALL_NAME_DIR "${LIB_DEST_DIR}"
+)
+
+install(TARGETS xpl
+	LIBRARY DESTINATION ${LIB_DEST_DIR}
+	ARCHIVE DESTINATION ${LIB_DEST_DIR}
+	)

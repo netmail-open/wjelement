@@ -1,0 +1,26 @@
+Compile and install WJElement:
+
+$ ccmake .  #change settings if desired, 'c'onfigure and 'g'enerate
+$ make
+# make install
+
+You may also use:
+$ cmake-gui .
+instead of ccmake.
+
+
+Use it in your program:
+
+#include <wjelement.h>
+
+
+Link against it in your project:
+
+-lwjelement
+  (simple usage)
+-lwjelement -lwjreader -lwjwriter
+  (advanced and lower-level functionality)
+
+
+By default, WJElement will install to /usr/local.  If linking fails to find
+WJElement immediately after installation, you may need to run ldconfig.

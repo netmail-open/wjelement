@@ -1,0 +1,10 @@
+#!/bin/bash
+
+dir=`dirname $0`
+
+which rlwrap > /dev/null
+if [ $? == 0 ]; then
+	rlwrap -pred $dir/wjecli $@
+else
+	$dir/wjecli $@
+fi
