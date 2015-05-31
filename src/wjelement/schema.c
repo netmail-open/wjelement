@@ -427,6 +427,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 
 		/* swap in any $ref'erenced schema */
 		if(loadcb && (str = WJEString(schema, "[\"$ref\"]", WJE_GET, NULL))) {
+
          // Johan: Add Inline dereferencing. Looking for definitions
          const char* inline_dereferencing = "#/definitions/";
          if (strncmp (inline_dereferencing, str, strlen (inline_dereferencing)) == 0) {
