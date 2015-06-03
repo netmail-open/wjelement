@@ -428,43 +428,44 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 		/* swap in any $ref'erenced schema */
 		if(str = WJEString(schema, "[\"$ref\"]", WJE_GET, NULL)) {
 
-         // Johan: Add Inline dereferencing. Looking for definitions
-         const char* inline_dereferencing = "#/definitions/";
-         if (strncmp (inline_dereferencing, str, strlen (inline_dereferencing)) == 0) {
-            WJElement schema_root = schema->parent;
-            while (schema_root->parent) {
-               schema_root = schema_root->parent;
-            }
+			// Johan: Add Inline dereferencing. Looking for definitions
+			const char* inline_dereferencing = "#/definitions/";
+			if (strncmp (inline_dereferencing, str,
+						 strlen (inline_dereferencing)) == 0) {
+				WJElement schema_root = schema->parent;
+				while (schema_root->parent) {
+					schema_root = schema_root->parent;
+				}
 
-            WJElement schema_definitions = WJEObject(schema_root, "definitions", WJE_GET);
-            if (schema_definitions) {
-               char *ptr = strrchr (str, '/');
-               if (ptr) {
-                  ++ptr;
-                  sub = WJEObject(schema_definitions, ptr, WJE_GET);
-                  if (sub) {
-                     fail = SchemaValidate (sub, document, err, loadcb, freecb, client,
-                                            name,
-                                            version);
-                     return fail;
-                  }
-               }
-            }
-         }
+				WJElement schema_definitions = WJEObject(schema_root,
+														 "definitions",
+														 WJE_GET);
+				if (schema_definitions) {
+					char *ptr = strrchr (str, '/');
+					if (ptr) {
+						++ptr;
+						sub = WJEObject(schema_definitions, ptr, WJE_GET);
+						if (sub) {
+							fail = SchemaValidate (sub, document, err,
+												   loadcb, freecb,
+												   client, name, version);
+							return fail;
+						}
+					}
+				}
+			}
 
-         if (loadcb) {
-            sub = loadcb (str, client, __FILE__, __LINE__);
-
-            fail = SchemaValidate (sub, document, err, loadcb, freecb, client,
-                                   name,
-                                   version);
-            if (freecb) {
-               freecb (sub, client);
-            }
-            else {
-               WJECloseDocument (sub);
-            }
-         }
+			if (loadcb) {
+				sub = loadcb (str, client, __FILE__, __LINE__);
+				fail = SchemaValidate (sub, document, err, loadcb, freecb,
+									   client, name, version);
+				if (freecb) {
+					freecb (sub, client);
+				}
+				else {
+					WJECloseDocument (sub);
+				}
+			}
 			return fail;
 		}
 
