@@ -306,6 +306,91 @@ static WJElement _WJELoad(_WJElement *parent, WJReader reader, char *where, WJEL
 	return((WJElement) l);
 }
 
+typedef struct WJEMemArgs
+{
+	char		*json;
+	char		quote;
+
+	size_t		len;
+} WJEMemArgs;
+
+EXPORT size_t WJEMemCallback(char *buffer, size_t length, size_t seen, void *userdata)
+{
+	WJEMemArgs	*args	= (WJEMemArgs *) userdata;
+	char		*json;
+	char		*q;
+	size_t		len;
+
+	if (!args || !args->json) {
+		return(0);
+	}
+
+	len		= args->len - seen;
+	json	= args->json + seen;
+
+	if (!len) {
+		/* Done */
+		return(0);
+	}
+
+	if (len > length) {
+		len = length;
+	}
+
+	if (len > 0) {
+		memcpy(buffer, json, len);
+
+		switch (args->quote) {
+			case '"':
+			case '\0':
+				/* Default behavior, do nothing to quotes */
+				break;
+
+			default:
+				/* Replace quotes in the data we just copied */
+				json	= buffer;
+				length	= len;
+
+				while (length && (q = memchr(json, args->quote, length))) {
+					*q = '"';
+
+					length -= (q - json);
+					json = q;
+				}
+
+				break;
+		}
+	}
+	return(len);
+}
+
+/*
+	Parse a JSON document already in memory directoy without requiring the
+	consumer to create a WJReader. This is meant as a simple utility function
+	and allows parsing documents with a non standard quote char for the sake of
+	embedding documents directly in C code.
+*/
+EXPORT WJElement _WJEParse(const char *json, char quote)
+{
+	WJElement		doc;
+	WJEMemArgs		args;
+	WJReader		reader;
+
+	args.json	= (char *) json;
+	args.quote	= quote;
+
+	if (json) {
+		args.len = strlen(json);
+	}
+
+	if (json && (reader = WJROpenDocument(WJEMemCallback, &args, NULL, 0))) {
+		doc = WJEOpenDocument(reader, NULL, NULL, NULL);
+		WJRCloseDocument(reader);
+	}
+
+	return(doc);
+}
+
 EXPORT WJElement _WJEOpenDocument(WJReader reader, char *where, WJELoadCB loadcb, void *data, const char *file, const int line)
 {
 	WJElement	element;

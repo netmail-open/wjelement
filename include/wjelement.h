@@ -150,6 +150,17 @@ typedef struct WJElementPublic {
 typedef WJElementPublic *			WJElement;
 
 /*
+	Parse the provided JSON document and return the matching WJElement
+
+	The _WJEParse version can be used to parse a document with a non-standard
+	quote character. This allows easy parsing of simple documents directly in a
+	C source file without having to escape double quote characters. Examle:
+		doc = _WJEParse("{ 'foo': true, 'bar': 'yup' }", '\'');
+*/
+#define				WJEParse(j) _WJEParse((j), '"')
+EXPORT WJElement	_WJEParse(const char *json, char quote);
+
+/*
 	Load a WJElement object from the provided WJReader
 
 	If a load callback is provided then it will be called before adding any new

@@ -640,23 +640,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "Ignoring unknown test \"%s\"\n", argv[a]);
 		} else {
 			/* Reopen the JSON for each test in case a test modified it */
-			if ((j = MemStrdup(json))) {
-				/* Correct the quotes */
-				for (x = j; *x; x++) {
-					if (*x == '\'') *x = '"';
-				}
-
-				// printf("JSON:\n%s\n", j);
-				if ((reader = WJROpenMemDocument(j, NULL, 0))) {
-					doc = WJEOpenDocument(reader, NULL, NULL, NULL);
-
-					WJRCloseDocument(reader);
-				}
-
-				MemRelease(&j);
-			}
-
-			if (!doc) {
+			if (!(doc = _WJEParse(json, '\''))) {
 				fprintf(stderr, "error: Could not parse JSON document\n");
 				MemoryManagerClose("wjeunit");
 				return(1);
