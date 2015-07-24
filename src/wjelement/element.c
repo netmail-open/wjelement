@@ -659,3 +659,43 @@ EXPORT void WJEWriteFILE(WJElement document, FILE* fd)
 	}
 	fprintf(fd, "\n");
 }
+
+typedef struct _MemWriterData {
+	size_t maxlength;
+	char *buffer;
+} _MemWriterData;
+static size_t MemWriteCB(char *data, size_t size, void *writedata) {
+	size_t write;
+	_MemWriterData *w = (_MemWriterData *)writedata;
+	if(w->maxlength) {
+		write = w->maxlength - strlen(w->buffer) - 1;
+	} else {
+		w->buffer = MemRealloc(w->buffer, strlen(w->buffer) + size + 1);
+		write = size;
+	}
+	if(size < write) {
+		write = size;
+	}
+	if(w->buffer) {
+		strncat(w->buffer, data, write);
+	}
+	return size;
+}
+
+EXPORT char * WJEWriteMEM(WJElement document, XplBool pretty, size_t maxlength)
+{
+	WJWriter memWriter;
+	_MemWriterData data;
+
+	data.maxlength = maxlength;
+	data.buffer = MemMalloc(maxlength);
+	if(data.buffer) {
+		*data.buffer = '\0';
+	}
+
+	if ((memWriter = _WJWOpenDocument(pretty, MemWriteCB, &data, maxlength))) {
+		WJEWriteDocument(document, memWriter, NULL);
+		WJWCloseDocument(memWriter);
+	}
+	return data.buffer;
+}

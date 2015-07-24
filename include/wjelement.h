@@ -178,6 +178,8 @@ EXPORT XplBool		_WJEWriteDocument(WJElement document, WJWriter writer, char *nam
 #define				WJEWriteDocument(d, w, n) _WJEWriteDocument((d), (w), (n), NULL, NULL, NULL)
 /* Write a WJElement object to the provided FILE* */
 EXPORT void WJEWriteFILE(WJElement document, FILE* fd);
+/* Allocate and write to a string (must be MemFree'd by the consumer) */
+EXPORT char * WJEWriteMEM(WJElement document, XplBool pretty, size_t maxlength);
 
 /* Destroy a WJElement object */
 EXPORT XplBool		WJECloseDocument(WJElement document);
