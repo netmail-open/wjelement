@@ -12,6 +12,10 @@ else(STATIC_LIB)
   set(BUILD_SHARED_LIBS ON)
 endif(STATIC_LIB)
 
+if("${CMAKE_SYSTEM}" MATCHES "Linux")
+  add_definitions(-D_GNU_SOURCE)
+endif()
+
 if(NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr/local)
 endif(NOT CMAKE_INSTALL_PREFIX)

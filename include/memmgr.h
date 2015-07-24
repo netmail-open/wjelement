@@ -25,6 +25,7 @@
 #include "xpl.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 
 #define MemAssert(p)

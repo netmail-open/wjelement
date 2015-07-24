@@ -16,7 +16,7 @@
 
 
 /****************************************************************************
- * stub replacement for Messaging Architects' internal Xpl library
+ * stub replacement for netmail's internal Xpl library
  ****************************************************************************/
 #include <stdarg.h>
 #include <stdio.h>
@@ -32,12 +32,12 @@
 #ifdef _WIN32
 # define		WIN_CDECL		__cdecl
 # define		WIN_STDCALL		__stdcall
-#ifndef COMPILE_AS_STATIC
-# define		EXPORT			__declspec(dllexport)
-# define		IMPORT			__declspec(dllimport)
-#else
-# define		EXPORT
-# define		IMPORT
+# ifndef COMPILE_AS_STATIC
+#  define		EXPORT			__declspec(dllexport)
+#  define		IMPORT			__declspec(dllimport)
+# else
+#  define		EXPORT
+#  define		IMPORT
 #endif
 # define		INLINE			__inline
 #else
@@ -46,6 +46,10 @@
 # define		EXPORT
 # define		IMPORT
 # define		INLINE			__inline
+
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <netdb.h>
 #endif
 
 
