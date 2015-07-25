@@ -154,9 +154,9 @@ typedef enum {
 </p>
 <p>
 <blockquote><pre>
-WJElement WJEParse(j) _WJEParse((j), '"');
+WJElement WJEParse(const char *json);
 WJElement _WJEParse(const char *json, char quote);
-</pre></blockquote><!--"-->
+</pre></blockquote>
 </p>
 <p>
 	The _WJEParse version can be used to parse a document with a non-standard
