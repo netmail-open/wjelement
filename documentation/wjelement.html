@@ -149,6 +149,24 @@ typedef enum {
 <h1>WJElement Interfaces</h1>
 <h2>Document/Element Management</h2>
 <p>
+<strong>WJEParse</strong>
+ - Parse the provided JSON document and return the new WJElement
+</p>
+<p>
+<blockquote><pre>
+WJElement WJEParse(j) _WJEParse((j), '"');
+WJElement _WJEParse(const char *json, char quote);
+</pre></blockquote><!--"-->
+</p>
+<p>
+	The _WJEParse version can be used to parse a document with a non-standard
+	quote character. This allows easy parsing of simple documents directly in a
+	C source file without having to escape double quote characters. Example:
+    <blockquote><pre>
+doc = _WJEParse("{ 'foo': true, 'bar': 'yup' }", '\'');
+    </pre></blockquote>
+</p>
+<p>
 <strong>WJEOpenDocument</strong>
  - Load a WJElement object from the provided
 <a href="wjreader.html">WJReader</a>
@@ -181,6 +199,20 @@ void WJEWriteFILE(WJElement document, FILE* fd);
   WJEWriteFILE() requires an already opened FILE* to write to.
   It is also used internally by <a href="#WJEDump">WJEDump()</a>
 </p>
+
+<p>
+<strong>WJEWriteMEM</strong>
+ - Allocate and write to a string
+<blockquote><pre>
+char * WJEWriteMEM(WJElement document, XplBool pretty, size_t maxlength);
+</pre></blockquote>
+</p>
+<p>
+  WJEWriteMEM() allocates and returns a string containing the document.
+  A maxlength of 0 means the string may be of unlimited length.
+  The returned string must be freed with MemFree by the consumer.
+</p>
+
 <p>
 <strong>WJECloseDocument</strong>
  - Destroy a WJElement object

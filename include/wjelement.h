@@ -150,11 +150,11 @@ typedef struct WJElementPublic {
 typedef WJElementPublic *			WJElement;
 
 /*
-	Parse the provided JSON document and return the matching WJElement
+	Parse the provided JSON document and return the new WJElement
 
 	The _WJEParse version can be used to parse a document with a non-standard
 	quote character. This allows easy parsing of simple documents directly in a
-	C source file without having to escape double quote characters. Examle:
+	C source file without having to escape double quote characters. Example:
 		doc = _WJEParse("{ 'foo': true, 'bar': 'yup' }", '\'');
 */
 #define				WJEParse(j) _WJEParse((j), '"')
@@ -178,7 +178,7 @@ EXPORT XplBool		_WJEWriteDocument(WJElement document, WJWriter writer, char *nam
 #define				WJEWriteDocument(d, w, n) _WJEWriteDocument((d), (w), (n), NULL, NULL, NULL)
 /* Write a WJElement object to the provided FILE* */
 EXPORT void WJEWriteFILE(WJElement document, FILE* fd);
-/* Allocate and write to a string (must be MemFree'd by the consumer) */
+/* Allocate and write a string (maxlength 0 = unlimited; remember to MemFree) */
 EXPORT char * WJEWriteMEM(WJElement document, XplBool pretty, size_t maxlength);
 
 /* Destroy a WJElement object */
