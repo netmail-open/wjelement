@@ -563,13 +563,48 @@ static int GetDefaultTest(WJElement doc)
 	/*
 		TODO:
 		- WJEInt32
-		- WJEUInt32 
+		- WJEUInt32
 		- WJEInt64
 		- WJEUInt64
 	*/
 
 	return(0);
 }
+
+/* Test the F functions */
+static int FormatStrTest(WJElement doc)
+{
+	char	*v;
+	int		i;
+	char	*longstr;
+
+	for (i = 0; i <= 9; i++) {
+		if (i != WJEInt32F(doc, WJE_GET, NULL, -1, "digits[%d]", i)) {
+			return(__LINE__);
+		}
+	}
+
+	if (!WJEBoolF(doc, WJE_GET, NULL, FALSE, "bools[%d]", 0))	return(__LINE__);
+	if ( WJEBoolF(doc, WJE_GET, NULL, FALSE, "bools[%d]", 1))	return(__LINE__);
+
+	/*
+		Test with a VERY long result that should go over the default buffer size
+		of 1024.
+	*/
+	longstr = MemMallocWait(2048);
+	memset(longstr, ' ', 2048);
+	longstr[2048 - 1] = '\0';
+
+	if (!WJEBoolF(doc, WJE_GET, NULL, FALSE, "bools[%d]%s", 0, longstr)) {
+		MemRelease(&longstr);
+		return(__LINE__);
+	}
+	MemRelease(&longstr);
+
+	return(0);
+}
+
+
 
 /*
 	----------------------------------------------------------------------------
@@ -597,7 +632,8 @@ struct {
 	{ "append",		AppendTest		},
 	{ "conditions",	ConditionsTest	},
 	{ "optionals",	OptionalsTest	},
-	{ "defaults",   GetDefaultTest  },
+	{ "defaults",	GetDefaultTest	},
+	{ "formatstr",	FormatStrTest	},
 
 	/*
 		TODO: Write the following tests

@@ -689,3 +689,326 @@ EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction actio
 	}
 }
 
+static char * WJEPathF(char *buffer, size_t len, const char *pathf, va_list args)
+{
+	size_t		needed;
+	char		*path;
+	va_list		localargs;
+
+	needed		= len;
+	*buffer		= '\0';
+	path		= buffer;
+
+	/* Use a copy of the args to avoid modifying the consumer's data */
+	va_copy(localargs, args);
+
+	vstrcatf(path, len, &needed, pathf, localargs);
+	if (needed <= len) {
+		/* Success */
+		return(path);
+	}
+
+	/*
+		They needed a larger path than the 1024 we put on the stack.
+		Allocate one for them.
+	*/
+	path		= MemMallocWait(++needed);
+	*path		= '\0';
+
+	/* Use a copy of the args to avoid modifying the consumer's data */
+	va_copy(localargs, args);
+
+	vstrcatf(path, needed, &needed, pathf, localargs);
+
+	return(path);
+}
+
+EXPORT WJElement WJEGetF(WJElement container, WJElement last, const char *pathf, ...)
+{
+	WJElement	ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = _WJEGet(container, path, last, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+EXPORT XplBool WJEBoolF(WJElement container, WJEAction action, WJElement *last, XplBool value, const char *pathf, ...)
+{
+	XplBool		ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = __WJEBool(container, path, action, last, value, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+EXPORT char * WJEStringF(WJElement container, WJEAction action, WJElement *last, const char *value, const char *pathf, ...)
+{
+	char *		ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = __WJEString(container, path, action, last, value, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+EXPORT char * WJEStringNF(WJElement container, WJEAction action, WJElement *last, const char *value, size_t len, const char *pathf, ...)
+{
+	char *		ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = __WJEStringN(container, path, action, last, value, len, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+EXPORT WJElement WJEObjectF(WJElement container, WJEAction action, WJElement *last, const char *pathf, ...)
+{
+	WJElement	ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = __WJEObject(container, path, action, last, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+EXPORT WJElement WJEArrayF(WJElement container, WJEAction action, WJElement *last, const char *pathf, ...)
+{
+	WJElement	ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = __WJEArray(container, path, action, last, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+EXPORT WJElement WJENullF(WJElement container, WJEAction action, WJElement *last, const char *pathf, ...)
+{
+	WJElement	ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = __WJENull(container, path, action, last, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+EXPORT int32 WJEInt32F(WJElement container, WJEAction action, WJElement *last, int32 value, const char *pathf, ...)
+{
+	int32		ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = __WJEInt32(container, path, action, last, value, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+EXPORT uint32 WJEUInt32F(WJElement container, WJEAction action, WJElement *last, uint32 value, const char *pathf, ...)
+{
+	uint32		ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = __WJEUInt32(container, path, action, last, value, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+EXPORT int64 WJEInt64F(WJElement container, WJEAction action, WJElement *last, int64 value, const char *pathf, ...)
+{
+	int64		ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = __WJEInt64(container, path, action, last, value, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+EXPORT uint64 WJEUInt64F(WJElement container, WJEAction action, WJElement *last, uint64 value, const char *pathf, ...)
+{
+	uint64		ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = __WJEUInt64(container, path, action, last, value, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+EXPORT double WJEDoubleF(WJElement container, WJEAction action, WJElement *last, double value, const char *pathf, ...)
+{
+	double		ret;
+	va_list		args;
+	size_t		needed;
+	char		*path;
+	char		buffer[1024];
+
+	va_start(args, pathf);
+
+	path = buffer;
+	path = WJEPathF(buffer, sizeof(buffer), pathf, args);
+
+	va_end(args);
+
+	ret = __WJEDouble(container, path, action, last, value, __FILE__, __LINE__);
+
+	if (path != buffer) {
+		MemRelease(&path);
+	}
+
+	return(ret);
+}
+
+

@@ -113,7 +113,8 @@ extern "C" {
 
 */
 
-typedef struct WJElementPublic {
+typedef struct WJElementPublic
+{
 	char							*name;
 	WJRType							type;
 
@@ -256,7 +257,7 @@ typedef enum {
 	WJE_MOD
 } WJEAction;
 
-// TODO	Remove this.  WJE_PUT was renamed to WJE_MOD.
+/* Left for backwards compatability. WJE_PUT was renamed to WJE_MOD */
 #define WJE_PUT WJE_MOD
 
 #define _WJEString(	container, path, action, last,	value)		__WJEString(	(container), (path), (action), (last),	(value),		__FILE__, __LINE__)
@@ -285,16 +286,38 @@ typedef enum {
 #define  WJEDouble( container, path, action,		value)		__WJEDouble(	(container), (path), (action), NULL,	(value),		__FILE__, __LINE__)
 
 EXPORT XplBool		__WJEBool(		WJElement container, const char *path, WJEAction action, WJElement *last, XplBool value,				const char *file, const int line);
-EXPORT char *		__WJEString(	WJElement container, const char *path, WJEAction action, WJElement *last, const char *value,				const char *file, const int line);
-EXPORT char *		__WJEStringN(	WJElement container, const char *path, WJEAction action, WJElement *last, const char *value, size_t len,	const char *file, const int line);
+EXPORT char *		__WJEString(	WJElement container, const char *path, WJEAction action, WJElement *last, const char *value,			const char *file, const int line);
+EXPORT char *		__WJEStringN(	WJElement container, const char *path, WJEAction action, WJElement *last, const char *value, size_t len,const char *file, const int line);
 EXPORT WJElement	__WJEObject(	WJElement container, const char *path, WJEAction action, WJElement *last,								const char *file, const int line);
 EXPORT WJElement	__WJEArray(		WJElement container, const char *path, WJEAction action, WJElement *last,								const char *file, const int line);
 EXPORT WJElement	__WJENull(		WJElement container, const char *path, WJEAction action, WJElement *last,								const char *file, const int line);
-EXPORT int32		__WJEInt32(		WJElement container, const char *path, WJEAction action, WJElement *last, int32 value,				const char *file, const int line);
-EXPORT uint32		__WJEUInt32(	WJElement container, const char *path, WJEAction action, WJElement *last, uint32 value,				const char *file, const int line);
-EXPORT int64		__WJEInt64(		WJElement container, const char *path, WJEAction action, WJElement *last, int64 value,				const char *file, const int line);
-EXPORT uint64		__WJEUInt64(	WJElement container, const char *path, WJEAction action, WJElement *last, uint64 value,				const char *file, const int line);
-EXPORT double		__WJEDouble(	WJElement container, const char *path, WJEAction action, WJElement *last, double value,				const char *file, const int line);
+EXPORT int32		__WJEInt32(		WJElement container, const char *path, WJEAction action, WJElement *last, int32 value,					const char *file, const int line);
+EXPORT uint32		__WJEUInt32(	WJElement container, const char *path, WJEAction action, WJElement *last, uint32 value,					const char *file, const int line);
+EXPORT int64		__WJEInt64(		WJElement container, const char *path, WJEAction action, WJElement *last, int64 value,					const char *file, const int line);
+EXPORT uint64		__WJEUInt64(	WJElement container, const char *path, WJEAction action, WJElement *last, uint64 value,					const char *file, const int line);
+EXPORT double		__WJEDouble(	WJElement container, const char *path, WJEAction action, WJElement *last, double value,					const char *file, const int line);
+
+/*
+	The following functions are identical to the non F variants except that the
+	path argument has been moved to the end and is used as a format string. For
+	example if you need a value by index, and that index is stored in the
+	variable x:
+		val = WJENumberF(doc, WJE_GET, NULL, 0, "foo[%d]", x);
+*/
+EXPORT WJElement	WJEGetF(	WJElement container, WJElement last,													const char *pathf, ...) XplFormatString(3, 4);
+EXPORT XplBool		WJEBoolF(	WJElement container, WJEAction action, WJElement *last, XplBool value,					const char *pathf, ...) XplFormatString(5, 6);
+EXPORT char *		WJEStringF(	WJElement container, WJEAction action, WJElement *last, const char *value,				const char *pathf, ...) XplFormatString(5, 6);
+EXPORT char *		WJEStringNF(WJElement container, WJEAction action, WJElement *last, const char *value, size_t len,	const char *pathf, ...) XplFormatString(6, 7);
+EXPORT WJElement	WJEObjectF(	WJElement container, WJEAction action, WJElement *last,									const char *pathf, ...) XplFormatString(4, 5);
+EXPORT WJElement	WJEArrayF(	WJElement container, WJEAction action, WJElement *last,									const char *pathf, ...) XplFormatString(4, 5);
+EXPORT WJElement	WJENullF(	WJElement container, WJEAction action, WJElement *last,									const char *pathf, ...) XplFormatString(4, 5);
+EXPORT int32		WJEInt32F(	WJElement container, WJEAction action, WJElement *last, int32 value,					const char *pathf, ...) XplFormatString(5, 6);
+EXPORT uint32		WJEUInt32F(	WJElement container, WJEAction action, WJElement *last, uint32 value,					const char *pathf, ...) XplFormatString(5, 6);
+EXPORT int64		WJEInt64F(	WJElement container, WJEAction action, WJElement *last, int64 value,					const char *pathf, ...) XplFormatString(5, 6);
+EXPORT uint64		WJEUInt64F(	WJElement container, WJEAction action, WJElement *last, uint64 value,					const char *pathf, ...) XplFormatString(5, 6);
+EXPORT double		WJEDoubleF(	WJElement container, WJEAction action, WJElement *last, double value,					const char *pathf, ...) XplFormatString(5, 6);
+
+
 
 /*
 	Find, create or update an element by name instead of path.  This allows
