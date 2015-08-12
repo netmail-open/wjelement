@@ -673,7 +673,7 @@ static size_t MemWriteCB(char *data, size_t size, void *writedata) {
 	} else {
 		if(size > w->length - strlen(w->buffer)) {
 			w->length += 4096;
-			w->buffer = MemRealloc(w->buffer, w->length);
+			w->buffer = MemReallocWait(w->buffer, w->length);
 		}
 		write = size;
 	}
