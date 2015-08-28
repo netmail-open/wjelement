@@ -312,13 +312,16 @@ XplBool _WJEBool(WJElement container, char *path, WJEAction action, WJElement *l
 </pre></blockquote>
 </p>
 <p>
-<strong>WJEString</strong>
+<strong>WJEString, WJEStringN</strong>
  - Access a string element
 </p>
 <p>
 <blockquote><pre>
 char * WJEString(WJElement container, char *path, WJEAction action, char *value);
 char * _WJEString(WJElement container, char *path, WJEAction action, WJElement *last, char *value);
+
+char * WJEStringN(WJElement container, char *path, WJEAction action, char *value, size_t len);
+char * _WJEStringN(WJElement container, char *path, WJEAction action, WJElement *last, char *value, size_t len);
 </pre></blockquote>
 </p>
 <p>
@@ -399,6 +402,34 @@ uint64 _WJEUInt64(WJElement container, char *path, WJEAction action, WJElement *
 <blockquote><pre>
 double WJEDouble(WJElement container, char *path, WJEAction action, double value);
 double _WJEDouble(WJElement container, char *path, WJEAction action, WJElement *last, double value);
+</pre></blockquote>
+</p>
+<p>
+<strong>WJE...F variants</strong>
+ - Format-capable versions of element functions
+</p>
+<p>
+The following functions...
+<ul>
+<li><strong>WJEGetF</strong></li>
+<li><strong>WJEBoolF</strong></li>
+<li><strong>WJEStringF</strong></li>
+<li><strong>WJEStringNF</strong></li>
+<li><strong>WJEObjectF</strong></li>
+<li><strong>WJEArrayF</strong></li>
+<li><strong>WJENullF</strong></li>
+<li><strong>WJEInt32F</strong></li>
+<li><strong>WJEUInt32F</strong></li>
+<li><strong>WJEInt64F</strong></li>
+<li><strong>WJEUInt64F</strong></li>
+<li><strong>WJEDoubleF</strong></li>
+</ul>
+...are identical to the non F variants except that the
+path argument has been moved to the end and is used as a format string. For
+example if you need a value by index, and that index is stored in the
+variable x:
+<blockquote><pre>
+val = WJENumberF(doc, WJE_GET, NULL, 0, "foo[%d]", x);
 </pre></blockquote>
 </p>
 <p>
