@@ -769,7 +769,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				while((arr = WJEGet(memb, "[]", arr))) {
 					MemAsprintf(&str, "[\"%s\"]",
 								WJEString(arr, NULL, WJE_GET, ""));
-					if(!document || !WJEGet(document, str, NULL)) {
+					if(document && !WJEGet(document, str, NULL)) {
 						fail = TRUE;
 						if(fail && err) {
 							err(client, "%s: required member '%s' not found.",
