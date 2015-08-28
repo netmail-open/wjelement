@@ -46,7 +46,10 @@ if(HAVE_REGEX_H)
 	add_definitions(-DHAVE_REGEX_H)
 else(HAVE_REGEX_H)
 	message("***  WARNING: GNU C regex library not found.")
-	message("     WJESchemaValidate() will not support patternProperties")
+	message("     WJESchemaValidate() will not support:")
+	message("         pattern")
+	message("         patternProperties")
+	message("         format")
 endif(HAVE_REGEX_H)
 
 # use, i.e. don't skip the full RPATH for the build tree
