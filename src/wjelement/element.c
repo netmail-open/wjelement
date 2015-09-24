@@ -501,7 +501,7 @@ EXPORT XplBool _WJEWriteDocument(WJElement document, WJWriter writer, char *name
 					if (!current->value.number.negative) {
 						WJWUInt64(name, current->value.number.i, writer);
 					} else {
-						WJWInt64(name, -current->value.number.i, writer);
+						WJWInt64(name, -((int64) current->value.number.i), writer);
 					}
 				}
 				break;

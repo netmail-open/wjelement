@@ -24,7 +24,6 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 add_definitions(-DHAVE_CONFIG_H)
-add_definitions(-DWJE_DISTINGUISH_INTEGER_TYPE)
 
 check_include_files(string.h HAVE_STRING_H)
 check_symbol_exists(strcasecmp "strings.h" HAVE_STRCASECMP)

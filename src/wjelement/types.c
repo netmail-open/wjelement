@@ -124,7 +124,7 @@ static void _WJESetNum(void *dest, size_t size, XplBool issigned, uint64 src, Xp
 			if (!negative) {
 				(*((int64 *) dest)) = src;
 			} else {
-				(*((int64 *) dest)) = -src;
+				(*((int64 *) dest)) = -((int64) src);
 			}
 		} else {
 			(*((uint64 *) dest)) = src;
@@ -134,7 +134,7 @@ static void _WJESetNum(void *dest, size_t size, XplBool issigned, uint64 src, Xp
 			if (!negative) {
 				(*((int32 *) dest)) = src;
 			} else {
-				(*((int32 *) dest)) = -src;
+				(*((int32 *) dest)) = -((int64) src);
 			}
 		} else {
 			(*((uint32 *) dest)) = src;
