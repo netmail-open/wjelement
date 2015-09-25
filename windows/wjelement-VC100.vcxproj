@@ -79,8 +79,7 @@
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <DisableSpecificWarnings>4018;4244;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -98,8 +97,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;WJE_DISTINGUISH_INTEGER_TYPE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4018;4244;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -112,7 +110,13 @@
     <ClCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;WJE_DISTINGUISH_INTEGER_TYPE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>../include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4018;4244;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4267;4018;4244;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <WarningLevel>Level3</WarningLevel>
+      <OmitFramePointers>false</OmitFramePointers>
+      <Optimization>Disabled</Optimization>
+      <MinimalRebuild>true</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <OutputFile>$(IntDir)$(ProjectName)d.lib</OutputFile>
@@ -123,7 +127,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <DisableSpecificWarnings>4018;4244;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4267;4018;4244;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>../include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;WJE_DISTINGUISH_INTEGER_TYPE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
