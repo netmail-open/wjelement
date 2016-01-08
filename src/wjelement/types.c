@@ -17,6 +17,10 @@
 
 #include "element.h"
 
+#ifdef _MSC_VER
+#define strtoull _strtoui64
+#endif
+
 EXPORT XplBool __WJEBool(WJElement container, const char *path, WJEAction action, WJElement *last, XplBool value, const char *file, const int line)
 {
 	_WJElement		*e;
@@ -175,7 +179,7 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 {
 	_WJElement		*e;
 	char			*s, *end;
-	int				r;
+	long long		r;
 	uint64			v;
 	XplBool			negative;
 
@@ -240,12 +244,17 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 				case WJR_TYPE_STRING:
 					/* Does the string contain a number? */
 					s = skipspace(e->value.string);
-					r = strtol(s, &end, 0);
-// TODO	Check for a -, and use 64 bit functions
-					if (end != s && (!(s = skipspace(end)) || !*s)) {
-						_WJESetNum(value, size, issigned, r, FALSE);
-						return;
-					}
+				        if(s[0] == '-') {
+				           	negative = TRUE;
+				           	++s;
+				        } else {
+				           	negative = FALSE;
+				        }
+				        r = strtoull(s, &end, 0);
+				        if (end != s && (!(s = skipspace(end)) || !*s)) {
+				        	_WJESetNum(value, size, issigned, r, negative);
+				        	return;
+				        }
 					/* fallthrough */
 
 				default:
