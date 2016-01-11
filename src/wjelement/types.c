@@ -179,7 +179,7 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 {
 	_WJElement		*e;
 	char			*s, *end;
-	long long		r;
+	uint64			r;
 	uint64			v;
 	XplBool			negative;
 
