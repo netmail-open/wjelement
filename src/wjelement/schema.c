@@ -884,7 +884,40 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				anyFail = anyFail || fail;
 			}
 
-		} else if(!stricmp(memb->name, "minLength")) {
+		}
+		else if (!stricmp(memb->name, "minProperties")) {
+			if (document && document->type == WJR_TYPE_OBJECT &&
+				memb->type == WJR_TYPE_NUMBER) {
+				val = WJENumber(memb, NULL, WJE_GET, 0);
+				fail = (document->count < val);
+				if (fail && err) {
+					err(client,
+						"%s: minimum properties (%d) not met (%d).",
+						name,
+						val,
+						document->count);
+				}
+				anyFail = anyFail || fail;
+			}
+
+		}
+		else if (!stricmp(memb->name, "maxProperties")) {
+			if (document && document->type == WJR_TYPE_OBJECT &&
+				memb->type == WJR_TYPE_NUMBER) {
+				val = WJENumber(memb, NULL, WJE_GET, 0);
+				fail = (document->count > val);
+				if (fail && err) {
+					err(client,
+						"%s: maximum properties (%d) exceeded (%d).",
+						name,
+						val,
+						document->count);
+				}
+				anyFail = anyFail || fail;
+			}
+
+		}
+		else if(!stricmp(memb->name, "minLength")) {
 			if(document && document->type == WJR_TYPE_STRING &&
 			   memb->type == WJR_TYPE_NUMBER) {
 				val = WJENumber(memb, NULL, WJE_GET, 0);
