@@ -707,6 +707,39 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 			}
 			anyFail = anyFail || fail;
 
+		} else if (!stricmp(memb->name, "oneOf")) {
+			if (document && memb->type == WJR_TYPE_ARRAY) {
+				num = 0;
+				val = 0;
+				arr = NULL;
+				while ((arr = WJEGet(memb, "[]", arr))) {
+					data = NULL;
+					if (val < memb->count) {
+						MemAsprintf(&str, "[%d]", val);
+						data = WJEGet(memb, str, NULL);
+						MemFree(str);
+					}
+					MemAsprintf(&str, "%s[%d]", name, val);
+					if (SchemaValidate(data, document, err, loadcb, freecb,
+						client, str, version)) {
+						num++;
+					}
+					MemFree(str);
+					str = NULL;
+					val++;
+				}
+				if (num != 1) {
+					fail = TRUE;
+					if (err) {
+						err(client, 
+							"%s failed oneOf validation; matched %d.", 
+							document->name, 
+							num);
+					}
+				}
+			}
+			anyFail = anyFail || fail;
+
 		} else if(!stricmp(memb->name, "items")) {
 			if(document && document->type == WJR_TYPE_ARRAY) {
 				if(memb->type == WJR_TYPE_OBJECT) {
@@ -1015,29 +1048,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				  !stricmp(memb->name, "title") ||
 				  !stricmp(memb->name, "description")) {
 
-		} else if(!stricmp(memb->name, "oneOf")) {
-                       if(document && memb->type == WJR_TYPE_ARRAY) {
-                          num = 0;
-                          fail = TRUE;
-                          while((arr = WJEGet(memb, "[]", arr))) {
-                             if(SchemaValidate(arr, document, err, loadcb, freecb, client, name, version)) {
-                                ++num;
-                                if(num > 1) {
-                                   break;
-                                }
-                             }
-                          }
-                          if(num == 1) {
-                             fail = FALSE;
-                          }
-                          else {
-                             if(err) {
-                                err(client, "%s did not match exactly one specified schema", name);
-                             }
-                          }
-                          anyFail = anyFail || fail;
-                       }
-                } else if(!stricmp(memb->name, "format")) {
+		} else if(!stricmp(memb->name, "format")) {
 #ifdef HAVE_REGEX_H
 			/* spec says we're not required to validate, but do it anyway! */
 			/*
