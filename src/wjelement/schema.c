@@ -944,7 +944,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				dval = WJEDouble(memb, NULL, WJE_GET, 0);
 				dnum = WJEDouble(document, NULL, WJE_GET, 0);
 				if(WJEBool(schema, "exclusiveMaximum", WJE_GET, FALSE)) {
-					fail = (dnum > dval && dnum != dval);
+					fail = (dnum > dval || dnum == dval);
 				} else {
 					fail = (dnum > dval);
 				}
