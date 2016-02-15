@@ -675,6 +675,38 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				anyFail = anyFail || fail;
 			}
 
+		} else if (!stricmp(memb->name, "anyOf")) {
+			if (document && memb->type == WJR_TYPE_ARRAY) {
+				num = 0;
+				val = 0;
+				arr = NULL;
+				while ((arr = WJEGet(memb, "[]", arr))) {
+					data = NULL;
+					if (val < memb->count) {
+						MemAsprintf(&str, "[%d]", val);
+						data = WJEGet(memb, str, NULL);
+						MemFree(str);
+					}
+					MemAsprintf(&str, "%s[%d]", name, val);
+					if (SchemaValidate(data, document, err, loadcb, freecb,
+						client, str, version)) {
+						num++;
+					}
+					MemFree(str);
+					str = NULL;
+					val++;
+				}
+				if (num == 0) {
+					fail = TRUE;
+					if (err) {
+						err(client, 
+							"%s failed anyOf validation.", 
+							document->name);
+					}
+				}
+			}
+			anyFail = anyFail || fail;
+
 		} else if(!stricmp(memb->name, "items")) {
 			if(document && document->type == WJR_TYPE_ARRAY) {
 				if(memb->type == WJR_TYPE_OBJECT) {
