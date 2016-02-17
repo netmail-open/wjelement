@@ -1,0 +1,22 @@
+# CMake files
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+CTestTestfile.cmake
+cmake_install.cmake
+cmake_uninstall.cmake
+install_manifest.txt
+
+# Output files
+wjelement.pc
+wjecli
+wjeunit
+libxpl.so
+libxpl.so.*
+libwjelement.so
+libwjelement.so.*
+libwjreader.so
+libwjreader.so.*
+libwjwriter.so
+libwjwriter.so.*
