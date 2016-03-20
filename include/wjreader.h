@@ -35,9 +35,29 @@ extern "C"{
 	document is accessed in the order of the document.
 */
 
-typedef struct {
+typedef enum
+{
+	WJR_EXPECTED_ELEMENT,		/* Expected: String, number, null, true, false, { or [. */
+
+	WJR_TOO_DEEP,				/* The document is too deep to continue parsing */
+	WJR_HASH_COMMENT,			/* A # character was encountered, if error is ignored it will be treaded as a comment character */
+	WJR_INVALID_CLOSE,			/* Expected: ',', ']' or '}' */
+
+	WJR_LAST_ERROR
+} WJRError;
+
+typedef struct WJReaderPublic
+{
 	uint32					depth;
 	uint32					maxdepth;
+
+	/*
+		If set the errcb will be called for each error or warning encountered
+		while trying to parse the JSON document. Returning TRUE indicates that
+		parsing should continue if possible. Returning FALSE will cause parsing
+		to fail immediately.
+	*/
+	XplBool					(* errcb)(WJRError error, XplBool fatal, int line, int offset, char *got, struct WJReaderPublic *reader);
 	void					*userdata;
 } WJReaderPublic;
 typedef WJReaderPublic *	WJReader;

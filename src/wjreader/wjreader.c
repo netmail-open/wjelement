@@ -151,7 +151,8 @@
 	avaliable because there is always at least one character between elements.
 */
 
-typedef struct {
+typedef struct
+{
 	WJReaderPublic		pub;
 
 	/* Internal depth, may not match the depth in the public structure		*/
@@ -181,6 +182,10 @@ typedef struct {
 	*/
 	char				punchout;
 
+	/* Position of the read pointer within the whole document				*/
+	int					line;
+	int					offset;
+
 	/*
 		Callback Information
 
@@ -202,7 +207,14 @@ typedef struct {
 #define WJRDocAssert(d)
 #endif
 
-
+static XplBool WJRErr(WJRError error, XplBool fatal, char *got, WJIReader *doc)
+{
+	if (doc && doc->pub.errcb) {
+		return(doc->pub.errcb(error, fatal, doc->line, doc->offset, got, (struct WJReaderPublic *) doc));
+	} else {
+		return(TRUE);
+	}
+}
 
 /*
 	Fill the buffer as much as possible.  The type list that is currently in use
@@ -227,6 +239,7 @@ static int WJRFillBuffer(WJIReader *doc)
 		}
 
 		if (doc->read > doc->write) {
+			/* Nothing left, reset */
 			doc->read = doc->write;
 		}
 
@@ -291,6 +304,49 @@ static int WJRFillBuffer(WJIReader *doc)
 	return(-1);
 }
 
+static char * WJRAdvance(WJIReader *doc, size_t size)
+{
+	int			i;
+
+	if (!doc || !doc->read) {
+		return(NULL);
+	}
+
+	if ((doc->read + size) <= doc->write) {
+		for (i = 0; i < size; i++) {
+			if ('\n' == doc->read[i]) {
+				doc->line++;
+				doc->offset = 1;
+			} else {
+				doc->offset++;
+			}
+		}
+
+		doc->read += size;
+	}
+	return(doc->read);
+}
+
+static void WJRSkipSpace(WJIReader *doc)
+{
+	do {
+		while ((doc->read < doc->write) && isspace(*doc->read)) {
+			WJRAdvance(doc, 1);
+		}
+
+	} while ((doc->read >= doc->write || *doc->read == '\0') && WJRFillBuffer(doc) > 0);
+}
+
+static void WJRSkipAlnum(WJIReader *doc)
+{
+	do {
+		while ((doc->read < doc->write) && isalnum(*doc->read)) {
+			WJRAdvance(doc, 1);
+		}
+
+	} while ((doc->read >= doc->write || *doc->read == '\0') && WJRFillBuffer(doc) > 0);
+}
+
 /*
 	Determine what type the next value is, and position the read pointer so that
 	the value can be parsed.
@@ -306,14 +362,14 @@ static int WJRDown(WJIReader *doc)
 	doc->negative = FALSE;
 
 	if (doc->depth >= doc->pub.maxdepth) {
+		WJRErr(WJR_TOO_DEEP, TRUE, NULL, doc);
+
 		/* The document has gotten too deep.  Refuse to parse any further. */
 		return(-1);
 	}
 
 	for (;;) {
-		do {
-			for (; doc->read < doc->write && isspace(*doc->read); doc->read++);
-		} while ((doc->read >= doc->write || *doc->read == '\0') && WJRFillBuffer(doc) > 0);
+		WJRSkipSpace(doc);
 
 		switch (*doc->read) {
 			case '{':
@@ -353,13 +409,12 @@ static int WJRDown(WJIReader *doc)
 					quote type.
 				*/
 				doc->current[0] = WJR_TYPE_STRING;
-
-				doc->read++;
+				WJRAdvance(doc, 1);
 				break;
 
 			case '-':
 				doc->negative = TRUE;
-				doc->read++;
+				WJRAdvance(doc, 1);
 
 				/* fallthrough */
 
@@ -395,13 +450,27 @@ static int WJRDown(WJIReader *doc)
 
 			case '#':
 				/* Python style comment. Skip until the end of the line */
-				do {
-					for (; doc->read < doc->write && *doc->read != '\n'; doc->read++);
-				} while ((doc->read >= doc->write || *doc->read == '\0') && WJRFillBuffer(doc) > 0);
-				continue;
+				if (WJRErr(WJR_HASH_COMMENT, FALSE, doc->read, doc)) {
+					do {
+						for (; doc->read < doc->write && *doc->read != '\n'; WJRAdvance(doc, 1));
+					} while ((doc->read >= doc->write || *doc->read == '\0') && WJRFillBuffer(doc) > 0);
+					continue;
+				} else {
+					doc->current[0] = WJR_TYPE_UNKNOWN;
+					break;
+				}
+
+			case ']':
+			case '}':
+			case ',':
+				/* Unexpected, but possibly recoverable */
+				WJRErr(WJR_EXPECTED_ELEMENT, FALSE, doc->read, doc);
+				doc->current[0] = WJR_TYPE_UNKNOWN;
+				break;
 
 			default:
 				/* Unknown */
+				WJRErr(WJR_EXPECTED_ELEMENT, TRUE, doc->read, doc);
 				doc->current[0] = WJR_TYPE_UNKNOWN;
 				break;
 		}
@@ -452,6 +521,8 @@ EXPORT WJReader _WJROpenDocument(WJReadCallback callback, void *userdata, char *
 			doc->write					= doc->buffer + 1;
 
 			*doc->read					= '\0';
+			doc->line					= 1;
+			doc->offset					= 1;
 
 			/*
 				Add a psudeo container on the stack that we never return, as a
@@ -703,10 +774,20 @@ static XplBool WJRSkipString(WJReader indoc)
 					/* We have actually reached the end of the string */
 					WJRDocAssert(doc);
 					doc->read[i] = '\0';
-					doc->read += i + 1;
+					WJRAdvance(doc, i + 1);
 					WJRDocAssert(doc);
 
-					for (; doc->read < doc->write && *doc->read && *doc->read != ':' && *doc->read != ',' && *doc->read != ']' && *doc->read != '}'; doc->read++);
+					while (doc->read < doc->write && *doc->read) {
+						switch (*doc->read) {
+							case ':': case ',': case ']': case '}':
+								break;
+
+							default:
+								WJRAdvance(doc, 1);
+								continue;
+						}
+						break;
+					}
 
 					/*
 						This element is complete.  Walk back up the stack one
@@ -752,9 +833,7 @@ EXPORT char * WJRNext(char *parent, size_t maxnamelen, WJReader indoc)
 				WJRDocAssert(doc);
 			}
 
-			do {
-				for (; doc->read < doc->write && isspace(*doc->read); doc->read++);
-			} while ((doc->read >= doc->write || *doc->read == '\0') && WJRFillBuffer(doc) > 0);
+			WJRSkipSpace(doc);
 
 			switch (*doc->current) {
 				case WJR_TYPE_STRING: {
@@ -789,7 +868,7 @@ EXPORT char * WJRNext(char *parent, size_t maxnamelen, WJReader indoc)
 					char		*current = doc->current;
 
 					if (*doc->read == ',') {
-						doc->read++;
+						WJRAdvance(doc, 1);
 
 						/*
 							Insert an item on the stack for the next value.
@@ -890,12 +969,11 @@ EXPORT char * WJRNext(char *parent, size_t maxnamelen, WJReader indoc)
 							*/
 							while (!WJRSkipString(indoc));
 
-							while ((doc->read >= doc->write || *doc->read == '\0') && WJRFillBuffer(doc) > 0) {
-								for (; doc->read < doc->write && isspace(*doc->read); doc->read++);
-							}
+							WJRSkipSpace(doc);
 
 							if (*doc->read == ':') {
-								doc->read++;
+								WJRAdvance(doc, 1);
+
 								/*
 									Now we've found a colon, so the real value
 									is up next.	The call to WJRString() that was
@@ -942,17 +1020,19 @@ EXPORT char * WJRNext(char *parent, size_t maxnamelen, WJReader indoc)
 
 								default:
 									/*
-										Make sure that the consumer knows that the
-										depth was wrong due to a badly formated JSON
-										document.
+										Make sure that the consumer knows that
+										the depth was wrong due to a badly
+										formated JSON document.
 									*/
 									doc->pub.depth++;
+
+									WJRErr(WJR_INVALID_CLOSE, TRUE, doc->read, doc);
 									break;
 							}
 						}
 
 						if (doc->read < doc->write) {
-							doc->read++;
+							WJRAdvance(doc, 1);
 						}
 
 						/* This array or object is now closed */
@@ -970,9 +1050,7 @@ EXPORT char * WJRNext(char *parent, size_t maxnamelen, WJReader indoc)
 							exists so that the consumer knows that the document
 							had trailing garbage.
 						*/
-						do {
-							for (; doc->read < doc->write && isspace(*doc->read); doc->read++);
-						} while ((doc->read >= doc->write || *doc->read == '\0') && WJRFillBuffer(doc) > 0);
+						WJRSkipSpace(doc);
 
 						if (*doc->read && doc->read < doc->write) {
 							doc->pub.depth = -1;
@@ -1038,7 +1116,7 @@ EXPORT char * WJRStringEx(XplBool *complete, size_t *length, WJReader indoc)
 							*/
 							char	*result = doc->read;
 
-							doc->read += i;
+							WJRAdvance(doc, i);
 							if (complete) {
 								*complete = FALSE;
 							}
@@ -1060,7 +1138,7 @@ EXPORT char * WJRStringEx(XplBool *complete, size_t *length, WJReader indoc)
 							WJRDocAssert(doc);
 							doc->read[i] = '\0';
 							WJRDocAssert(doc);
-							doc->read += i + 1;
+							WJRAdvance(doc, i + 1);
 
 							if (doc->current > doc->buffer) {
 								WJRUp(doc);
@@ -1116,7 +1194,7 @@ EXPORT char * WJRStringEx(XplBool *complete, size_t *length, WJReader indoc)
 								WJRDocAssert(doc);
 							}
 
-							doc->read += i;
+							WJRAdvance(doc, i);
 
 							if (complete) {
 								*complete = FALSE;
@@ -1240,9 +1318,9 @@ EXPORT char * WJRStringEx(XplBool *complete, size_t *length, WJReader indoc)
 					WJRDocAssert(doc);
 					doc->read[i] = '\0';
 					WJRDocAssert(doc);
-					doc->read += i + 1;
+					WJRAdvance(doc, i + 1);
 
-					for (; doc->read < doc->write && *doc->read && *doc->read != ':' && *doc->read != ',' && *doc->read != ']' && *doc->read != '}'; doc->read++);
+					for (; doc->read < doc->write && *doc->read && *doc->read != ':' && *doc->read != ',' && *doc->read != ']' && *doc->read != '}'; WJRAdvance(doc, 1));
 
 					/*
 						This element is complete.  Walk back up the stack one
@@ -1373,13 +1451,11 @@ static void WJRNumber(void *value, WJRNumberType type, WJReader indoc)
 		}
 
 		if (end) {
-			doc->read = end;
+			WJRAdvance(doc, end - doc->read);
 		}
 
 		/* Skip past any whitespace */
-		do {
-			for (; doc->read < doc->write && isspace(*doc->read); doc->read++);
-		} while ((doc->read >= doc->write || *doc->read == '\0') && WJRFillBuffer(doc) > 0);
+		WJRSkipSpace(doc);
 	}
 
 	/* This element is complete.  Walk back up the stack one level. */
@@ -1477,14 +1553,10 @@ EXPORT XplBool WJRBoolean(WJReader indoc)
 			Skip past any alpha numeric characters, which are likely part of the
 			value.
 		*/
-		do {
-			for (; doc->read < doc->write && isalnum(*doc->read); doc->read++);
-		} while ((doc->read >= doc->write || *doc->read == '\0') && WJRFillBuffer(doc) > 0);
+		WJRSkipAlnum(doc);
 
 		/* Skip past any whitespace */
-		do {
-			for (; doc->read < doc->write && isspace(*doc->read); doc->read++);
-		} while ((doc->read >= doc->write || *doc->read == '\0') && WJRFillBuffer(doc) > 0);
+		WJRSkipSpace(doc);
 	}
 
 	/* This element is complete.  Walk back up the stack one level. */

@@ -162,6 +162,52 @@ int runcmd(WJElement *doc, WJElement *current, char *line)
 	}
 }
 
+static XplBool errcb(WJRError error, XplBool fatal, int line, int offset, char *got, struct WJReaderPublic *reader)
+{
+	switch (error) {
+		case WJR_HASH_COMMENT:
+			/* Ignore; treat as a comment */
+			return(TRUE);
+
+		default:
+			break;
+	}
+
+	fprintf(stderr, "Parse %s on line %d, char %d:  ", fatal ? "error" : "warning", line, offset);
+
+	switch (error) {
+		case WJR_EXPECTED_ELEMENT:
+			if (got && *got) {
+				fprintf(stderr, "Unexpected character '%c' found ", *got);
+			} else {
+				fprintf(stderr, "Document terminated ");
+			}
+
+			fprintf(stderr, "while looking for a string, number, null, true, false, '{' or '['.\n");
+			break;
+
+		case WJR_TOO_DEEP:
+			fprintf(stderr, "Document exceeded maximum parsable depth\n");
+			break;
+
+		case WJR_INVALID_CLOSE:
+			if (got && *got) {
+				fprintf(stderr, "Unexpected character '%c' found ", *got);
+			} else {
+				fprintf(stderr, "Document terminated ");
+			}
+
+			fprintf(stderr, "while looking for a ',', ']' or '}'\n");
+			break;
+
+		default:
+			fprintf(stderr, "Unknown error: %d\n", error);
+			break;
+	}
+
+	return(TRUE);
+}
+
 int main(int argc, char **argv)
 {
 	FILE		*in			= NULL;
@@ -213,6 +259,8 @@ int main(int argc, char **argv)
 			rewind(in);
 
 			if ((reader = WJROpenFILEDocument(in, NULL, 0))) {
+				reader->errcb = errcb;
+
 				doc = WJEOpenDocument(reader, NULL, NULL, NULL);
 				WJRCloseDocument(reader);
 
