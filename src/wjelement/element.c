@@ -792,5 +792,5 @@ EXPORT char * WJEWriteMEM(WJElement document, XplBool pretty, size_t maxlength)
 		WJEWriteDocument(document, memWriter, NULL);
 		WJWCloseDocument(memWriter);
 	}
-	return MemRealloc(data.buffer, strlen(data.buffer));
+	return MemRealloc(data.buffer, strlen(data.buffer) + 1);
 }
