@@ -54,7 +54,7 @@ void usage(char *arg0)
 	}
 }
 
-char * nextField(char *value, char **end)
+char * nextfield(char *value, char **end)
 {
 	char		*d, *s;
 
@@ -129,7 +129,7 @@ int runcmd(WJElement *doc, WJElement *current, char *line)
 	char			*args	= NULL;
 	int				i;
 
-	// cmd = nextField(line, &args);
+	// cmd = nextfield(line, &args);
 
 	/* Look for a command using the letter, which does NOT require a space */
 	for (i = 0; (command = &WJECLIcmds[i]) && command->name; i++) {
@@ -141,7 +141,7 @@ int runcmd(WJElement *doc, WJElement *current, char *line)
 
 	/* Look for a full command */
 	if (!command || !command->name) {
-		cmd = nextField(line, &args);
+		cmd = nextfield(line, &args);
 
 		for (i = 0; (command = &WJECLIcmds[i]) && command->name; i++) {
 			if (!stricmp(cmd, command->name)) {

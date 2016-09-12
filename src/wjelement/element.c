@@ -16,6 +16,7 @@
 
 
 #include "element.h"
+#include <time.h>
 
 void WJEChanged(WJElement element)
 {
@@ -402,6 +403,68 @@ EXPORT WJElement _WJEOpenDocument(WJReader reader, char *where, WJELoadCB loadcb
 	return(element);
 }
 
+EXPORT char * _WJEToString(WJElement document, XplBool pretty, const char *file, const int line)
+{
+	WJWriter		writer;
+	char			*mem	= NULL;
+
+	if ((writer = WJWOpenMemDocument(pretty, &mem))) {
+		WJEWriteDocument(document, writer, NULL);
+		WJWCloseDocument(writer);
+	}
+	if (mem) {
+		MemUpdateOwner(mem, file, line);
+	}
+	return(mem);
+}
+
+EXPORT WJElement WJEFromFile(const char *path)
+{
+	WJElement	e	= NULL;
+	FILE		*f;
+	WJReader	reader;
+
+	if (!path) {
+		errno = EINVAL;
+		return(NULL);
+	}
+
+	if ((f = fopen(path, "rb"))) {
+		if ((reader = WJROpenFILEDocument(f, NULL, 0))) {
+			e = WJEOpenDocument(reader, NULL, NULL, NULL);
+			WJRCloseDocument(reader);
+		}
+
+		fclose(f);
+	}
+
+	return(e);
+}
+
+EXPORT XplBool WJEToFile(WJElement document, XplBool pretty, const char *path)
+{
+	FILE			*f;
+	WJWriter		writer;
+	XplBool			ret	= FALSE;
+
+	if (!document || !path) {
+		errno = EINVAL;
+		return(FALSE);
+	}
+
+	if ((f = fopen(path, "wb"))) {
+		if ((writer = WJWOpenFILEDocument(pretty, f))) {
+			ret = WJEWriteDocument(document, writer, NULL);
+
+			WJWCloseDocument(writer);
+		}
+
+		fclose(f);
+	}
+
+	return(ret);
+}
+
 static WJElement _WJECopy(_WJElement *parent, WJElement original, WJECopyCB copycb, void *data, const char *file, const int line)
 {
 	_WJElement	*l = NULL;
@@ -521,6 +584,10 @@ EXPORT XplBool _WJEWriteDocument(WJElement document, WJWriter writer, char *name
 	}
 
 	if (document) {
+		if (document->writecb) {
+			return(document->writecb(document, writer, name));
+		}
+
 		switch (current->pub.type) {
 			default:
 			case WJR_TYPE_UNKNOWN:
@@ -612,6 +679,9 @@ EXPORT XplBool WJECloseDocument(WJElement document)
 		if (document->parent->child == document) {
 			document->parent->child = document->next;
 		}
+		if (document->parent->last == document) {
+			document->parent->last = document->prev;
+		}
 		document->parent->count--;
 	}
 
@@ -658,6 +728,26 @@ EXPORT void WJEWriteFILE(WJElement document, FILE* fd)
 		WJWCloseDocument(dumpWriter);
 	}
 	fprintf(fd, "\n");
+}
+
+EXPORT void WJEDumpFile(WJElement document)
+{
+	WJWriter		dumpWriter;
+	FILE			*file;
+	char			path[1024];
+
+	strprintf(path, sizeof(path), NULL, "%08lx.json", (long) time(NULL));
+
+	if ((file = fopen(path, "wb"))) {
+		if ((dumpWriter = WJWOpenFILEDocument(TRUE, file))) {
+			WJEWriteDocument(document, dumpWriter, NULL);
+			WJWCloseDocument(dumpWriter);
+		}
+		fprintf(file, "\n");
+		fclose(file);
+
+		printf("Dumped JSON document to %s\n", path);
+	}
 }
 
 typedef struct _MemWriterData {

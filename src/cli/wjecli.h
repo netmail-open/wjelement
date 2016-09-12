@@ -33,6 +33,7 @@ typedef struct
 typedef struct
 {
 	XplBool			pretty;
+	uint32			flags;
 	int				base;
 
 	char			*filename;
@@ -41,7 +42,7 @@ typedef struct
 } WJECLIGlobals;
 
 /* wjecli.c */
-char * nextField(char *value, char **end);
+char * nextfield(char *value, char **end);
 int runcmd(WJElement *doc, WJElement *current, char *line);
 void usage(char *arg0);
 
