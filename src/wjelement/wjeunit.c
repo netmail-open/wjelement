@@ -34,6 +34,7 @@ char *json = \
 "{																			\n"
 "	'one':1, 'two':2, 'three':3,											\n"
 "	'digits':[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ],								\n"
+"	'numbers':[ 0, 100, 0x200, 0x500 ],										\n"
 "	'bools':[ true, false ],												\n"
 "																			\n"
 "	'a':{																	\n"
@@ -475,6 +476,16 @@ static int ConditionsTest(WJElement doc)
 
 	if (!WJEGet(doc, "sender.address == 'foo*'", NULL))		return(__LINE__);
 
+
+	if (!WJEGet(doc, "numbers[1] == 100", NULL))			return(__LINE__);
+	if ( WJEGet(doc, "numbers[1] != 100", NULL))			return(__LINE__);
+
+	if (!WJEGet(doc, "numbers[1] == 0x64", NULL))			return(__LINE__);
+	if ( WJEGet(doc, "numbers[1] != 0x64", NULL))			return(__LINE__);
+
+	if (!WJEGet(doc, "numbers[2] == 0x200", NULL))			return(__LINE__);
+	if ( WJEGet(doc, "numbers[2] != 0x200", NULL))			return(__LINE__);
+
 	return(0);
 }
 
@@ -530,9 +541,11 @@ static int GetDefaultTest(WJElement doc)
 	if (-1.0 != WJEDouble(doc, "absent",	WJE_GET, -1.0)) return(__LINE__);
 	if (0.0 != WJEDouble(doc, "absent",		WJE_GET, 0.0))	return(__LINE__);
 	if (1.0 != WJEDouble(doc, "absent",		WJE_GET, 1.0))	return(__LINE__);
-	if (-1.0 != WJEDouble(doc, "empty",		WJE_GET, -1.0)) return(__LINE__);
+
+	/* A 'null' object is returned as 0 */
+	if (0.0 != WJEDouble(doc, "empty",		WJE_GET, -1.0)) return(__LINE__);
 	if (0.0 != WJEDouble(doc, "empty",		WJE_GET, 0.0))	return(__LINE__);
-	if (1.0 != WJEDouble(doc, "empty",		WJE_GET, 1.0))	return(__LINE__);
+	if (0.0 != WJEDouble(doc, "empty",		WJE_GET, 1.0))	return(__LINE__);
 
 	/* WJEBool */
 	if (1 != WJEBool(doc, "absent",			WJE_GET, 1))	return(__LINE__);
@@ -676,7 +689,23 @@ int main(int argc, char **argv)
 			fprintf(stderr, "Ignoring unknown test \"%s\"\n", argv[a]);
 		} else {
 			/* Reopen the JSON for each test in case a test modified it */
-			if (!(doc = _WJEParse(json, '\''))) {
+			if ((j = MemStrdup(json))) {
+				/* Correct the quotes */
+				for (x = j; *x; x++) {
+					if (*x == '\'') *x = '"';
+				}
+
+				// printf("JSON:\n%s\n", j);
+				if ((reader = WJROpenMemDocument(j, NULL, 0))) {
+					doc = WJEOpenDocument(reader, NULL, NULL, NULL);
+
+					WJRCloseDocument(reader);
+				}
+
+				MemRelease(&j);
+			}
+
+			if (!doc) {
 				fprintf(stderr, "error: Could not parse JSON document\n");
 				MemoryManagerClose("wjeunit");
 				return(1);
@@ -696,3 +725,4 @@ int main(int argc, char **argv)
 	MemoryManagerClose("wjeunit");
 	return(r);
 }
+

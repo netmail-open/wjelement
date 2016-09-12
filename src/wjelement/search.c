@@ -55,6 +55,12 @@ static long _WJEIndex(WJElement e)
 {
 	long		r = 0;
 
+	/* Is this the last element? If so don't bother counting */
+	if (e && !e->next && e->parent && e->parent->count) {
+		return(e->parent->count - 1);
+	}
+
+	/* Find this item's index */
 	while (e && e->prev) {
 		e = e->prev;
 		r++;
@@ -92,9 +98,8 @@ static int WJEMatchExact(WJElement root, WJElement parent, WJElement e, WJEActio
 		}
 	} else {
 		/* Verify that the name matches exactly */
-
 		if (e->name && strlen(e->name) == len &&
-			name && !strnicmp(e->name, name, len)
+			name && !wstrncmp(e->name, name, len, action)
 		) {
 			return(0);
 		} else {
@@ -205,6 +210,11 @@ static int WJEMatchSubscript(WJElement root, WJElement parent, WJElement e, WJEA
 	char		*x, *y, *tmp;
 	size_t		l;
 	long		i, r;
+
+	/* Shortcut */
+	if (name && '$' == *name && e && e->next) {
+		return(- __LINE__);
+	}
 
 	/* Find the index and the wrapped index of this element */
 	if (e) {
@@ -319,44 +329,84 @@ static int WJEMatchSubscript(WJElement root, WJElement parent, WJElement e, WJEA
 				break;
 
 			default:
-				/*
-					The value wasn't a quoted string, so it must be an offset,
-					or a range.
-				*/
-				a = b = strtol(p, &tmp, 0); b++;
-				if (tmp == p) {
-					/* There where no valid numbers, this is not a valid offset */
-					return(- __LINE__);
-				}
+				/* The value may be an unquoted string, an offset or a range.  */
+				if (isalpha(*p)) {
+					/*
+						Unquoted string
 
-				p = skipspace(tmp);
-				if (*p == ':' && (p = skipspace(p + 1))) {
-					b = strtol(p, &tmp, 0);
+						Compare a character at a time, but an unquoted string
+						may not have escaped characters and is case sensitive.
+					*/
+					if (e && e->name) {
+						y = e->name;
+					} else {
+						y = "";
+					}
+
+					for (x = p; ; x++, y++) {
+						if (x >= (name + len)) {
+							if (!*y) {
+								/* Match */
+								return(0);
+							}
+							break;
+						}
+
+						if (!*y || !*x || *x != *y) {
+							break;
+						}
+					}
+
+					if (!e) {
+						/*
+							Any name is valid in an unquoted string, so allow an
+							element to be created.
+						*/
+						return(0);
+					}
+
+					/* No match */
+					p = NULL;
+					break;
+
+				} else {
+					a = b = strtol(p, &tmp, 0); b++;
 					if (tmp == p) {
-						/* There where no valid numbers, bogus */
+						/* There where no valid numbers, this is not a valid offset */
 						return(- __LINE__);
 					}
 
 					p = skipspace(tmp);
-				}
+					if (*p == ':' && (p = skipspace(p + 1))) {
+						b = strtol(p, &tmp, 0);
+						if (tmp == p) {
+							/* There where no valid numbers, bogus */
+							return(- __LINE__);
+						}
 
-				/* The offset or range is ready to check */
-				if ((i >= a && i < b) || (r >= a && r < b)) {
-					if (e) return(0);
+						p = skipspace(tmp);
+					}
 
-					/*
-						The case below handles $, which is used as a special
-						offset to append to an array.  The offset here is
-						referencing the same thing, so fallthrough.
-					*/
-				} else {
-					/* No match */
-					break;
+					/* The offset or range is ready to check */
+					if ((i >= a && i < b) || (r >= a && r < b)) {
+						if (e) return(0);
+
+						/*
+							The case below handles $, which is used as a special
+							offset to append to an array.  The offset here is
+							referencing the same thing, so fallthrough.
+						*/
+					} else {
+						/* No match */
+						break;
+					}
 				}
 
 			case '$':
 				if (e) {
-					if (action == WJE_GET && parent->type == WJR_TYPE_ARRAY && -1 == r) {
+					if ((action & WJE_ACTION_MASK) == WJE_GET &&
+						parent->type == WJR_TYPE_ARRAY && -1 == r
+					) {
 						return(0);
 					}
 
@@ -571,6 +621,20 @@ static char * WJENextName(char *path, size_t *len, char **end, WJEMatchCB *match
 					return(NULL);
 
 				default:
+					/*
+						Allow an unquoted name as long as the name starts with
+						an alphabetic character.
+					*/
+					if (isalpha(*p)) {
+						for (p++; *p; p++) {
+							if (']' == *p) {
+								break;
+							}
+						}
+
+						*specific = TRUE;
+						break;
+					}
 #ifdef DEBUG_WJE
 					fprintf(stderr,
 						"WJElement: Invalid syntax at byte %ld in JSON path: %s\n",
@@ -652,7 +716,7 @@ static int WJECheckCondition(WJElement e, char **condition, WJEAction action)
 			return(0);
 	}
 
-	switch (action) {
+	switch ((action & WJE_ACTION_MASK)) {
 		case WJE_NEW:
 		case WJE_SET:
 			/* Conditions do not behave correctly with WJE_NEW or WJE_SET */
@@ -695,7 +759,7 @@ static int WJECheckCondition(WJElement e, char **condition, WJEAction action)
 		) {
 			if ('\'' == *value) {
 				r = stripatn(s, v, len);
-			} else if (!(r = strnicmp(s, v, len))) {
+			} else if (!(r = wstrncmp(s, v, len, action))) {
 				r = strlen(s) - len;
 			}
 		}
@@ -751,7 +815,7 @@ WJElement WJESearch(WJElement container, const char *path, WJEAction *action, WJ
 	char		*tmp;
 	int			depth;
 
-	if (!container && (*action == WJE_NEW || *action == WJE_SET)) {
+	if (!container && ((*action & WJE_ACTION_MASK) == WJE_NEW || (*action & WJE_ACTION_MASK) == WJE_SET)) {
 		if ((container = WJENew(NULL, NULL, 0, file, line))) {
 			MemUpdateOwner(container, file, line);
 			container->type = WJR_TYPE_UNKNOWN;
@@ -784,7 +848,7 @@ WJElement WJESearch(WJElement container, const char *path, WJEAction *action, WJ
 
 	e = last;
 	for (;;) {
-		if (match && !match->child && (*action == WJE_NEW || *action == WJE_SET)) {
+		if (match && !match->child && ((*action & WJE_ACTION_MASK) == WJE_NEW || (*action & WJE_ACTION_MASK) == WJE_SET)) {
 			/* Insert additional child elements if needed to satisfy the path */
 			e		= NULL;
 			parent	= match;
@@ -832,16 +896,17 @@ WJElement WJESearch(WJElement container, const char *path, WJEAction *action, WJ
 			}
 		}
 
-		if (n && *action == WJE_NEW && (!end || !*end)) {
+		if (n && (*action & WJE_ACTION_MASK) == WJE_NEW && (!end || !*end)) {
 			/*
 				n matches the path completely, meaning that a new element can't
 				be created.  The match must be returned, but the caller needs to
 				know that it is not a new element.
 			*/
-			*action = WJE_GET;
+			*action &= ~WJE_ACTION_MASK;
+			*action |= WJE_GET;
 		}
 
-		if (!n && (*action == WJE_NEW || *action == WJE_SET) &&
+		if (!n && ((*action & WJE_ACTION_MASK) == WJE_NEW || (*action & WJE_ACTION_MASK) == WJE_SET) &&
 			!cb(container, parent, NULL, *action, name, len)
 		) {
 			/*
@@ -914,12 +979,12 @@ EXPORT WJElement _WJEChild(WJElement container, char *name, WJEAction action, co
 	if (!container || !name) return(NULL);
 
 	for (e = container->child; e; e = e->next) {
-		if (e->name && !strcmp(e->name, name)) {
+		if (e->name && !wstrcmp(e->name, name, action)) {
 			break;
 		}
 	}
 
-	switch (action) {
+	switch ((action & WJE_ACTION_MASK)) {
 		case WJE_GET:
 		case WJE_PUT:
 			return(e);
@@ -946,4 +1011,15 @@ EXPORT WJElement _WJEChild(WJElement container, char *name, WJEAction action, co
 	}
 	return(e);
 }
+
+// TODO Implement a flag to cause selectors to be matched as direct child names
+//		instead of selectors and then retire WJEGet() and WJEChild().
+//
+//		We can remain backwards compatable with macros or wrapper functions that
+//		call this. I want to discourage the use of those functions though.
+EXPORT WJElement _WJEAny(WJElement container, char *path, WJEAction action, WJElement last, const char *file, const int line)
+{
+	return(WJESearch(container, path, &action, last, file, line));
+}
+
 
