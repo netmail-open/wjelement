@@ -42,6 +42,19 @@ typedef struct {
 	*/
 	int					base;
 
+	/*
+		If set to TRUE (enabled by default) then any character that can not be
+		encoded as a UTF8 character will be written as \xXX where XX are a hex
+		representation of the value.
+
+		This can be disabled since it is non-standard JSON and will cause parse
+		errors with some parsers.
+
+		If disabled then any invalid characters will not be written to the
+		document.
+	*/
+	XplBool				escapeInvalidChars;
+
 	struct {
 		void			*data;
 		WJWriteCallback	cb;
@@ -114,6 +127,12 @@ EXPORT XplBool			WJWRawValue(char *name, char *value, XplBool done, WJWriter doc
 */
 EXPORT size_t			WJWFileCallback(char *buffer, size_t length, void *data);
 #define WJWOpenFILEDocument(pretty, file) _WJWOpenDocument((pretty), WJWFileCallback, (file), 0)
+
+/*
+	An alternative method of opening a JSON document for writing, which will
+	provide a proper callback for allocating and writing to a memory allocation.
+*/
+EXPORT WJWriter			WJWOpenMemDocument(XplBool pretty, char **mem);
 
 #ifdef __cplusplus
 }
