@@ -852,20 +852,18 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				if(fail && err) {
 					err(client, "required item '%s' not found.", name);
 				}
-			} else if(version >= 4 && memb->type == WJR_TYPE_ARRAY) {
+			} else if(memb->type == WJR_TYPE_ARRAY) {
 				/* draft 4;  "required": [ "prop1", "prop2" ] */
 				arr = NULL;
 				while((arr = WJEGet(memb, "[]", arr))) {
-					MemAsprintf(&str, "[\"%s\"]",
-								WJEString(arr, NULL, WJE_GET, ""));
-					if(document && !WJEGet(document, str, NULL)) {
+					str = WJEString(arr, NULL, WJE_GET, "");
+					if(document && !WJEChild(document, str, WJE_GET)) {
 						fail = TRUE;
 						if(fail && err) {
 							err(client, "%s: required member '%s' not found.",
 								name, str);
 						}
 					}
-					MemRelease(&str);
 				}
 			}
 			anyFail = anyFail || fail;
