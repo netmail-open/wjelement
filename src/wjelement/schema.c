@@ -775,7 +775,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 										   client, str, version)) {
 							fail = TRUE;
 							if(err) {
-								err(client, "%s failed vaidation.", str);
+								err(client, "%s failed validation.", str);
 							}
 						}
 						MemFree(str);
@@ -798,7 +798,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 										   client, str, version)) {
 							fail = TRUE;
 							if(err) {
-								err(client, "%s failed tuple type vaidation.",
+								err(client, "%s failed tuple type validation.",
 									str);
 							}
 						}
@@ -829,7 +829,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 							fail = TRUE;
 							if(err) {
 								err(client,
-									"additional item %s failed vaidation.",
+									"additional item %s failed validation.",
 									str);
 							}
 						}
