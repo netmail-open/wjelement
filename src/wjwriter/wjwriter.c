@@ -19,7 +19,7 @@
 #include <stdlib.h>
 
 #include <xpl.h>
-#include <hulautil.h>
+#include <nmutil.h>
 #include <memmgr.h>
 
 #include <wjwriter.h>

@@ -16,15 +16,15 @@
 
 
 /****************************************************************************
- * stub replacement for Messaging Architects' internal Hula utility library
+ * stub replacement for Messaging Architects' internal netmail utility library
  ****************************************************************************/
 #include "xpl.h"
 #include <stdio.h>
 #include <errno.h>
 
 
-#ifndef HULAUTIL_H
-#define HULAUTIL_H
+#ifndef NMUTIL_H
+#define NMUTIL_H
 
 
 #endif
