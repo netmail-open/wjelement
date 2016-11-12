@@ -16,7 +16,7 @@
 
 
 #include <xpl.h>
-#include <hulautil.h>
+#include <nmutil.h>
 #include <memmgr.h>
 
 #include <wjreader.h>
@@ -587,7 +587,6 @@ static int GetDefaultTest(WJElement doc)
 /* Test the F functions */
 static int FormatStrTest(WJElement doc)
 {
-	char	*v;
 	int		i;
 	char	*longstr;
 

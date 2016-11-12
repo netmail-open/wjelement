@@ -165,9 +165,11 @@ typedef WJElementPublic *			WJElement;
 	C source file without having to escape double quote characters. Example:
 		doc = _WJEParse("{ 'foo': true, 'bar': 'yup' }", '\'');
 */
-EXPORT WJElement	_WJEParse(const char *json, char quote);
-#define				WJEParse(j) _WJEParse((j), '"')
-#define				WJEFromString(j) _WJEParse((j), '"')
+#define				WJEFromString(j)		__WJEFromString((j), '"', __FILE__, __LINE__)
+#define				WJEParse(j)				__WJEFromString((j), '"', __FILE__, __LINE__)
+#define				_WJEFromString(j, q)	__WJEFromString((j), (q), __FILE__, __LINE__)
+#define				_WJEParse(j, q)			__WJEFromString((j), (q), __FILE__, __LINE__)
+EXPORT WJElement	__WJEFromString(const char *json, char quote, const char *file, const int line);
 
 /*
 	Allocate a string and write the JSON source for the provided WJElement to
@@ -198,13 +200,15 @@ EXPORT XplBool		_WJEWriteDocument(WJElement document, WJWriter writer, char *nam
 #define				WJEWriteDocument(d, w, n) _WJEWriteDocument((d), (w), (n), NULL, NULL, NULL)
 
 /* Write a WJElement object to the provided FILE* */
-EXPORT void WJEWriteFILE(WJElement document, FILE* fd);
+EXPORT void			WJEWriteFILE(WJElement document, FILE* fd);
 
 /* Read a WJElement object from the provided FILE* */
-EXPORT WJElement WJEReadFILE(FILE* fd);
+EXPORT WJElement	WJEReadFILE(FILE* fd);
 
 /* Destroy a WJElement object */
-EXPORT XplBool		WJECloseDocument(WJElement document);
+EXPORT XplBool		_WJECloseDocument(WJElement document, const char *file, const int line);
+#define				WJECloseDocument(d) _WJECloseDocument((d), __FILE__, __LINE__)
+
 /*
 	WJECloseDocument is also used to delete/remove an item from a parent
 	document:

@@ -737,7 +737,6 @@ EXPORT WJElement WJEGetF(WJElement container, WJElement last, const char *pathf,
 {
 	WJElement	ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -761,7 +760,6 @@ EXPORT XplBool WJEBoolF(WJElement container, WJEAction action, WJElement *last, 
 {
 	XplBool		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -785,7 +783,6 @@ EXPORT char * WJEStringF(WJElement container, WJEAction action, WJElement *last,
 {
 	char *		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -809,7 +806,6 @@ EXPORT char * WJEStringNF(WJElement container, WJEAction action, WJElement *last
 {
 	char *		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -833,7 +829,6 @@ EXPORT WJElement WJEObjectF(WJElement container, WJEAction action, WJElement *la
 {
 	WJElement	ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -857,7 +852,6 @@ EXPORT WJElement WJEArrayF(WJElement container, WJEAction action, WJElement *las
 {
 	WJElement	ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -881,7 +875,6 @@ EXPORT WJElement WJENullF(WJElement container, WJEAction action, WJElement *last
 {
 	WJElement	ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -905,7 +898,6 @@ EXPORT int32 WJEInt32F(WJElement container, WJEAction action, WJElement *last, i
 {
 	int32		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -929,7 +921,6 @@ EXPORT uint32 WJEUInt32F(WJElement container, WJEAction action, WJElement *last,
 {
 	uint32		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -953,7 +944,6 @@ EXPORT int64 WJEInt64F(WJElement container, WJEAction action, WJElement *last, i
 {
 	int64		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -977,7 +967,6 @@ EXPORT uint64 WJEUInt64F(WJElement container, WJEAction action, WJElement *last,
 {
 	uint64		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -1001,7 +990,6 @@ EXPORT double WJEDoubleF(WJElement container, WJEAction action, WJElement *last,
 {
 	double		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 

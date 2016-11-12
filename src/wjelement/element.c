@@ -14,7 +14,6 @@
     along with WJElement.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include "element.h"
 #include <time.h>
 
@@ -63,13 +62,12 @@ _WJElement * _WJENew(_WJElement *parent, char *name, size_t len, const char *fil
 			if (!parent->pub.child) {
 				parent->pub.child = (WJElement) result;
 			} else {
-				/* Find the last child so it can be added at the end */
-				for (prev = parent->pub.child; prev && prev->next; prev = prev->next);
-
+				prev = parent->pub.last;
 				prev->next = (WJElement) result;
 				result->pub.prev = prev;
 			}
 
+			parent->pub.last = (WJElement) result;
 			parent->pub.count++;
 		}
 
@@ -115,6 +113,9 @@ EXPORT XplBool _WJEDetach(WJElement document, const char *file, const int line)
 		if (document->parent->child == document) {
 			document->parent->child = document->next;
 		}
+		if (document->parent->last == document) {
+			document->parent->last = document->prev;
+		}
 		document->parent->count--;
 		document->parent = NULL;
 	}
@@ -141,6 +142,10 @@ EXPORT XplBool WJEAttach(WJElement container, WJElement document)
 		return(FALSE);
 	}
 
+	if (document->parent == container) {
+		return(TRUE);
+	}
+
 	if (document->name) {
 		while ((prev = WJEChild(container, document->name, WJE_GET))) {
 			WJEDetach(prev);
@@ -155,12 +160,11 @@ EXPORT XplBool WJEAttach(WJElement container, WJElement document)
 	if (!container->child) {
 		container->child = document;
 	} else {
-		/* Find the last child so it can be added at the end */
-		for (prev = container->child; prev && prev->next; prev = prev->next);
-
+		prev = container->last;
 		prev->next = document;
 		document->prev = prev;
 	}
+	container->last = document;
 	container->count++;
 	WJEChanged(container);
 
@@ -307,6 +311,17 @@ static WJElement _WJELoad(_WJElement *parent, WJReader reader, char *where, WJEL
 	return((WJElement) l);
 }
 
+EXPORT WJElement _WJEOpenDocument(WJReader reader, char *where, WJELoadCB loadcb, void *data, const char *file, const int line)
+{
+	WJElement	element;
+
+	if ((element = _WJELoad(NULL, reader, where, loadcb, data, file, line))) {
+		MemUpdateOwner(element, file, line);
+	}
+
+	return(element);
+}
+
 typedef struct WJEMemArgs
 {
 	char		*json;
@@ -315,7 +330,7 @@ typedef struct WJEMemArgs
 	size_t		len;
 } WJEMemArgs;
 
-EXPORT size_t WJEMemCallback(char *buffer, size_t length, size_t seen, void *userdata)
+static size_t WJEMemCallback(char *buffer, size_t length, size_t seen, void *userdata)
 {
 	WJEMemArgs	*args	= (WJEMemArgs *) userdata;
 	char		*json;
@@ -371,7 +386,7 @@ EXPORT size_t WJEMemCallback(char *buffer, size_t length, size_t seen, void *use
 	and allows parsing documents with a non standard quote char for the sake of
 	embedding documents directly in C code.
 */
-EXPORT WJElement _WJEParse(const char *json, char quote)
+EXPORT WJElement __WJEFromString(const char *json, char quote, const char *file, const int line)
 {
 	WJElement		doc;
 	WJEMemArgs		args;
@@ -385,22 +400,11 @@ EXPORT WJElement _WJEParse(const char *json, char quote)
 	}
 
 	if (json && (reader = WJROpenDocument(WJEMemCallback, &args, NULL, 0))) {
-		doc = WJEOpenDocument(reader, NULL, NULL, NULL);
+		doc = _WJEOpenDocument(reader, NULL, NULL, NULL, file, line);
 		WJRCloseDocument(reader);
 	}
 
 	return(doc);
-}
-
-EXPORT WJElement _WJEOpenDocument(WJReader reader, char *where, WJELoadCB loadcb, void *data, const char *file, const int line)
-{
-	WJElement	element;
-
-	if ((element = _WJELoad(NULL, reader, where, loadcb, data, file, line))) {
-		MemUpdateOwner(element, file, line);
-	}
-
-	return(element);
 }
 
 EXPORT char * _WJEToString(WJElement document, XplBool pretty, const char *file, const int line)
@@ -656,7 +660,7 @@ EXPORT XplBool _WJEWriteDocument(WJElement document, WJWriter writer, char *name
 	return(TRUE);
 }
 
-EXPORT XplBool WJECloseDocument(WJElement document)
+EXPORT XplBool _WJECloseDocument(WJElement document, const char *file, const int line)
 {
 	_WJElement	*current = (_WJElement *) document;
 	WJElement	child;
@@ -697,26 +701,26 @@ EXPORT XplBool WJECloseDocument(WJElement document)
 	/* Destroy all children */
 	while ((child = document->child)) {
 		WJEDetach(child);
-		WJECloseDocument(child);
+		_WJECloseDocument(child, file, line);
 	}
 
 	if (current->pub.type == WJR_TYPE_STRING) {
-		MemFree(current->value.string);
+		MemFreeEx(current->value.string, file, line);
 		current->pub.length = 0;
 	}
 
 	if (document->name && current->_name != document->name) {
-		MemRelease(&document->name);
+		MemReleaseEx(&document->name, file, line);
 	}
 
-	MemFree(current);
+	MemFreeEx(current, file, line);
 
 	return(TRUE);
 }
 
 EXPORT void WJEDump(WJElement document)
 {
-    WJEWriteFILE(document, stdout);
+	WJEWriteFILE(document, stdout);
 }
 
 EXPORT void WJEWriteFILE(WJElement document, FILE* fd)
@@ -728,6 +732,7 @@ EXPORT void WJEWriteFILE(WJElement document, FILE* fd)
 		WJWCloseDocument(dumpWriter);
 	}
 	fprintf(fd, "\n");
+	fflush(fd);
 }
 
 EXPORT void WJEDumpFile(WJElement document)
@@ -750,47 +755,26 @@ EXPORT void WJEDumpFile(WJElement document)
 	}
 }
 
-typedef struct _MemWriterData {
-	size_t maxlength;
-	size_t length;
-	char *buffer;
-} _MemWriterData;
-static size_t MemWriteCB(char *data, size_t size, void *writedata) {
-	size_t write;
-	_MemWriterData *w = (_MemWriterData *)writedata;
-	if(w->maxlength) {
-		write = w->maxlength - strlen(w->buffer) - 1;
-	} else {
-		if(size > w->length - strlen(w->buffer)) {
-			w->length += 4096;
-			w->buffer = MemReallocWait(w->buffer, w->length);
-		}
-		write = size;
-	}
-	if(size < write) {
-		write = size;
-	}
-	if(w->buffer) {
-		strncat(w->buffer, data, write);
-	}
-	return size;
-}
-
-EXPORT char * WJEWriteMEM(WJElement document, XplBool pretty, size_t maxlength)
+static size_t fileReaderCB( char *data, size_t length, size_t seen, void *client )
 {
-	WJWriter memWriter;
-	_MemWriterData data;
-
-	data.length = 0;
-	data.maxlength = maxlength;
-	data.buffer = MemMalloc(maxlength);
-	if(data.buffer) {
-		*data.buffer = '\0';
+	DebugAssert(length);
+	DebugAssert(data);
+	if(!data) {
+		return 0;
 	}
-
-	if ((memWriter = _WJWOpenDocument(pretty, MemWriteCB, &data, maxlength))) {
-		WJEWriteDocument(document, memWriter, NULL);
-		WJWCloseDocument(memWriter);
-	}
-	return MemRealloc(data.buffer, strlen(data.buffer) + 1);
+	return fread(data, 1, length, client);
 }
+
+EXPORT WJElement WJEReadFILE(FILE* fd)
+{
+	WJReader		reader;
+	WJElement		obj = NULL;
+
+	if ((reader = WJROpenDocument(fileReaderCB, fd, NULL, 0))) {
+		obj = WJEOpenDocument(reader, NULL, NULL, NULL);
+		WJRCloseDocument(reader);
+	}
+	return obj;
+}
+
+
