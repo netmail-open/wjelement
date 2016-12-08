@@ -554,6 +554,7 @@ EXPORT size_t WJRFileCallback(char *buffer, size_t length, size_t seen, void *da
 EXPORT size_t WJRMemCallback(char *buffer, size_t length, size_t seen, void *userdata)
 {
 	char		*json = (char *) userdata;
+	char		*end;
 	size_t		len;
 
 	if (!json) {
@@ -563,8 +564,12 @@ EXPORT size_t WJRMemCallback(char *buffer, size_t length, size_t seen, void *use
 #if 0
 	len = strlen(json);
 #else
-	len = ((char *)memchr(json + seen, '\0', length + 1)) - json;
-	// DebugAssert(len == strlen(json));
+	end = memchr(json + seen, '\0', length + 1);
+	if (end) {
+		len = end - json;
+	} else {
+		len = length;
+	}
 #endif
 
 	if (len <= seen) {
