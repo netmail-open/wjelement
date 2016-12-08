@@ -631,7 +631,13 @@ EXPORT size_t WJRMemCallback(char *buffer, size_t length, size_t seen, void *use
 		return(0);
 	}
 
+#if 0
 	len = strlen(json);
+#else
+	len = ((char *)memchr(json + seen, '\0', length + 1)) - json;
+	// DebugAssert(len == strlen(json));
+#endif
+
 	if (len <= seen) {
 		return(0);
 	}
