@@ -616,7 +616,60 @@ static int FormatStrTest(WJElement doc)
 	return(0);
 }
 
+static char * GenerateBigJSONStr(int count)
+{
+	/* allocate buffer. */
+	char	*item		= "{\"a\" : 1, \"b\": \"abc\"},";
+	int		itemlen		= strlen(item);
+	char	*out		= MemMalloc((count * itemlen) + 3);
+	char	*walk		= out + 1;
+	int		i;
 
+	*out = '\0';
+	strcpy(out, "[");
+
+	for (i = 0; i < count; i++) {
+		walk += sprintf(walk, "%s", item);
+	}
+
+	/* Remove the trailing comma */
+	walk--;
+	strcat(walk, "]");
+
+	return(out);
+}
+
+static int BigDocTest(WJElement doc)
+{
+	char		*json;
+	WJReader	r;
+	WJElement	d;
+
+	json = GenerateBigJSONStr(100000);
+	r = WJROpenMemDocument(json, NULL, 0);
+	d = WJEOpenDocument(r, NULL, NULL, NULL);
+	WJRCloseDocument(r);
+	WJECloseDocument(d);
+	MemRelease(&json);
+
+	return(0);
+}
+
+static int RealBigDocTest(WJElement doc)
+{
+	char		*json;
+	WJReader	r;
+	WJElement	d;
+
+	json = GenerateBigJSONStr(1000000);
+	r = WJROpenMemDocument(json, NULL, 0);
+	d = WJEOpenDocument(r, NULL, NULL, NULL);
+	WJRCloseDocument(r);
+	WJECloseDocument(d);
+	MemRelease(&json);
+
+	return(0);
+}
 
 /*
 	----------------------------------------------------------------------------
@@ -646,6 +699,8 @@ struct {
 	{ "optionals",	OptionalsTest	},
 	{ "defaults",	GetDefaultTest	},
 	{ "formatstr",	FormatStrTest	},
+	{ "bigdoc",		BigDocTest		},
+	{ "realbigdoc",	RealBigDocTest	},
 
 	/*
 		TODO: Write the following tests
