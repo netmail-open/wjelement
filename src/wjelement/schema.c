@@ -866,6 +866,32 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 					}
 				}
 			}
+                        
+                        // here check all memb member in document
+                       	if(document && memb->type == WJR_TYPE_ARRAY) {
+				arr = NULL;
+				while((arr = WJEGet(memb, "[]", arr))) {
+                                    // value holen
+                                        char *pVal1 = WJEString(arr, NULL, WJE_GET, "");
+        				WJElement arr2 = NULL;
+            				val = 0;
+        				while((arr2 = WJEGet(document, "[]", arr2))) {
+                                    // value holen
+                                            if(strcmp(pVal1,arr2->name)==0){
+                                                val=1;
+                                                break;
+                                            }
+                                        }
+                                        if(!val) {
+                                                fail = TRUE;
+                                                if(err) {
+                                                        err(client, "%s: required member %s not found.", name,pVal1);
+                                                }
+                                        }
+				}
+				anyFail = anyFail || fail;
+			}
+
 			anyFail = anyFail || fail;
 
 		} else if(!stricmp(memb->name, "dependencies")) {
