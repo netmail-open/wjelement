@@ -568,7 +568,7 @@ EXPORT size_t WJRMemCallback(char *buffer, size_t length, size_t seen, void *use
 	if (end) {
 		len = end - json;
 	} else {
-		len = length;
+		len = length + seen;
 	}
 #endif
 

@@ -63,4 +63,5 @@ add_test(WJElement:Defaults				${EXECUTABLE_OUTPUT_PATH}/wjeunit defaults		)
 add_test(WJElement:FormatStr			${EXECUTABLE_OUTPUT_PATH}/wjeunit formatstr		)
 add_test(WJElement:BigDoc				${EXECUTABLE_OUTPUT_PATH}/wjeunit bigdoc		)
 add_test(WJElement:RealBigDoc			${EXECUTABLE_OUTPUT_PATH}/wjeunit realbigdoc	)
+add_test(WJElement:RealBigDoc2			${EXECUTABLE_OUTPUT_PATH}/wjeunit realbigdoc2	)
 
