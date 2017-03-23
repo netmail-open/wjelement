@@ -642,34 +642,59 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 #endif
 
 		} else if(!stricmp(memb->name, "additionalProperties")) {
-			sub = WJEObject(schema, "properties", WJE_GET);
-			if(sub && document && document->type == WJR_TYPE_OBJECT) {
-				if(memb->type == WJR_TYPE_FALSE) {
-					data = NULL;
-					while((data = WJEGet(document, "[]", data))) {
-						if(!WJEGet(sub, data->name, NULL)) {
-							fail = TRUE;
-							if(err) {
+			if(document && document->type == WJR_TYPE_OBJECT) {
+				data = NULL;
+				fail = TRUE;
+#ifdef HAVE_REGEX_H
+				regex_t preg;
+#endif
+				while((data = WJEGet(document, "[]", data))) {
+					if((sub = WJEObject(schema, "properties", WJE_GET))) {
+						if(memb->type == WJR_TYPE_FALSE &&
+						   WJEGet(sub, data->name, NULL)) {
+							/* found in properties */
+							if(fail) fail = FALSE;
+						} else if(memb->type == WJR_TYPE_OBJECT) {
+							if(SchemaValidate(memb, data, err,
+											  loadcb, freecb, client,
+											  data->name, version)) {
+								if(fail) fail = FALSE;
+							} else if(err) {
 								err(client,
-									"%s: additional property '%s' found.",
+									"%s: extra property '%s' not valid.",
 									name, data->name);
 							}
 						}
 					}
-				} else if(memb->type == WJR_TYPE_OBJECT) {
-					data = NULL;
-					while((data = WJEGet(document, "[]", data))) {
-						if(!WJEChild(sub, data->name, WJE_GET)) {
-							if(!SchemaValidate(memb, data, err, loadcb, freecb,
-											   client, data->name, version)) {
-								fail = TRUE;
-								if(err) {
-									err(client,
-										"%s: extra property '%s' not valid.",
-										name, data->name);
+#ifdef HAVE_REGEX_H
+					if((sub = WJEObject(schema, "patternProperties",
+										WJE_GET))) {
+						while((arr = WJEGet(sub, "[]", arr))) {
+							if(!regcomp(&preg, arr->name,
+										REG_EXTENDED | REG_NOSUB)) {
+								if(memb->type == WJR_TYPE_FALSE &&
+								   !regexec(&preg, data->name, 0, NULL, 0)) {
+									/* found in patternProperties */
+									if(fail) fail = FALSE;
+								} else if(memb->type == WJR_TYPE_OBJECT) {
+									if(SchemaValidate(memb, data, err,
+													  loadcb, freecb,
+													  client, data->name,
+													  version)) {
+										if(fail) fail = FALSE;
+									} else if(err) {
+										err(client,
+											"%s: extra property '%s' not valid.",
+											name, data->name);
+									}
 								}
 							}
 						}
+					}
+#endif
+					if(err && fail) {
+						err(client,
+							"%s: extra property '%s' found.", name, data->name);
 					}
 				}
 				anyFail = anyFail || fail;
