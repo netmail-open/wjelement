@@ -688,6 +688,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 											name, data->name);
 									}
 								}
+								regfree(&preg);
 							}
 						}
 					}
