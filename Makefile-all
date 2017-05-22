@@ -1,0 +1,42 @@
+CC=gcc
+MAKEDIR=@mkdir -p $(@D)
+BUILDDIR=unix/release
+#CFLAGS=-c -Wall -DWJE_DISTINGUISH_INTEGER_TYPE -O3 -Iinclude
+CFLAGS=-c -Wall -DWJE_DISTINGUISH_INTEGER_TYPE -g -DDEBUG -Iinclude
+
+all: $(BUILDDIR)/libwjelement.a
+
+$(BUILDDIR)/libwjelement.a: $(BUILDDIR)/xpl.o $(BUILDDIR)/element.o $(BUILDDIR)/hash.o $(BUILDDIR)/search.o $(BUILDDIR)/types.o $(BUILDDIR)/wjreader.o $(BUILDDIR)/wjwriter.o
+	$(MAKEDIR)
+	ar rvs $@ $(BUILDDIR)/xpl.o $(BUILDDIR)/element.o $(BUILDDIR)/hash.o $(BUILDDIR)/search.o $(BUILDDIR)/types.o $(BUILDDIR)/wjreader.o $(BUILDDIR)/wjwriter.o
+
+$(BUILDDIR)/xpl.o: src/lib/xpl.c
+	$(MAKEDIR)
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILDDIR)/element.o: src/wjelement/element.c
+	$(MAKEDIR)
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILDDIR)/hash.o: src/wjelement/hash.c
+	$(MAKEDIR)
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILDDIR)/search.o: src/wjelement/search.c
+	$(MAKEDIR)
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILDDIR)/types.o: src/wjelement/types.c
+	$(MAKEDIR)
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILDDIR)/wjreader.o: src/wjreader/wjreader.c
+	$(MAKEDIR)
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILDDIR)/wjwriter.o: src/wjwriter/wjwriter.c
+	$(MAKEDIR)
+	$(CC) $(CFLAGS) $< -o $@
+
+clean:
+	rm $(BUILDDIR)/*

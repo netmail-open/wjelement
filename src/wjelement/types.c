@@ -70,13 +70,23 @@ EXPORT XplBool __WJEBool(WJElement container, const char *path, WJEAction action
 					return(e->value.boolean);
 
 				case WJR_TYPE_NUMBER:
+					return(e->value.number.d != 0);
+
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+				case WJR_TYPE_INTEGER:
+					return(e->value.number.i != 0);
+#endif
+
+/*
+				case WJR_TYPE_NUMBER:
+				case WJR_TYPE_INTEGER:
 					if (e->value.number.hasDecimalPoint) {
 						return(e->value.number.d != 0);
 					} else {
 						return(e->value.number.i != 0);
 					}
 					break;
-
+*/
 				default:
 				case WJR_TYPE_UNKNOWN:
 				case WJR_TYPE_NULL:
@@ -118,7 +128,7 @@ static void _WJESetNum(void *dest, size_t size, XplBool issigned, uint64 src, Xp
 			if (!negative) {
 				(*((int64 *) dest)) = src;
 			} else {
-				(*((int64 *) dest)) = -src;
+				(*((int64 *) dest)) = -((int64) src);
 			}
 		} else {
 			(*((uint64 *) dest)) = src;
@@ -128,7 +138,7 @@ static void _WJESetNum(void *dest, size_t size, XplBool issigned, uint64 src, Xp
 			if (!negative) {
 				(*((int32 *) dest)) = src;
 			} else {
-				(*((int32 *) dest)) = -src;
+				(*((int32 *) dest)) = -((int64) src);
 			}
 		} else {
 			(*((uint32 *) dest)) = src;
@@ -200,6 +210,9 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 				break;
 
 			case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+			case WJR_TYPE_INTEGER:
+#endif
 				negative = FALSE;
 
 				if ((e->value.number.i == _WJEGetNum(value, size, issigned, &negative)) &&
@@ -228,6 +241,9 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 
 			switch (e->pub.type) {
 				case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+				case WJR_TYPE_INTEGER:
+#endif
 					_WJESetNum(value, size, issigned, e->value.number.i, e->value.number.negative);
 					return;
 
@@ -274,6 +290,11 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 
 				e->value.number.i = _WJEGetNum(value, size, issigned, &e->value.number.negative);
 				e->value.number.d = (double) e->value.number.i;
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+				e->pub.type = WJR_TYPE_INTEGER;
+#else
+				e->pub.type = WJR_TYPE_NUMBER;
+#endif
 				return;
 			} else {
 				/* Negate the value - It must NOT match the original */
@@ -368,6 +389,9 @@ EXPORT char * __WJEStringN(WJElement container, const char *path, WJEAction acti
 
 				default:
 				case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+				case WJR_TYPE_INTEGER:
+#endif
 				case WJR_TYPE_UNKNOWN:
 				case WJR_TYPE_NULL:
 				case WJR_TYPE_OBJECT:
@@ -602,7 +626,11 @@ EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction actio
 				break;
 
 			case WJR_TYPE_NUMBER:
-				if (e->value.number.hasDecimalPoint) {
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+			case WJR_TYPE_INTEGER:
+#endif
+				if (e->pub.type	== WJR_TYPE_NUMBER)
+				{		
 					if (e->value.number.negative) {
 						if (e->value.number.d * -1.0 == value) {
 							break;
@@ -612,7 +640,9 @@ EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction actio
 							break;
 						}
 					}
-				} else {
+				}
+				else
+				{
 					if (e->value.number.negative) {
 						if ((double) e->value.number.i * -1.0 == value) {
 							break;
@@ -641,20 +671,22 @@ EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction actio
 
 			switch (e->pub.type) {
 				case WJR_TYPE_NUMBER:
-					if (e->value.number.hasDecimalPoint) {
-						if (e->value.number.negative) {
-							return(e->value.number.d * -1.0);
-						} else {
-							return(e->value.number.d);
-						}
+					if (e->value.number.negative) {
+						return(e->value.number.d * -1.0);
 					} else {
-						if (e->value.number.negative) {
-							return((double) e->value.number.i * -1.0);
-						} else {
-							return((double) e->value.number.i);
-						}
+						return(e->value.number.d);
 					}
 					break;
+
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+				case WJR_TYPE_INTEGER:
+					if (e->value.number.negative) {
+						return((double) e->value.number.i * -1.0);
+					} else {
+						return((double) e->value.number.i);
+					}
+					break;
+#endif
 
 				case WJR_TYPE_BOOL:
 				case WJR_TYPE_TRUE:
@@ -686,7 +718,13 @@ EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction actio
 
 				if (e->value.number.d != (double) e->value.number.i) {
 					e->value.number.hasDecimalPoint = TRUE;
+					e->pub.type = WJR_TYPE_NUMBER;
 				} else {
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+					e->pub.type = WJR_TYPE_INTEGER;
+#else
+					e->pub.type = WJR_TYPE_NUMBER;
+#endif
 					e->value.number.hasDecimalPoint = FALSE;
 				}
 
