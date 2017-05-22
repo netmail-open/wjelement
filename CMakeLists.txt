@@ -12,6 +12,11 @@ else(STATIC_LIB)
   set(BUILD_SHARED_LIBS ON)
 endif(STATIC_LIB)
 
+option(DISTINGUISH_INTEGERS "Distinguish between integer and non-integer numbers" OFF)
+if(DISTINGUISH_INTEGERS)
+  add_definitions(-DWJE_DISTINGUISH_INTEGER_TYPE)
+endif()
+
 if("${CMAKE_SYSTEM}" MATCHES "Linux")
   add_definitions(-D_GNU_SOURCE)
 endif()
