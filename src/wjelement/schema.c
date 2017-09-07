@@ -738,7 +738,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				num = 0;
 				fail = TRUE;
 				while((arr = WJEGet(memb, "[]", arr))) {
-					if(SchemaValidate(arr, document, err, loadcb, freecb, client, name, version)) {
+					if(SchemaValidate(arr, document, NULL, loadcb, freecb, client, name, version)) {
 						++num;
 						if(num > 1) {
 							break;
