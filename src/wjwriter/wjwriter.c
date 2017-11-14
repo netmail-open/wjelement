@@ -175,7 +175,7 @@ static int WJWrite(WJIWriter *doc, char *data, size_t length)
 	while (length) {
 		/* Fill our buffer as much as possible */
 		if (doc->used < doc->size) {
-			size = min(length, doc->size - doc->used);
+			size = xpl_min(length, doc->size - doc->used);
 
 			memcpy(doc->buffer + doc->used, data, size);
 			result		+= size;

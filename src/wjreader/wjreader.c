@@ -863,7 +863,7 @@ EXPORT char * WJRNext(char *parent, size_t maxnamelen, WJReader indoc)
 										Cut off any portion of the string that
 										isn't needed
 									*/
-									name[min(maxnamelen, length)] = '\0';
+									name[xpl_min(maxnamelen, length)] = '\0';
 
 									/*
 										Determine where the name needs to go.
