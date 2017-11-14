@@ -55,12 +55,12 @@
 
 /* xpldefs.h */
 
-#ifndef min
-#define min(a, b)   (((a) < (b))? (a): (b))
+#ifndef xpl_min
+#define xpl_min(a, b)   (((a) < (b))? (a): (b))
 #endif
 
-#ifndef max
-#define max(a, b)   (((a) > (b))? (a): (b))
+#ifndef xpl_max
+#define xpl_max(a, b)   (((a) > (b))? (a): (b))
 #endif
 
 
