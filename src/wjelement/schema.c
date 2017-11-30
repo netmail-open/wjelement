@@ -649,12 +649,16 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				regex_t preg;
 #endif
 				while((data = WJEGet(document, "[]", data))) {
-					if((sub = WJEObject(schema, "properties", WJE_GET))) {
-						if(memb->type == WJR_TYPE_FALSE &&
-						   WJEGet(sub, data->name, NULL)) {
-							/* found in properties */
-							if(fail) fail = FALSE;
-						} else if(memb->type == WJR_TYPE_OBJECT) {
+					if(sub = WJEObject(schema, "properties", WJE_GET)) {
+						if(memb->type == WJR_TYPE_FALSE) {
+							if (WJEGet(sub, data->name, NULL)) {
+								/* found in properties */
+								if(fail) fail = FALSE;
+							} else {
+							/* not found in properties */
+								fail = TRUE;
+							}
+                    } else if(memb->type == WJR_TYPE_OBJECT) {
 							if(SchemaValidate(memb, data, err,
 											  loadcb, freecb, client,
 											  data->name, version)) {
