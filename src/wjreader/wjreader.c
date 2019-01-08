@@ -436,7 +436,7 @@ EXPORT WJReader _WJROpenDocument(WJReadCallback callback, void *userdata, char *
 		}
 
 		if (doc) {
-			memset(doc, 0, sizeof(WJIReader));
+			memset(doc, 0, sizeof(WJIReader) + maxdepth);
 
 			doc->buffersize				= buffersize - sizeof(WJIReader) - 1;
 			doc->callback				= callback;
