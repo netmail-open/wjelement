@@ -97,9 +97,10 @@ static int WJEMatchExact(WJElement root, WJElement parent, WJElement e, WJEActio
 			return(-1);
 		}
 	} else {
-		/* Verify that the name matches exactly */
+		/* Verify that the name matches exactly, case sensitive */
+
 		if (e->name && strlen(e->name) == len &&
-			name && !wstrncmp(e->name, name, len, action)
+			name && !strncmp(e->name, name, len)
 		) {
 			return(0);
 		} else {
@@ -233,8 +234,8 @@ static int WJEMatchSubscript(WJElement root, WJElement parent, WJElement e, WJEA
 		switch (*p) {
 			case '"':
 				/*
-					Compare a character at a time, handling escaped characters
-					and ignoring case.
+					Compare a character at a time, case sensitive, handling 
+               escaped characters.
 				*/
 				if (e && e->name) {
 					y = e->name;
@@ -258,7 +259,7 @@ static int WJEMatchSubscript(WJElement root, WJElement parent, WJElement e, WJEA
 						}
 					}
 
-					if (!*y || !*x || tolower(*x) != tolower(*y)) {
+					if (!*y || !*x || *x != *y) {
 						break;
 					}
 				}
