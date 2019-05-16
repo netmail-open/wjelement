@@ -96,7 +96,7 @@ CONFIGURE_FILE(
   "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config.pc.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/wjelement.pc"
 )
-INSTALL(FILES "${CMAKE_BINARY_DIR}/wjelement.pc"
+INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/wjelement.pc"
         DESTINATION ${LIB_DEST_DIR}/pkgconfig)
 
 # uninstall target
