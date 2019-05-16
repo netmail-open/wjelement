@@ -12,11 +12,46 @@ install_manifest.txt
 wjelement.pc
 wjecli
 wjeunit
-libxpl.so
-libxpl.so.*
-libwjelement.so
-libwjelement.so.*
-libwjreader.so
-libwjreader.so.*
-libwjwriter.so
-libwjwriter.so.*
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Log files
+*.log
+
+# Visual Studio specific files
+Win32/
+x64/
+ipch/
+*.suo
+*.sdf
+*.user
+*.tlog
+

@@ -24,5 +24,5 @@ package, or use it in ways we haven't thought of.  Read the docs/headers, have
 fun, and if you use it for something awesome, let us know about it!  :^)
 
 
-* Owen Swerkstrom <<owens@netmail.com>> - community/repo front-man, WJESchema
-* Micah N Gorrell &lt;micahg&#64;netmail.com&gt; - primary author of WJElement
+* Owen Swerkstrom <<owen.swerkstrom@netgovern.com>> - community/repo front-man, WJESchema
+* Micah N Gorrell <<wje@minego.net>> - primary author of WJElement

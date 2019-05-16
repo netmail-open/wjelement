@@ -78,7 +78,7 @@ static char * _findElement(WJElement *e, char *selector)
 
 /*
 	Find the element that the provided selector argument is refering to. This
-	function applies all the wjecli specific logic, and then uses WJEGet to
+	function applies all the wjecli specific logic, and then uses WJEAny to
 	actually find the element.
 */
 static WJElement findElement(WJElement e, char *selector, WJElement last)
@@ -93,7 +93,7 @@ static WJElement findElement(WJElement e, char *selector, WJElement last)
 		return(NULL);
 	}
 
-	return(WJEGet(e, selector, last));
+	return(WJEAny(e, selector, wje.flags | WJE_GET, last));
 }
 
 static int WJECLILoad(WJElement *doc, WJElement *current, char *line)
@@ -104,9 +104,9 @@ static int WJECLILoad(WJElement *doc, WJElement *current, char *line)
 	char		*file;
 	int			r		= 0;
 
-	file = nextField(line, &line);
+	file = nextfield(line, &line);
 
-	if (nextField(line, &line)) {
+	if (nextfield(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -160,9 +160,9 @@ static int WJECLIMerge(WJElement *doc, WJElement *current, char *line)
 	char		*file;
 	int			r		= 0;
 
-	file = nextField(line, &line);
+	file = nextfield(line, &line);
 
-	if (nextField(line, &line)) {
+	if (nextfield(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -218,11 +218,11 @@ static int WJECLISave(WJElement *doc, WJElement *current, char *line)
 		return(1);
 	}
 
-	if (!(file = nextField(line, &line))) {
+	if (!(file = nextfield(line, &line))) {
 		file = wje.filename;
 	}
 
-	if (!file || nextField(line, &line)) {
+	if (!file || nextfield(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -270,9 +270,9 @@ static int WJECLIPrint(WJElement *doc, WJElement *current, char *line)
 	}
 	c = e;
 
-	selector = nextField(line, &line);
+	selector = nextfield(line, &line);
 
-	if (nextField(line, &line)) {
+	if (nextfield(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -324,9 +324,9 @@ static int WJECLIDump(WJElement *doc, WJElement *current, char *line)
 	}
 	c = e;
 
-	selector = nextField(line, &line);
+	selector = nextfield(line, &line);
 
-	if (nextField(line, &line)) {
+	if (nextfield(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -338,13 +338,13 @@ static int WJECLIDump(WJElement *doc, WJElement *current, char *line)
 		}
 	}
 
-	if ((value = WJEString(e, NULL, WJE_GET, NULL))) {
+	if ((value = WJEString(e, NULL, wje.flags | WJE_GET, NULL))) {
 		fprintf(stdout, "%s\n", value);
 		return(0);
 	}
 
 	if (WJR_TYPE_NUMBER == e->type) {
-		num = WJENumber(e, NULL, WJE_GET, 0);
+		num = WJENumber(e, NULL, wje.flags | WJE_GET, 0);
 		fprintf(stdout, "%ld\n", num);
 		return(0);
 
@@ -358,9 +358,9 @@ static int WJECLIPretty(WJElement *doc, WJElement *current, char *line)
 {
 	char		*arg;
 
-	arg = nextField(line, &line);
+	arg = nextfield(line, &line);
 
-	if (nextField(line, &line)) {
+	if (nextfield(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -385,12 +385,47 @@ static int WJECLIPretty(WJElement *doc, WJElement *current, char *line)
 	return(0);
 }
 
+static int WJECLIIgnoreCase(WJElement *doc, WJElement *current, char *line)
+{
+	char		*arg;
+
+	arg = nextfield(line, &line);
+
+	if (nextfield(line, &line)) {
+		fprintf(stderr, "Invalid arguments\n");
+		return(2);
+	}
+
+	if (!arg) {
+		if (wje.flags & WJE_IGNORE_CASE) {
+			wje.flags &= ~WJE_IGNORE_CASE;
+		} else {
+			wje.flags |= WJE_IGNORE_CASE;
+		}
+	} else if (!stricmp(arg, "on")) {
+		wje.flags |= WJE_IGNORE_CASE;
+	} else if (!stricmp(arg, "off")) {
+		wje.flags &= ~WJE_IGNORE_CASE;
+	} else {
+		fprintf(stderr, "Argument must be \"on\" or \"off\"\n");
+		return(3);
+	}
+
+	if (wje.pretty) {
+		printf("Selectors will now be treated as case insensitve\n");
+	} else {
+		printf("Selectors will now be treated as case sensitve\n");
+	}
+
+	return(0);
+}
+
 static int WJECLIBase(WJElement *doc, WJElement *current, char *line)
 {
 	char		*arg;
 
-	if (!(arg = nextField(line, &line)) ||
-		nextField(line, &line)
+	if (!(arg = nextfield(line, &line)) ||
+		nextfield(line, &line)
 	) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
@@ -417,12 +452,12 @@ static int WJECLISelect(WJElement *doc, WJElement *current, char *line)
 	char		*selector;
 	WJElement	e;
 
-	if (!(selector = nextField(line, &line))) {
+	if (!(selector = nextfield(line, &line))) {
 		*current = *doc;
 		return(0);
 	}
 
-	if (nextField(line, &line)) {
+	if (nextfield(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -515,7 +550,7 @@ static int WJECLIList(WJElement *doc, WJElement *current, char *line)
 
 	e = *current;
 
-	if ((selector = nextField(line, &line))) {
+	if ((selector = nextfield(line, &line))) {
 		selector = _findElement(&e, selector);
 	}
 
@@ -523,13 +558,13 @@ static int WJECLIList(WJElement *doc, WJElement *current, char *line)
 		selector = "[]";
 	}
 
-	if (nextField(line, &line)) {
+	if (nextfield(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
 
 	m = NULL;
-	while ((m = WJEGet(e, selector, m))) {
+	while ((m = WJEAny(e, selector, wje.flags | WJE_GET, m))) {
 		printPath(e, m);
 	}
 
@@ -538,7 +573,7 @@ static int WJECLIList(WJElement *doc, WJElement *current, char *line)
 
 static int WJECLIpwd(WJElement *doc, WJElement *current, char *line)
 {
-	if (nextField(line, &line)) {
+	if (nextfield(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -560,7 +595,7 @@ static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 	int64		i;
 	double		d;
 
-	if (!(selector = nextField(line, &line)) || !line || !*line) {
+	if (!(selector = nextfield(line, &line)) || !line || !*line) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -580,11 +615,11 @@ static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 			} else if ((sb.st_size != (off_t) fread(contents, sizeof(char), sb.st_size, file))) {
 				fprintf(stderr, "Could not read file: %s\n", line);
 				r = 3;
-			} else if (!(n = WJEObject(NULL, NULL, WJE_SET))) {
+			} else if (!(n = WJEObject(NULL, NULL, wje.flags | WJE_SET))) {
 				fprintf(stderr, "Could not allocate memory\n");
 				r = 5;
 			} else {
-				WJEStringN(n, NULL, WJE_SET, contents, sb.st_size);
+				WJEStringN(n, NULL, wje.flags | WJE_SET, contents, sb.st_size);
 			}
 
 			MemRelease(&contents);
@@ -621,33 +656,33 @@ static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 	if (n) {
 		switch (n->type) {
 			case WJR_TYPE_OBJECT:
-				t = WJEObject(*current, selector, WJE_SET);
+				t = WJEObject(*current, selector, wje.flags | WJE_SET);
 				WJEMergeObjects(t, n, TRUE);
 				break;
 
 			case WJR_TYPE_ARRAY:
-				t = WJEArray(*current, selector, WJE_SET);
+				t = WJEArray(*current, selector, wje.flags | WJE_SET);
 				WJEMergeObjects(t, n, TRUE);
 				break;
 
 			case WJR_TYPE_STRING:
-				WJEString(*current, selector, WJE_SET,
-						WJEString(n, NULL, WJE_GET, NULL));
+				WJEString(*current, selector, wje.flags | WJE_SET,
+						WJEString(n, NULL, wje.flags | WJE_GET, NULL));
 				break;
 
 			case WJR_TYPE_NUMBER:
-				d = WJEDouble(n, NULL, WJE_GET, 0);
+				d = WJEDouble(n, NULL, wje.flags | WJE_GET, 0);
 
 				if (d != (uint64) d) {
-					WJEDouble(*current, selector, WJE_SET, d);
+					WJEDouble(*current, selector, wje.flags | WJE_SET, d);
 				} else {
-					u = WJEUInt64(n, NULL, WJE_GET, 0);
-					i = WJEInt64( n, NULL, WJE_GET, 0);
+					u = WJEUInt64(n, NULL, wje.flags | WJE_GET, 0);
+					i = WJEInt64( n, NULL, wje.flags | WJE_GET, 0);
 
 					if (i < 0) {
-						WJEInt64(*current, selector, WJE_SET, i);
+						WJEInt64(*current, selector, wje.flags | WJE_SET, i);
 					} else {
-						WJEUInt64(*current, selector, WJE_SET, u);
+						WJEUInt64(*current, selector, wje.flags | WJE_SET, u);
 					}
 				}
 
@@ -656,12 +691,12 @@ static int WJECLISet(WJElement *doc, WJElement *current, char *line)
 			case WJR_TYPE_BOOL:
 			case WJR_TYPE_TRUE:
 			case WJR_TYPE_FALSE:
-				WJEBool(*current, selector, WJE_SET,
-						WJEBool(n, NULL, WJE_GET, FALSE));
+				WJEBool(*current, selector, wje.flags | WJE_SET,
+						WJEBool(n, NULL, wje.flags | WJE_GET, FALSE));
 				break;
 
 			case WJR_TYPE_NULL:
-				WJENull(*current, selector, WJE_SET);
+				WJENull(*current, selector, wje.flags | WJE_SET);
 				break;
 
 			default:
@@ -696,11 +731,11 @@ static int WJECLIMove(WJElement *doc, WJElement *current, char *line)
 		return(1);
 	}
 
-	selectora	= nextField(line, &line);
-	selectorb	= nextField(line, &line);
-	name		= nextField(line, &line);
+	selectora	= nextfield(line, &line);
+	selectorb	= nextfield(line, &line);
+	name		= nextfield(line, &line);
 
-	if (!selectora || !selectorb || nextField(line, &line)) {
+	if (!selectora || !selectorb || nextfield(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -711,7 +746,7 @@ static int WJECLIMove(WJElement *doc, WJElement *current, char *line)
 	}
 
 	if (!(parent = findElement(e, selectorb, NULL)) &&
-		!(parent = WJEObject(e, selectorb, WJE_NEW))
+		!(parent = WJEObject(e, selectorb, wje.flags | WJE_NEW))
 	) {
 		fprintf(stderr, "Could not find specified element: %s\n", selectorb);
 		return(4);
@@ -740,11 +775,11 @@ static int WJECLICopy(WJElement *doc, WJElement *current, char *line)
 		return(1);
 	}
 
-	selectora	= nextField(line, &line);
-	selectorb	= nextField(line, &line);
-	name		= nextField(line, &line);
+	selectora	= nextfield(line, &line);
+	selectorb	= nextfield(line, &line);
+	name		= nextfield(line, &line);
 
-	if (!selectora || !selectorb || nextField(line, &line)) {
+	if (!selectora || !selectorb || nextfield(line, &line)) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
@@ -755,7 +790,7 @@ static int WJECLICopy(WJElement *doc, WJElement *current, char *line)
 	}
 
 	if (!(parent = findElement(e, selectorb, NULL)) &&
-		!(parent = WJEObject(e, selectorb, WJE_NEW))
+		!(parent = WJEObject(e, selectorb, wje.flags | WJE_NEW))
 	) {
 		fprintf(stderr, "Could not find specified element: %s\n", selectorb);
 		return(4);
@@ -774,6 +809,160 @@ static int WJECLICopy(WJElement *doc, WJElement *current, char *line)
 	return(0);
 }
 
+static int wjeKeySortCB(const void *a, const void *b)
+{
+	WJElement	*doca	= (WJElement *) a;
+	WJElement	*docb	= (WJElement *) b;
+	char		*keya	= ((* doca) && (* doca)->name) ? (* doca)->name : "";
+	char		*keyb	= ((* docb) && (* docb)->name) ? (* docb)->name : "";
+
+	return(strcmp(keya, keyb));
+}
+
+static int wjeValueSortCB(const void *a, const void *b)
+{
+	WJElement	*doca	= (WJElement *) a;
+	WJElement	*docb	= (WJElement *) b;
+	char		*vala	= WJEString(*doca, NULL, wje.flags | WJE_GET, NULL);
+	char		*valb	= WJEString(*docb, NULL, wje.flags | WJE_GET, NULL);
+	char		linea[256];
+	char		lineb[256];
+
+	if (!vala && WJR_TYPE_NUMBER == (*doca)->type) {
+		int64		tmp = WJEInt64(*doca, NULL, wje.flags | WJE_GET, 0);
+
+		strprintf(linea, sizeof(linea), NULL, "%lld", (long long) tmp);
+		vala = linea;
+	}
+
+	if (!valb && WJR_TYPE_NUMBER == (*docb)->type) {
+		int64		tmp = WJEInt64(*docb, NULL, wje.flags | WJE_GET, 0);
+
+		strprintf(lineb, sizeof(lineb), NULL, "%lld", (long long) tmp);
+		valb = lineb;
+	}
+
+	return(strcmp(vala ? vala : "", valb ? valb : ""));
+}
+
+/* Sort the children of the provided object by name */
+static void wjesort(WJElement doc, XplBool recursive, int (*compar)(const void *, const void *))
+{
+	WJElement	c;
+	WJElement	*list;
+	int			i;
+	int			count;
+
+	if (!doc || !doc->child) {
+		return;
+	}
+
+	if (recursive) {
+		for (c = doc->child; c; c = c->next) {
+			wjesort(c, recursive, compar);
+		}
+	}
+
+	/* Step 1: Pull the children off and put them in a list */
+	list = MemCallocWait(doc->count + 1, sizeof(WJElement));
+	count = doc->count;
+
+	for (i = 0; i < count && (c = doc->child); i++) {
+		WJEDetach(c);
+		list[i] = c;
+	}
+
+	/* Step 2: Sort the list */
+	qsort(&list[0], count, sizeof(WJElement), compar);
+
+	/* Step 3: Reattach the children */
+	for (i = 0; i < count; i++) {
+		if (!list[i]) {
+			continue;
+		}
+
+		WJEAttach(doc, list[i]);
+		list[i] = NULL;
+	}
+	MemRelease(&list);
+}
+
+static int WJECLIKeySort(WJElement *doc, WJElement *current, char *line)
+{
+	char		*selector;
+	XplBool		recursive	= FALSE;
+	WJElement	e, c;
+	int			r			= 0;
+
+	if (!(e = *current) && !(e = *doc)) {
+		fprintf(stderr, "No JSON document loaded\n");
+		return(1);
+	}
+	c = e;
+
+	selector = nextfield(line, &line);
+
+	/* Does the user want it to be recursive?  */
+	if (selector && (!stricmp(selector, "-r") || !stricmp(selector, "--recursive"))) {
+		recursive = TRUE;
+
+		selector = nextfield(line, &line);
+	}
+
+	if (nextfield(line, &line)) {
+		fprintf(stderr, "Invalid arguments\n");
+		return(2);
+	}
+
+	if (selector) {
+		if (!(e = findElement(c, selector, NULL))) {
+			fprintf(stderr, "Could not find specified element: %s\n", selector);
+			return(4);
+		}
+	}
+
+	wjesort(e, recursive, wjeKeySortCB);
+	return(r);
+}
+
+static int WJECLIValueSort(WJElement *doc, WJElement *current, char *line)
+{
+	char		*selector;
+	XplBool		recursive	= FALSE;
+	WJElement	e, c;
+	int			r			= 0;
+
+	if (!(e = *current) && !(e = *doc)) {
+		fprintf(stderr, "No JSON document loaded\n");
+		return(1);
+	}
+	c = e;
+
+	selector = nextfield(line, &line);
+
+	/* Does the user want it to be recursive?  */
+	if (selector && (!stricmp(selector, "-r") || !stricmp(selector, "--recursive"))) {
+		recursive = TRUE;
+
+		selector = nextfield(line, &line);
+	}
+
+	if (nextfield(line, &line)) {
+		fprintf(stderr, "Invalid arguments\n");
+		return(2);
+	}
+
+	if (selector) {
+		if (!(e = findElement(c, selector, NULL))) {
+			fprintf(stderr, "Could not find specified element: %s\n", selector);
+			return(4);
+		}
+	}
+
+	wjesort(e, recursive, wjeValueSortCB);
+	return(r);
+}
+
 static int WJECLIRemove(WJElement *doc, WJElement *current, char *line)
 {
 	char		*selector;
@@ -781,14 +970,14 @@ static int WJECLIRemove(WJElement *doc, WJElement *current, char *line)
 
 	e = *current;
 
-	if (!(selector = nextField(line, &line)) ||
-		nextField(line, &line)
+	if (!(selector = nextfield(line, &line)) ||
+		nextfield(line, &line)
 	) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
 
-	while ((m = WJEGet(e, selector, NULL))) {
+	while ((m = WJEAny(e, selector, wje.flags | WJE_GET, NULL))) {
 		WJECloseDocument(m);
 	}
 
@@ -802,7 +991,7 @@ static int WJECLIEach(WJElement *doc, WJElement *current, char *line)
 	WJElement	e, m, c;
 	int			r = 0;
 
-	if (!(selector	= nextField(line, &line)) ||
+	if (!(selector	= nextfield(line, &line)) ||
 		!line
 	) {
 		fprintf(stderr, "Invalid arguments\n");
@@ -811,7 +1000,7 @@ static int WJECLIEach(WJElement *doc, WJElement *current, char *line)
 
 	e = *current;
 	m = NULL;
-	while ((m = WJEGet(e, selector, m))) {
+	while ((m = WJEAny(e, selector, wje.flags | WJE_GET, m))) {
 		c = m;
 
 		/*
@@ -870,11 +1059,11 @@ static int WJECLIValidate(WJElement *doc, WJElement *current, char *line)
 	char *pat;
 	int r = 0;
 
-	if(!(file = nextField(line, &line))) {
+	if(!(file = nextfield(line, &line))) {
 		fprintf(stderr, "Invalid arguments\n");
 		return(2);
 	}
-	pat = nextField(line, &line);
+	pat = nextfield(line, &line);
 
 	if(!(f = fopen(file, "rb"))) {
 		perror(NULL);
@@ -971,6 +1160,10 @@ WJECLIcmd WJECLIcmds[] =
 		WJECLIPretty,	"[on|off]"
 	},
 	{
+		'\0', "ignorecase",	"Toggle case sensitivity",
+		WJECLIIgnoreCase,"[on|off]"
+	},
+	{
 		'\0', "base",	"Change the base to use for numbers when printing "	\
 						"a JSON document. A base other than 10 will result "\
 						"in a non standard JSON document which may not be "	\
@@ -1025,6 +1218,14 @@ WJECLIcmd WJECLIcmds[] =
 	{
 		'\0', "copy",	NULL,
 		WJECLICopy,		NULL
+	},
+	{
+		'\0', "sort",	"Sort the children of an object by their values.",
+		WJECLIValueSort,"[-r|--recursive] [<selector>]"
+	},
+	{
+		'\0', "keysort","Sort the children of an object by their keys.",
+		WJECLIKeySort,	"[-r|--recursive] [<selector>]"
 	},
 
 	{

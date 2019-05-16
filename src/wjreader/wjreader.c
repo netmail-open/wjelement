@@ -20,7 +20,7 @@
 #include <stdlib.h>
 
 #include <xpl.h>
-#include <hulautil.h>
+#include <nmutil.h>
 #include <memmgr.h>
 
 #include <wjreader.h>
@@ -436,7 +436,7 @@ EXPORT WJReader _WJROpenDocument(WJReadCallback callback, void *userdata, char *
 		}
 
 		if (doc) {
-			memset(doc, 0, sizeof(WJIReader));
+			memset(doc, 0, sizeof(WJIReader) + maxdepth);
 
 			doc->buffersize				= buffersize - sizeof(WJIReader) - 1;
 			doc->callback				= callback;
@@ -554,13 +554,24 @@ EXPORT size_t WJRFileCallback(char *buffer, size_t length, size_t seen, void *da
 EXPORT size_t WJRMemCallback(char *buffer, size_t length, size_t seen, void *userdata)
 {
 	char		*json = (char *) userdata;
+	char		*end;
 	size_t		len;
 
 	if (!json) {
 		return(0);
 	}
 
+#if 0
 	len = strlen(json);
+#else
+	end = memchr(json + seen, '\0', length + 1);
+	if (end) {
+		len = end - json;
+	} else {
+		len = length + seen;
+	}
+#endif
+
 	if (len <= seen) {
 		return(0);
 	}
@@ -852,7 +863,7 @@ EXPORT char * WJRNext(char *parent, size_t maxnamelen, WJReader indoc)
 										Cut off any portion of the string that
 										isn't needed
 									*/
-									name[min(maxnamelen, length)] = '\0';
+									name[xpl_min(maxnamelen, length)] = '\0';
 
 									/*
 										Determine where the name needs to go.

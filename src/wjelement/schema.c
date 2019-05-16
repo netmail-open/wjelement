@@ -426,7 +426,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 		}
 
 		/* swap in any $ref'erenced schema */
-		if(str = WJEString(schema, "[\"$ref\"]", WJE_GET, NULL)) {
+		if((str = WJEString(schema, "[\"$ref\"]", WJE_GET, NULL))) {
 
 			// Johan: Add Inline dereferencing. Looking for definitions
 			const char* inline_dereferencing = "#/definitions/";
@@ -642,34 +642,64 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 #endif
 
 		} else if(!stricmp(memb->name, "additionalProperties")) {
-			sub = WJEObject(schema, "properties", WJE_GET);
-			if(sub && document && document->type == WJR_TYPE_OBJECT) {
-				if(memb->type == WJR_TYPE_FALSE) {
-					data = NULL;
-					while((data = WJEGet(document, "[]", data))) {
-						if(!WJEGet(sub, data->name, NULL)) {
-							fail = TRUE;
-							if(err) {
+			if(document && document->type == WJR_TYPE_OBJECT) {
+				data = NULL;
+				fail = TRUE;
+#ifdef HAVE_REGEX_H
+				regex_t preg;
+#endif
+				while((data = WJEGet(document, "[]", data))) {
+					if((sub = WJEObject(schema, "properties", WJE_GET))) {
+						if(memb->type == WJR_TYPE_FALSE) {
+							if (WJEGet(sub, data->name, NULL)) {
+								/* found in properties */
+								if(fail) fail = FALSE;
+							} else {
+							/* not found in properties */
+								fail = TRUE;
+							}
+                    } else if(memb->type == WJR_TYPE_OBJECT) {
+							if(SchemaValidate(memb, data, err,
+											  loadcb, freecb, client,
+											  data->name, version)) {
+								if(fail) fail = FALSE;
+							} else if(err) {
 								err(client,
-									"%s: additional property '%s' found.",
+									"%s: extra property '%s' not valid.",
 									name, data->name);
 							}
 						}
 					}
-				} else if(memb->type == WJR_TYPE_OBJECT) {
-					data = NULL;
-					while((data = WJEGet(document, "[]", data))) {
-						if(!WJEChild(sub, data->name, WJE_GET)) {
-							if(!SchemaValidate(memb, data, err, loadcb, freecb,
-											   client, data->name, version)) {
-								fail = TRUE;
-								if(err) {
-									err(client,
-										"%s: extra property '%s' not valid.",
-										name, data->name);
+#ifdef HAVE_REGEX_H
+					if((sub = WJEObject(schema, "patternProperties",
+										WJE_GET))) {
+						while((arr = WJEGet(sub, "[]", arr))) {
+							if(!regcomp(&preg, arr->name,
+										REG_EXTENDED | REG_NOSUB)) {
+								if(memb->type == WJR_TYPE_FALSE &&
+								   !regexec(&preg, data->name, 0, NULL, 0)) {
+									/* found in patternProperties */
+									if(fail) fail = FALSE;
+								} else if(memb->type == WJR_TYPE_OBJECT) {
+									if(SchemaValidate(memb, data, err,
+													  loadcb, freecb,
+													  client, data->name,
+													  version)) {
+										if(fail) fail = FALSE;
+									} else if(err) {
+										err(client,
+											"%s: extra property '%s' not valid.",
+											name, data->name);
+									}
 								}
+								regfree(&preg);
 							}
 						}
+					}
+#endif
+					if(err && fail) {
+						err(client,
+							"%s: extra property '%s' found.", name, data->name);
 					}
 				}
 				anyFail = anyFail || fail;
@@ -712,7 +742,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				num = 0;
 				fail = TRUE;
 				while((arr = WJEGet(memb, "[]", arr))) {
-					if(SchemaValidate(arr, document, err, loadcb, freecb, client, name, version)) {
+					if(SchemaValidate(arr, document, NULL, loadcb, freecb, client, name, version)) {
 						++num;
 						if(num > 1) {
 							break;
@@ -775,7 +805,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 										   client, str, version)) {
 							fail = TRUE;
 							if(err) {
-								err(client, "%s failed vaidation.", str);
+								err(client, "%s failed validation.", str);
 							}
 						}
 						MemFree(str);
@@ -798,7 +828,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 										   client, str, version)) {
 							fail = TRUE;
 							if(err) {
-								err(client, "%s failed tuple type vaidation.",
+								err(client, "%s failed tuple type validation.",
 									str);
 							}
 						}
@@ -829,7 +859,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 							fail = TRUE;
 							if(err) {
 								err(client,
-									"additional item %s failed vaidation.",
+									"additional item %s failed validation.",
 									str);
 							}
 						}
@@ -852,20 +882,18 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				if(fail && err) {
 					err(client, "required item '%s' not found.", name);
 				}
-			} else if(version >= 4 && memb->type == WJR_TYPE_ARRAY) {
+			} else if(memb->type == WJR_TYPE_ARRAY) {
 				/* draft 4;  "required": [ "prop1", "prop2" ] */
 				arr = NULL;
 				while((arr = WJEGet(memb, "[]", arr))) {
-					MemAsprintf(&str, "[\"%s\"]",
-								WJEString(arr, NULL, WJE_GET, ""));
-					if(document && !WJEGet(document, str, NULL)) {
+					str = WJEString(arr, NULL, WJE_GET, "");
+					if(document && !WJEChild(document, str, WJE_GET)) {
 						fail = TRUE;
 						if(fail && err) {
 							err(client, "%s: required member '%s' not found.",
 								name, str);
 						}
 					}
-					MemRelease(&str);
 				}
 			}
 			anyFail = anyFail || fail;
@@ -1121,7 +1149,7 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 				if(!stricmp(str, "date-time")) {
 					str2 = "^([0-9]{4})-(1[0-2]|0[1-9])-"
 						"(3[0-1]|0[1-9]|[1-2][0-9])T"
-						"(2[0-3]|[0-1][0-9]):[0-5][0-9]:[0-5][0-9]Z$";
+						"(2[0-3]|[0-1][0-9]):[0-5][0-9]:[0-5][0-9]([.][0-9]+)?Z$";
 				} else if(!stricmp(str, "date")) {
 					str2 = "^([0-9]{4})-(1[0-2]|0[1-9])-"
 						"(3[0-1]|0[1-9]|[1-2][0-9])$";

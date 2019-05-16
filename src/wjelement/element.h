@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 #include <xpl.h>
-#include <hulautil.h>
+#include <nmutil.h>
 #include <memmgr.h>
 
 #include <wjelement.h>
@@ -65,6 +65,23 @@ WJElement WJESearch(WJElement container, const char *path, WJEAction *action, WJ
 									'_' == (c)		||	\
 									'-' == (c)			\
 								)
+
+
+/* The upper bits of the action may contain modifier flags */
+#define WJE_ACTION_MASK			0x0000ffff
+
+/*
+	Helpers to deal with string comparisons taking into account the
+	WJE_IGNORE_CASE flag.
+*/
+#define wstrcmp(a, b, actionval)		(((actionval) & WJE_IGNORE_CASE) ?	\
+											stricmp((a), (b)) :				\
+											strcmp((a), (b)))
+
+#define wstrncmp(a, b, l, actionval)	(((actionval) & WJE_IGNORE_CASE) ?	\
+											strnicmp((a), (b), (l)) :		\
+											strncmp((a), (b), (l)))
+
 
 /*
 	The following macros allow using many internal functions against a public

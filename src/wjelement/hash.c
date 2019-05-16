@@ -70,6 +70,9 @@ static void _WJEHash(WJElement document, int depth, WJEHashCB update, void *cont
 			break;
 
 		case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+		case WJR_TYPE_INTEGER:
+#endif
 			n = WJENumber(document, NULL, WJE_GET, 0);
 			update(context, &n, sizeof(n));
 

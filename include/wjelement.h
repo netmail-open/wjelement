@@ -62,11 +62,11 @@ extern "C" {
 	Negative offsets are wrapped to the end of the array (or object) meaning
 	that [-1] references the last item.
 
-	Subscripts may reference a range of offsets by providing 2 offsets seperated
+	Subscripts may reference a range of offsets by providing 2 offsets separated
 	by a colon:
 		foo[2:5]
 
-	Subscripts may reference a set of items by seperating offsets, offset,
+	Subscripts may reference a set of items by separating offsets, offset,
 	ranges, double quoted and single quoted values:
 		foo[2,4:6,'bar.*', "smeg"]
 
@@ -110,7 +110,6 @@ extern "C" {
 		foo; bar <= 3
 		foo; bar != 'foo*'
 		foo; bar != "one"
-
 */
 
 typedef struct WJElementPublic
@@ -122,6 +121,7 @@ typedef struct WJElementPublic
 	struct WJElementPublic			*prev;
 
 	struct WJElementPublic			*child;
+	struct WJElementPublic			*last;
 	struct WJElementPublic			*parent;
 
 	/* The number of children */
@@ -147,6 +147,13 @@ typedef struct WJElementPublic
 		does get free'd correctly at the correct time.
 	*/
 	XplBool							(* freecb)(struct WJElementPublic *);
+
+	/*
+		If set then this callback will be called when this element is written
+		with WJEWriteDocument() and the callback is responsible for writing the
+		JSON for this node and it's children.
+	*/
+	XplBool							(* writecb)(struct WJElementPublic *, WJWriter writer, char *name);
 } WJElementPublic;
 typedef WJElementPublic *			WJElement;
 
@@ -158,8 +165,22 @@ typedef WJElementPublic *			WJElement;
 	C source file without having to escape double quote characters. Example:
 		doc = _WJEParse("{ 'foo': true, 'bar': 'yup' }", '\'');
 */
-#define				WJEParse(j) _WJEParse((j), '"')
-EXPORT WJElement	_WJEParse(const char *json, char quote);
+#define				WJEFromString(j)		__WJEFromString((j), '"', __FILE__, __LINE__)
+#define				WJEParse(j)				__WJEFromString((j), '"', __FILE__, __LINE__)
+#define				_WJEFromString(j, q)	__WJEFromString((j), (q), __FILE__, __LINE__)
+#define				_WJEParse(j, q)			__WJEFromString((j), (q), __FILE__, __LINE__)
+EXPORT WJElement	__WJEFromString(const char *json, char quote, const char *file, const int line);
+
+/*
+	Allocate a string and write the JSON source for the provided WJElement to
+	it. The consumer is responsible for calling MemFree() on the result.
+*/
+EXPORT char *		_WJEToString(WJElement document, XplBool pretty, const char *file, const int line);
+#define WJEToString( d, p ) _WJEToString( (d), (p), __FILE__, __LINE__)
+
+/* Read or write a WJElement to a file by path */
+EXPORT WJElement	WJEFromFile(const char *path);
+EXPORT XplBool		WJEToFile(WJElement document, XplBool pretty, const char *path);
 
 /*
 	Load a WJElement object from the provided WJReader
@@ -177,18 +198,28 @@ typedef XplBool		(* WJEWriteCB)(WJElement node, WJWriter writer, void *data);
 EXPORT XplBool		_WJEWriteDocument(WJElement document, WJWriter writer, char *name,
 						WJEWriteCB precb, WJEWriteCB postcb, void *data);
 #define				WJEWriteDocument(d, w, n) _WJEWriteDocument((d), (w), (n), NULL, NULL, NULL)
+
 /* Write a WJElement object to the provided FILE* */
-EXPORT void WJEWriteFILE(WJElement document, FILE* fd);
-/* Allocate and write a string (maxlength 0 = unlimited; remember to MemFree) */
-EXPORT char * WJEWriteMEM(WJElement document, XplBool pretty, size_t maxlength);
+EXPORT void			WJEWriteFILE(WJElement document, FILE* fd);
+
+/* Read a WJElement object from the provided FILE* */
+EXPORT WJElement	WJEReadFILE(FILE* fd);
 
 /* Destroy a WJElement object */
-EXPORT XplBool		WJECloseDocument(WJElement document);
+EXPORT XplBool		_WJECloseDocument(WJElement document, const char *file, const int line);
+#define				WJECloseDocument(d) _WJECloseDocument((d), __FILE__, __LINE__)
+
 /*
 	WJECloseDocument is also used to delete/remove an item from a parent
 	document:
 	WJECloseDocument(WJEGet(...));
 */
+
+/*
+	Remove any items matching the specified selector
+*/
+#define				WJERemove(d, p) \
+					while ((WJECloseDocument(WJEGet((d), (p), NULL)))) { ; }
 
 /* Duplicate an existing WJElement */
 typedef XplBool		(* WJECopyCB)(WJElement destination, WJElement object, void *data, const char *file, const int line);
@@ -199,6 +230,7 @@ EXPORT WJElement	_WJECopyDocument(WJElement to, WJElement from, WJECopyCB loadcb
 /* Remove a WJElement from it's parent (and siblings) */
 EXPORT XplBool		_WJEDetach(WJElement document, const char *file, const int line);
 #define WJEDetach( d )	_WJEDetach( (d), __FILE__, __LINE__ )
+#define WJEDettach( d )	_WJEDetach( (d), __FILE__, __LINE__ )
 
 /* Add a document to another document as a child */
 EXPORT XplBool		WJEAttach(WJElement container, WJElement document);
@@ -236,7 +268,7 @@ typedef enum {
 		When applicable a NULL will be returned.  Otherwise a value that does
 		not match the requested value will be returned.
 	*/
-	WJE_SET,
+	WJE_SET = 1,
 
 	/*
 		Create a new element and assign it the specified value.
@@ -244,7 +276,7 @@ typedef enum {
 		If an element already exists then it will not be modified, and the value
 		of that existing element will be returned.
 	*/
-	WJE_NEW,
+	WJE_NEW = 2,
 
 	/*
 		Assign the specified value to an existing element, and return the value
@@ -254,10 +286,17 @@ typedef enum {
 		When applicable a NULL will be returned.  Otherwise a value that does
 		not match the requested value will be returned.
 	*/
-	WJE_MOD
+	WJE_MOD = 3
 } WJEAction;
 
-/* Left for backwards compatability. WJE_PUT was renamed to WJE_MOD */
+/*
+	The following flags can be OR'ed with a WJEAction value for any function
+	that takes a WJEAction:
+*/
+#define WJE_IGNORE_CASE			0x00010000
+
+
+// TODO	Remove this.  WJE_PUT was renamed to WJE_MOD.
 #define WJE_PUT WJE_MOD
 
 #define _WJEString(	container, path, action, last,	value)		__WJEString(	(container), (path), (action), (last),	(value),		__FILE__, __LINE__)
@@ -329,6 +368,18 @@ EXPORT double		WJEDoubleF(	WJElement container, WJEAction action, WJElement *las
 */
 EXPORT WJElement _WJEChild(WJElement container, char *name, WJEAction action, const char *file, const int line);
 #define WJEChild(c, n, a) _WJEChild((c), (n), (a), __FILE__, __LINE__)
+
+
+/*
+	Find, create or update an element by path regardless of type.
+
+	Type specific actions may be done by passing the resulting WJElement and a
+	NULL path to WJEBool(), WJENumber(), WJEString(), WJEObject(), WJEArray() or
+	WJENull().
+*/
+EXPORT WJElement _WJEAny(WJElement container, char *path, WJEAction action, WJElement last, const char *file, const int line);
+#define WJEAny(c, p, a, l) _WJEAny((c), (p), (a), (l), __FILE__, __LINE__)
+
 
 /* Calculate a hash for a document */
 typedef int (* WJEHashCB)(void *context, void *data, size_t size);
@@ -408,8 +459,9 @@ EXPORT void WJESchemaFreeBacklink(char *backlink);
 /* Debug function that will write a document to stdout */
 EXPORT void WJEDump(WJElement document);
 
-/* For compatibility with old code, due to a typo */
-#define WJEDettach( d )	_WJEDetach( (d), __FILE__, __LINE__ )
+/* Debug function that will write a document to a file in the current dir */
+EXPORT void WJEDumpFile(WJElement document);
+
 
 #ifdef __cplusplus
 }

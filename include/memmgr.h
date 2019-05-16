@@ -27,6 +27,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef asprintf
+	EXPORT int asprintf(char **strp, const char *fmt, ...);
+#else
+#define HAS_ASPRINTF
+#endif
 
 #define MemAssert(p)
 

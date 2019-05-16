@@ -1,6 +1,7 @@
 Compile and install WJElement:
 
 $ ccmake .  #change settings if desired, 'c'onfigure and 'g'enerate
+$ cmake -DLIB_DEST_DIR=/usr/local/lib64  #set lib path if needed
 $ make
 # make install
 

@@ -50,7 +50,7 @@ EXPORT XplBool __WJEBool(WJElement container, const char *path, WJEAction action
 				/* fallthrough */
 
 			default:
-				if (WJE_GET != action) {
+				if (WJE_GET != (action & WJE_ACTION_MASK)) {
 					_WJEChanged(e);
 				}
 				break;
@@ -58,7 +58,7 @@ EXPORT XplBool __WJEBool(WJElement container, const char *path, WJEAction action
 	}
 
 	if (last) *last = (WJElement) e;
-	switch (action) {
+	switch ((action & WJE_ACTION_MASK)) {
 		default:
 		case WJE_GET:
 			if (!e) return(value);
@@ -70,13 +70,23 @@ EXPORT XplBool __WJEBool(WJElement container, const char *path, WJEAction action
 					return(e->value.boolean);
 
 				case WJR_TYPE_NUMBER:
+					return(e->value.number.d != 0);
+
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+				case WJR_TYPE_INTEGER:
+					return(e->value.number.i != 0);
+#endif
+
+/*
+				case WJR_TYPE_NUMBER:
+				case WJR_TYPE_INTEGER:
 					if (e->value.number.hasDecimalPoint) {
 						return(e->value.number.d != 0);
 					} else {
 						return(e->value.number.i != 0);
 					}
 					break;
-
+*/
 				default:
 				case WJR_TYPE_UNKNOWN:
 				case WJR_TYPE_NULL:
@@ -118,7 +128,7 @@ static void _WJESetNum(void *dest, size_t size, XplBool issigned, uint64 src, Xp
 			if (!negative) {
 				(*((int64 *) dest)) = src;
 			} else {
-				(*((int64 *) dest)) = -src;
+				(*((int64 *) dest)) = -((int64) src);
 			}
 		} else {
 			(*((uint64 *) dest)) = src;
@@ -128,7 +138,7 @@ static void _WJESetNum(void *dest, size_t size, XplBool issigned, uint64 src, Xp
 			if (!negative) {
 				(*((int32 *) dest)) = src;
 			} else {
-				(*((int32 *) dest)) = -src;
+				(*((int32 *) dest)) = -((int64) src);
 			}
 		} else {
 			(*((uint32 *) dest)) = src;
@@ -200,6 +210,9 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 				break;
 
 			case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+			case WJR_TYPE_INTEGER:
+#endif
 				negative = FALSE;
 
 				if ((e->value.number.i == _WJEGetNum(value, size, issigned, &negative)) &&
@@ -210,7 +223,7 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 				/* fallthrough */
 
 			default:
-				if (WJE_GET != action) {
+				if (WJE_GET != (action & WJE_ACTION_MASK)) {
 					_WJEChanged(e);
 				}
 				break;
@@ -218,7 +231,7 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 	}
 
 	if (last) *last = (WJElement) e;
-	switch (action) {
+	switch ((action & WJE_ACTION_MASK)) {
 		default:
 		case WJE_GET:
 			if (!e) {
@@ -228,6 +241,9 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 
 			switch (e->pub.type) {
 				case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+				case WJR_TYPE_INTEGER:
+#endif
 					_WJESetNum(value, size, issigned, e->value.number.i, e->value.number.negative);
 					return;
 
@@ -271,8 +287,14 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 			if ((e = _WJEReset(e, WJR_TYPE_NUMBER))) {
 				e->value.number.negative		= FALSE;
 				e->value.number.hasDecimalPoint	= FALSE;
+
 				e->value.number.i = _WJEGetNum(value, size, issigned, &e->value.number.negative);
 				e->value.number.d = (double) e->value.number.i;
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+				e->pub.type = WJR_TYPE_INTEGER;
+#else
+				e->pub.type = WJR_TYPE_NUMBER;
+#endif
 				return;
 			} else {
 				/* Negate the value - It must NOT match the original */
@@ -287,9 +309,9 @@ static void _WJENum(WJElement container, const char *path, WJEAction action, WJE
 
 EXPORT char * __WJEString(WJElement container, const char *path, WJEAction action, WJElement *last, const char *value, const char *file, const int line)
 {
-	size_t		len = 0;
+	size_t		len	= 0;
 
-	switch (action) {
+	switch ((action & WJE_ACTION_MASK)) {
 		default:
 			break;
 
@@ -329,13 +351,13 @@ EXPORT char * __WJEStringN(WJElement container, const char *path, WJEAction acti
 					break;
 				}
 
-				if (e->value.string && value && !strcmp(e->value.string, value)) {
+				if (e->value.string && value && !wstrcmp(e->value.string, value, action)) {
 					break;
 				}
 				/* fallthrough */
 
 			default:
-				if (WJE_GET != action) {
+				if (WJE_GET != (action & WJE_ACTION_MASK)) {
 					_WJEChanged(e);
 				}
 				break;
@@ -343,7 +365,7 @@ EXPORT char * __WJEStringN(WJElement container, const char *path, WJEAction acti
 	}
 
 	if (last) *last = (WJElement) e;
-	switch (action) {
+	switch ((action & WJE_ACTION_MASK)) {
 		default:
 		case WJE_GET:
 			if (!e) return((char *) value);
@@ -367,6 +389,9 @@ EXPORT char * __WJEStringN(WJElement container, const char *path, WJEAction acti
 
 				default:
 				case WJR_TYPE_NUMBER:
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+				case WJR_TYPE_INTEGER:
+#endif
 				case WJR_TYPE_UNKNOWN:
 				case WJR_TYPE_NULL:
 				case WJR_TYPE_OBJECT:
@@ -384,7 +409,7 @@ EXPORT char * __WJEStringN(WJElement container, const char *path, WJEAction acti
 					return((e->value.string = NULL));
 				} else {
 					e->value.string = MemMallocWait(len + 1);
-					strprintf(e->value.string, len + 1, NULL, "%.*s", (int) len, value);
+					strncpy(e->value.string, value, len);
 					e->value.string[len] = '\0';
 
 					MemUpdateOwner(e->value.string, file, line);
@@ -412,7 +437,7 @@ EXPORT WJElement __WJEObject(WJElement container, const char *path, WJEAction ac
 	do {
 		a = action;
 		e = WJESearch(container, path, &a, e, file, line);
-	} while (e && action == WJE_GET && e->type != WJR_TYPE_OBJECT);
+	} while (e && (action & WJE_ACTION_MASK) == WJE_GET && e->type != WJR_TYPE_OBJECT);
 
 	if (e) {
 		switch (e->type) {
@@ -428,7 +453,7 @@ EXPORT WJElement __WJEObject(WJElement container, const char *path, WJEAction ac
 				break;
 
 			default:
-				if (WJE_GET != action) {
+				if (WJE_GET != (action & WJE_ACTION_MASK)) {
 					_WJEChanged(e);
 				}
 				break;
@@ -437,7 +462,7 @@ EXPORT WJElement __WJEObject(WJElement container, const char *path, WJEAction ac
 
 	if (last) *last = e;
 
-	switch (a) {
+	switch ((a & WJE_ACTION_MASK)) {
 		case WJE_SET:
 		case WJE_PUT:
 			return(WJEReset(e, WJR_TYPE_OBJECT));
@@ -464,7 +489,7 @@ EXPORT WJElement __WJEArray(WJElement container, const char *path, WJEAction act
 	do {
 		a = action;
 		e = WJESearch(container, path, &a, e, file, line);
-	} while (e && action == WJE_GET && e->type != WJR_TYPE_ARRAY);
+	} while (e && (action & WJE_ACTION_MASK) == WJE_GET && e->type != WJR_TYPE_ARRAY);
 
 	if (e) {
 		switch (e->type) {
@@ -480,7 +505,7 @@ EXPORT WJElement __WJEArray(WJElement container, const char *path, WJEAction act
 				break;
 
 			default:
-				if (WJE_GET != action) {
+				if (WJE_GET != (action & WJE_ACTION_MASK)) {
 					_WJEChanged(e);
 				}
 				break;
@@ -489,7 +514,7 @@ EXPORT WJElement __WJEArray(WJElement container, const char *path, WJEAction act
 
 	if (last) *last = e;
 
-	switch (a) {
+	switch ((a & WJE_ACTION_MASK)) {
 		case WJE_SET:
 		case WJE_PUT:
 			return(WJEReset(e, WJR_TYPE_ARRAY));
@@ -516,7 +541,7 @@ EXPORT WJElement __WJENull(WJElement container, const char *path, WJEAction acti
 	do {
 		a = action;
 		e = WJESearch(container, path, &a, e, file, line);
-	} while (e && action == WJE_GET && e->type != WJR_TYPE_NULL);
+	} while (e && (action & WJE_ACTION_MASK) == WJE_GET && e->type != WJR_TYPE_NULL);
 
 	if (e) {
 		switch (e->type) {
@@ -532,7 +557,7 @@ EXPORT WJElement __WJENull(WJElement container, const char *path, WJEAction acti
 				break;
 
 			default:
-				if (WJE_GET != action) {
+				if (WJE_GET != (action & WJE_ACTION_MASK)) {
 					_WJEChanged(e);
 				}
 				break;
@@ -541,7 +566,7 @@ EXPORT WJElement __WJENull(WJElement container, const char *path, WJEAction acti
 
 	if (last) *last = e;
 
-	switch (a) {
+	switch ((a & WJE_ACTION_MASK)) {
 		case WJE_SET:
 		case WJE_PUT:
 			return(WJEReset(e, WJR_TYPE_NULL));
@@ -601,7 +626,11 @@ EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction actio
 				break;
 
 			case WJR_TYPE_NUMBER:
-				if (e->value.number.hasDecimalPoint) {
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+			case WJR_TYPE_INTEGER:
+#endif
+				if (e->pub.type	== WJR_TYPE_NUMBER)
+				{		
 					if (e->value.number.negative) {
 						if (e->value.number.d * -1.0 == value) {
 							break;
@@ -611,7 +640,9 @@ EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction actio
 							break;
 						}
 					}
-				} else {
+				}
+				else
+				{
 					if (e->value.number.negative) {
 						if ((double) e->value.number.i * -1.0 == value) {
 							break;
@@ -625,7 +656,7 @@ EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction actio
 				/* fallthrough */
 
 			default:
-				if (WJE_GET != action) {
+				if (WJE_GET != (action & WJE_ACTION_MASK)) {
 					_WJEChanged(e);
 				}
 				break;
@@ -633,27 +664,29 @@ EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction actio
 	}
 
 	if (last) *last = (WJElement) e;
-	switch (action) {
+	switch ((action & WJE_ACTION_MASK)) {
 		default:
 		case WJE_GET:
 			if (!e) return(value);
 
 			switch (e->pub.type) {
 				case WJR_TYPE_NUMBER:
-					if (e->value.number.hasDecimalPoint) {
-						if (e->value.number.negative) {
-							return(e->value.number.d * -1.0);
-						} else {
-							return(e->value.number.d);
-						}
+					if (e->value.number.negative) {
+						return(e->value.number.d * -1.0);
 					} else {
-						if (e->value.number.negative) {
-							return((double) e->value.number.i * -1.0);
-						} else {
-							return((double) e->value.number.i);
-						}
+						return(e->value.number.d);
 					}
 					break;
+
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+				case WJR_TYPE_INTEGER:
+					if (e->value.number.negative) {
+						return((double) e->value.number.i * -1.0);
+					} else {
+						return((double) e->value.number.i);
+					}
+					break;
+#endif
 
 				case WJR_TYPE_BOOL:
 				case WJR_TYPE_TRUE:
@@ -666,7 +699,7 @@ EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction actio
 					break;
 
 				default:
-					return(value);
+					return(0);
 			}
 
 		case WJE_SET:
@@ -685,7 +718,13 @@ EXPORT double __WJEDouble(WJElement container, const char *path, WJEAction actio
 
 				if (e->value.number.d != (double) e->value.number.i) {
 					e->value.number.hasDecimalPoint = TRUE;
+					e->pub.type = WJR_TYPE_NUMBER;
 				} else {
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+					e->pub.type = WJR_TYPE_INTEGER;
+#else
+					e->pub.type = WJR_TYPE_NUMBER;
+#endif
 					e->value.number.hasDecimalPoint = FALSE;
 				}
 
@@ -736,7 +775,6 @@ EXPORT WJElement WJEGetF(WJElement container, WJElement last, const char *pathf,
 {
 	WJElement	ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -760,7 +798,6 @@ EXPORT XplBool WJEBoolF(WJElement container, WJEAction action, WJElement *last, 
 {
 	XplBool		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -784,7 +821,6 @@ EXPORT char * WJEStringF(WJElement container, WJEAction action, WJElement *last,
 {
 	char *		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -808,7 +844,6 @@ EXPORT char * WJEStringNF(WJElement container, WJEAction action, WJElement *last
 {
 	char *		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -832,7 +867,6 @@ EXPORT WJElement WJEObjectF(WJElement container, WJEAction action, WJElement *la
 {
 	WJElement	ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -856,7 +890,6 @@ EXPORT WJElement WJEArrayF(WJElement container, WJEAction action, WJElement *las
 {
 	WJElement	ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -880,7 +913,6 @@ EXPORT WJElement WJENullF(WJElement container, WJEAction action, WJElement *last
 {
 	WJElement	ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -904,7 +936,6 @@ EXPORT int32 WJEInt32F(WJElement container, WJEAction action, WJElement *last, i
 {
 	int32		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -928,7 +959,6 @@ EXPORT uint32 WJEUInt32F(WJElement container, WJEAction action, WJElement *last,
 {
 	uint32		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -952,7 +982,6 @@ EXPORT int64 WJEInt64F(WJElement container, WJEAction action, WJElement *last, i
 {
 	int64		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -976,7 +1005,6 @@ EXPORT uint64 WJEUInt64F(WJElement container, WJEAction action, WJElement *last,
 {
 	uint64		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -1000,7 +1028,6 @@ EXPORT double WJEDoubleF(WJElement container, WJEAction action, WJElement *last,
 {
 	double		ret;
 	va_list		args;
-	size_t		needed;
 	char		*path;
 	char		buffer[1024];
 
@@ -1019,5 +1046,4 @@ EXPORT double WJEDoubleF(WJElement container, WJEAction action, WJElement *last,
 
 	return(ret);
 }
-
 

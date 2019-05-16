@@ -19,7 +19,7 @@
 #include <stdlib.h>
 
 #include <xpl.h>
-#include <hulautil.h>
+#include <nmutil.h>
 #include <memmgr.h>
 
 #include <wjwriter.h>
@@ -175,7 +175,7 @@ static int WJWrite(WJIWriter *doc, char *data, size_t length)
 	while (length) {
 		/* Fill our buffer as much as possible */
 		if (doc->used < doc->size) {
-			size = min(length, doc->size - doc->used);
+			size = xpl_min(length, doc->size - doc->used);
 
 			memcpy(doc->buffer + doc->used, data, size);
 			result		+= size;
@@ -267,10 +267,11 @@ EXPORT WJWriter _WJWOpenDocument(XplBool pretty, WJWriteCallback callback, void 
 		The first value after opening a document should not be preceded by a
 		comma.  skipcomma will be reset after reading that first value.
 	*/
-	doc->public.pretty		= pretty;
-	doc->public.base		= 10;
-	doc->skipcomma			= TRUE;
-	doc->skipbreak			= TRUE;
+	doc->public.pretty				= pretty;
+	doc->public.escapeInvalidChars	= TRUE;
+	doc->public.base				= 10;
+	doc->skipcomma					= TRUE;
+	doc->skipbreak					= TRUE;
 
 	return((WJWriter) doc);
 }
@@ -334,6 +335,39 @@ EXPORT size_t WJWFileCallback(char *buffer, size_t length, void *data)
 	}
 
 	return(0);
+}
+
+static size_t WJWMemCallback(char *buffer, size_t length, void *data)
+{
+	char		**mem = data;
+	size_t		l;
+
+	if (mem) {
+		if (!*mem) {
+			*mem = MemMallocWait(length + 1);
+			memcpy(*mem, buffer, length);
+			(*mem)[length] = '\0';
+		} else {
+			l = strlen(*mem);
+
+			*mem = MemReallocWait(*mem, l + length + 1);
+			memcpy(*mem + l, buffer, length);
+			(*mem)[l + length] = '\0';
+		}
+
+		return(length);
+	}
+
+	return(0);
+}
+
+EXPORT WJWriter WJWOpenMemDocument(XplBool pretty, char **mem)
+{
+	if (!mem) {
+		return(NULL);
+	}
+
+	return(_WJWOpenDocument(pretty, WJWMemCallback, mem, 0));
 }
 
 /*
@@ -440,8 +474,9 @@ static XplBool WJWriteString(char *value, size_t length, XplBool done, WJIWriter
 					e += (l - 1);
 				} else if (l == 1) {
 					/*
-						*e is valid UTF8 but is not a printable character, and will be escaped before
-						being sent, using the JSON-standard "\u00xx" form
+						*e is valid UTF8 but is not a printable character, and
+						will be escaped before being sent, using the
+						JSON-standard "\u00xx" form
 					*/
 					char	unicodeHex[sizeof("\\u0000")];
 
@@ -454,15 +489,18 @@ static XplBool WJWriteString(char *value, size_t length, XplBool done, WJIWriter
 				} else if (l < 0) {
 					/*
 						*e is not valid UTF8 data, and must be escaped before
-						being sent. But JSON-standard does not give us a mechanism
-						so we chose "\xhh" format because of its almost universal comprehension.
+						being sent. But JSON-standard does not give us a
+						mechanism so we chose "\xhh" format because of its
+						almost universal comprehension.
 					*/
 					char	nonUnicodeHex[sizeof("\\x00")];
 
 					WJWrite(doc, v, e - v);
 
-					sprintf(nonUnicodeHex, "\\x%02x", (unsigned char) *e);
-					WJWrite(doc, nonUnicodeHex, sizeof(nonUnicodeHex)-1);
+					if (doc->public.escapeInvalidChars) {
+						sprintf(nonUnicodeHex, "\\x%02x", (unsigned char) *e);
+						WJWrite(doc, nonUnicodeHex, sizeof(nonUnicodeHex)-1);
+					}
 
 					v = e + 1;
 				}
