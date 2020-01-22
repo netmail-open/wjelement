@@ -255,7 +255,7 @@ int main(int argc, char **argv)
 		}
 
 		if (fgets(line, sizeof(line), in)) {
-			cmd = skipspace(line);
+			cmd = _skipspace(line, NULL);
 		} else {
 			cmd = NULL;
 		}
