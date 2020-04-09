@@ -311,10 +311,20 @@ static XplBool ValidateType(WJElement value, char *type) {
 	if(!stricmp(type, "string")) {
 		return (value->type == WJR_TYPE_STRING);
 	} else if(!stricmp(type, "number")) {
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+		return ((value->type == WJR_TYPE_NUMBER) ||
+				(value->type == WJR_TYPE_INTEGER));
+#else
 		return (value->type == WJR_TYPE_NUMBER);
+#endif
 	} else if(!stricmp(type, "integer")) {
+#ifdef WJE_DISTINGUISH_INTEGER_TYPE
+		return (value->type == WJR_TYPE_INTEGER &&
+				!((_WJElement *)value)->value.number.hasDecimalPoint);
+#else
 		return (value->type == WJR_TYPE_NUMBER &&
 				!((_WJElement *)value)->value.number.hasDecimalPoint);
+#endif
 	} else if(!stricmp(type, "boolean")) {
 		return (value->type == WJR_TYPE_BOOL ||
 				value->type == WJR_TYPE_TRUE ||
