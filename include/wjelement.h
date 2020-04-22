@@ -174,6 +174,9 @@ EXPORT WJElement	__WJEFromString(const char *json, char quote, const char *file,
 /*
 	Allocate a string and write the JSON source for the provided WJElement to
 	it. The consumer is responsible for calling MemFree() on the result.
+
+	If the consumer and WJE are linked to separate memory libraries, it may be
+	necessary to call WJEMemFree() instead.
 */
 EXPORT char *		_WJEToString(WJElement document, XplBool pretty, const char *file, const int line);
 #define WJEToString( d, p ) _WJEToString( (d), (p), __FILE__, __LINE__)
@@ -461,6 +464,14 @@ EXPORT void WJEDump(WJElement document);
 
 /* Debug function that will write a document to a file in the current dir */
 EXPORT void WJEDumpFile(WJElement document);
+
+/*
+  Our own MemFree wrapper, in cases where consumer code uses a different
+  memory library than WJElement.
+  It is always safe (but usually unnecessary) to use this instead of MemFree.
+*/
+EXPORT void WJEMemFree(void *mem);
+EXPORT void WJEMemRelease(void **mem);
 
 
 #ifdef __cplusplus

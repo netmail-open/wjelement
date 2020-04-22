@@ -806,4 +806,15 @@ EXPORT WJElement WJEReadFILE(FILE* fd)
 	return obj;
 }
 
-
+EXPORT void WJEMemFree(void *mem)
+{
+	if(mem != NULL) {
+		MemFree(mem);
+	}
+}
+EXPORT void WJEMemRelease(void **mem)
+{
+	if(mem != NULL && !*mem != NULL) {
+		MemRelease(mem);
+	}
+}
