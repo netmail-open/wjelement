@@ -699,6 +699,52 @@ static int LargeDoc2Test(WJElement doc)
 	return(result);
 }
 
+static int SchemaTest(WJElement doc)
+{
+	int			result			= 0;
+
+	/* The schema is valid, and the document adheres to the schema. */
+	{
+		char		schema_json[]	= "{\"type\":\"object\",\"properties\":{\"string\":{\"type\":\"string\",\"pattern\":\"^This\"}}}";
+		WJReader	schema_reader	= WJROpenMemDocument(schema_json, NULL, 0);
+		WJElement	schema			= WJEOpenDocument(schema_reader, NULL, NULL, NULL);
+		if (!WJESchemaValidate(schema, doc, NULL, NULL, NULL, NULL)) {
+			printf("e: Expected document to adhere to schema, but it didn't\n");
+			result = __LINE__;
+		}
+		WJECloseDocument(schema);
+		WJRCloseDocument(schema_reader);
+	}
+
+	/* The schema is valid, and the document does not adhere to the schema. */
+	{
+		char		schema_json[]	= "{\"type\":\"object\",\"properties\":{\"string\":{\"type\":\"string\",\"pattern\":\"^That\"}}}";
+		WJReader	schema_reader	= WJROpenMemDocument(schema_json, NULL, 0);
+		WJElement	schema			= WJEOpenDocument(schema_reader, NULL, NULL, NULL);
+		if (WJESchemaValidate(schema, doc, NULL, NULL, NULL, NULL)) {
+			printf("e: Expected document to not adhere to schema, but it did\n");
+			result = __LINE__;
+		}
+		WJECloseDocument(schema);
+		WJRCloseDocument(schema_reader);
+	}
+
+	/* The schema is valid JSON but has an invalid regex. */
+	{
+		char		schema_json[]	= "{\"type\":\"object\",\"properties\":{\"string\":{\"type\":\"string\",\"pattern\":\"+\"}}}";
+		WJReader	schema_reader	= WJROpenMemDocument(schema_json, NULL, 0);
+		WJElement	schema			= WJEOpenDocument(schema_reader, NULL, NULL, NULL);
+		if (WJESchemaValidate(schema, doc, NULL, NULL, NULL, NULL)) {
+			printf("e: Expected validation to fail, but it succeeded\n");
+			result = __LINE__;
+		}
+		WJECloseDocument(schema);
+		WJRCloseDocument(schema_reader);
+	}
+
+	return(result);
+}
+
 /*
 	----------------------------------------------------------------------------
 	End of tests
@@ -730,6 +776,7 @@ struct {
 	{ "bigdoc",		BigDocTest		},
 	{ "realbigdoc",	RealBigDocTest	},
 	{ "realbigdoc2",LargeDoc2Test	},
+	{ "schema",		SchemaTest		},
 
 	/*
 		TODO: Write the following tests

@@ -703,6 +703,12 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 									}
 								}
 								regfree(&preg);
+							} else {
+								fail = TRUE;
+								if(err) {
+									err(client, "%s: '%s' is not a valid regular expression.",
+										name, arr->name);
+								}
 							}
 						}
 					}
@@ -1104,14 +1110,22 @@ static XplBool SchemaValidate(WJElement schema, WJElement document,
 		} else if(!stricmp(memb->name, "pattern")) {
 #ifdef HAVE_REGEX_H
 			if(document && document->type == WJR_TYPE_STRING) {
-				regex_t pat;
 				str = WJEString(memb, NULL, WJE_GET, NULL);
-				if(str && !regcomp(&pat, str, REG_EXTENDED | REG_NOSUB)) {
-					if(regexec(&pat, WJEString(document, NULL, WJE_GET, ""),
-							   0, NULL, 0)) {
+				if(str) {
+					regex_t pat;
+					if (!regcomp(&pat, str, REG_EXTENDED | REG_NOSUB)) {
+						if(regexec(&pat, WJEString(document, NULL, WJE_GET, ""),
+								   0, NULL, 0)) {
+							fail = TRUE;
+						}
+						regfree(&pat);
+					} else {
 						fail = TRUE;
+						if(err) {
+							err(client, "%s: '%s' is not a valid regular expression.",
+								name, str);
+						}
 					}
-					regfree(&pat);
 				}
 				if(fail && err) {
 					err(client, "%s: '%s' does not match '%s' format.",
