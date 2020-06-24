@@ -241,6 +241,12 @@ WJElement WJECopyDocument(WJElement to, WJElement from, WJECopyCB loadcb, void *
   criteria.
 </p>
 <p>
+  WJECopyDocument is normally used to create a new copy or to populate a new,
+  empty document, but that is not required or enforced.  If "to" is already
+  populated, WJEMergeObjects is probably the desired function for copying in
+  other contents.
+</p>
+<p>
 <strong>WJEDetach</strong>
  - Remove a WJElement from it's parent (and siblings)
 </p>
