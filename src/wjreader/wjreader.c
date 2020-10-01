@@ -1450,7 +1450,7 @@ EXPORT double WJRDouble(WJReader doc)
 
 /*
 	Parse the number in the JSON document as either a UInt64 or a double,
-	depending on the existance of a decimal point.
+	depending on the existence of a decimal point.
 
 	Return TRUE if there was a decimal point, and fill out *d. If there is no
 	decimal point then return FALSE and fill out *i.

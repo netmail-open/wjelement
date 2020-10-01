@@ -203,7 +203,7 @@ static int WJEMatchSubscript(WJElement root, WJElement parent, WJElement e, WJEA
 		Walk through all items in the subscript and do the proper check on each
 		piece.  Return 0 on the first match.
 
-		The name has already been validated, so the existance of a closing ] is
+		The name has already been validated, so the existence of a closing ] is
 		a sure thing, and any quoted string will be terminated.
 	*/
 	char		*p;
