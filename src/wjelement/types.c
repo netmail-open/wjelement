@@ -95,7 +95,7 @@ EXPORT XplBool __WJEBool(WJElement container, const char *path, WJEAction action
 
 				case WJR_TYPE_OBJECT:
 				case WJR_TYPE_ARRAY:
-					/* TRUE based on the existance of the object */
+					/* TRUE based on the existence of the object */
 					return(TRUE);
 
 				case WJR_TYPE_STRING:
