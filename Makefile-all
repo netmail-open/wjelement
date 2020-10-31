@@ -69,7 +69,7 @@ OBJS_SHARED	=	${SRCS:%.c=$(OBJDIR)%_shared.o}
 all: $(BUILDDIR)$(NAME_LIB).a $(BUILDDIR)$(NAME_LIB_SHARED)
 
 $(BUILDDIR)$(NAME_LIB_SHARED): $(OBJS)
-	if [ $(OSFLAG) = "WIN" ]; then printf \
+	@if [ $(OSFLAG) = "WIN" ]; then printf \
 		"Compiling DLL: "$(BUILDDIR)$(NAME_LIB).dll" -> " ; \
 		$(CC) -shared -o $(BUILDDIR)$(NAME_LIB).dll $(CFLAGS) $(OBJS) \
 		-Wl,--output-def,$(BUILDDIR)$(NAME_LIB).def \
@@ -106,7 +106,7 @@ linux_shared: $(OBJS_SHARED)
 
 
 $(BUILDDIR)$(NAME_LIB).a: $(OBJS)
-	ar rvs $@ $<
+	ar rvs $@ $(OBJS)
 
 clean:
 	rm -rf $(BUILDDIR)*
