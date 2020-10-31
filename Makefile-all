@@ -1,42 +1,114 @@
-CC=gcc
-MAKEDIR=@mkdir -p $(@D)
-BUILDDIR=unix/release
-#CFLAGS=-c -Wall -DWJE_DISTINGUISH_INTEGER_TYPE -O3 -Iinclude
-CFLAGS=-c -Wall -DWJE_DISTINGUISH_INTEGER_TYPE -g -DDEBUG -Iinclude
+#This file can be called with `make -f Makefile-all`
+#The windows build for this file uses mingw
 
-all: $(BUILDDIR)/libwjelement.a
+THIS = Makefile-all
 
-$(BUILDDIR)/libwjelement.a: $(BUILDDIR)/xpl.o $(BUILDDIR)/element.o $(BUILDDIR)/hash.o $(BUILDDIR)/search.o $(BUILDDIR)/types.o $(BUILDDIR)/wjreader.o $(BUILDDIR)/wjwriter.o
+# Compiler
+CC	= _
+CC_WIN32 = i686-w64-mingw32-gcc
+CC_WIN64 = x86_64-w64-mingw32-gcc
+CC_LINUX = gcc
+CC_MACOS = gcc
+
+
+MAKEDIR			= @mkdir -p $(@D)
+PLATFORMDIR		= _
+BUILDDIR		= $(PLATFORMDIR)release/
+NAME_LIB		= libwjelement
+NAME_LIB_SHARED	= libwjelement_shared
+CFLAGS			+= -Wall -Wextra -DWJE_DISTINGUISH_INTEGER_TYPE -Iinclude
+
+release: export CFLAGS=-O3
+release: all
+
+debug: export CFLAGS=-g -DDEBUG
+debug: all
+
+
+SRCDIR =	./src/
+OBJDIR =	$(BUILDDIR)obj/
+
+# Set platform-specific variables
+ifeq ($(OS),Windows_NT)
+	OSFLAG := "WIN"
+	PLATFORMDIR = ./windows/
+    ifeq ($(PROCESSOR_ARCHITECTURE),x86)
+		CC := $(CC_WIN32)
+    endif
+    ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
+		CC := $(CC_WIN64)
+    endif
+else
+	UNAME_S := $(shell uname -s)
+	PLATFORMDIR = ./unix/
+	ifeq ($(UNAME_S),Linux)
+		OSFLAG := "LINUX"
+		CC := $(CC_LINUX)
+	endif
+	ifeq ($(UNAME_S),Darwin)
+		OSFLAG := "MACOS"
+		CC := $(CC_MACOS)
+	endif
+endif
+
+
+SRCS = 	lib/xpl.c \
+		wjelement/element.c \
+		wjelement/schema.c \
+		wjelement/hash.c \
+		wjelement/search.c \
+		wjelement/types.c \
+		wjreader/wjreader.c \
+		wjwriter/wjwriter.c
+
+OBJS		=	${SRCS:%.c=$(OBJDIR)%.o}
+OBJS_SHARED	=	${SRCS:%.c=$(OBJDIR)%_shared.o}
+
+
+
+all: $(BUILDDIR)$(NAME_LIB).a $(BUILDDIR)$(NAME_LIB_SHARED)
+
+$(BUILDDIR)$(NAME_LIB_SHARED): $(OBJS)
+	if [ $(OSFLAG) = "WIN" ]; then printf \
+		"Compiling DLL: "$(BUILDDIR)$(NAME_LIB).dll" -> " ; \
+		$(CC) -shared -o $(BUILDDIR)$(NAME_LIB).dll $(CFLAGS) $(OBJS) \
+		-Wl,--output-def,$(BUILDDIR)$(NAME_LIB).def \
+		-Wl,--out-implib,$(BUILDDIR)$(NAME_LIB).lib \
+		-Wl,--export-all-symbols ; \
+	elif [ $(OSFLAG) = "MACOS" ]; then printf \
+		"Compiling dylib: "$(BUILDDIR)$(NAME_LIB).dylib" -> " ; \
+		$(CC) -shared	-o $(BUILDDIR)$(NAME_LIB).dylib $(CFLAGS) $(OBJS) ; \
+	elif [ $(OSFLAG) = "LINUX" ]; then \
+		$(MAKE) -f $(THIS) linux_shared ; \
+		printf "Compiling so: "$(BUILDDIR)$(NAME_LIB).so" -> " ; \
+		$(CC) -shared		-o $(BUILDDIR)$(NAME_LIB).so $(CFLAGS) $(OBJS_SHARED) ; \
+	fi
+	@printf $(GREEN)"OK!"$(RESET)"\n"
+
+
+
+# This rule compiles object files from source files
+$(OBJDIR)%.o : $(SRCDIR)%.c
 	$(MAKEDIR)
-	ar rvs $@ $(BUILDDIR)/xpl.o $(BUILDDIR)/element.o $(BUILDDIR)/hash.o $(BUILDDIR)/search.o $(BUILDDIR)/types.o $(BUILDDIR)/wjreader.o $(BUILDDIR)/wjwriter.o
+	@printf "Compiling file: "$@" -> "
+	@$(CC) $(CFLAGS) -c $< -o $@
+	@printf $(GREEN)"OK!"$(RESET)"\n"
 
-$(BUILDDIR)/xpl.o: src/lib/xpl.c
+# This rule compiles shared object files from source files for .so compilation
+$(OBJDIR)%_shared.o : $(SRCDIR)%.c
 	$(MAKEDIR)
-	$(CC) $(CFLAGS) $< -o $@
+	@printf "Compiling file: "$@" -> "
+	@$(CC) $(CFLAGS) -fPIC -c $< -o $@
+	@printf $(GREEN)"OK!"$(RESET)"\n"
 
-$(BUILDDIR)/element.o: src/wjelement/element.c
-	$(MAKEDIR)
-	$(CC) $(CFLAGS) $< -o $@
+# This rule compiles all shared object files to prepare linux release
+linux_shared: $(OBJS_SHARED)
 
-$(BUILDDIR)/hash.o: src/wjelement/hash.c
-	$(MAKEDIR)
-	$(CC) $(CFLAGS) $< -o $@
 
-$(BUILDDIR)/search.o: src/wjelement/search.c
-	$(MAKEDIR)
-	$(CC) $(CFLAGS) $< -o $@
-
-$(BUILDDIR)/types.o: src/wjelement/types.c
-	$(MAKEDIR)
-	$(CC) $(CFLAGS) $< -o $@
-
-$(BUILDDIR)/wjreader.o: src/wjreader/wjreader.c
-	$(MAKEDIR)
-	$(CC) $(CFLAGS) $< -o $@
-
-$(BUILDDIR)/wjwriter.o: src/wjwriter/wjwriter.c
-	$(MAKEDIR)
-	$(CC) $(CFLAGS) $< -o $@
+$(BUILDDIR)$(NAME_LIB).a: $(OBJS)
+	ar rvs $@ $<
 
 clean:
-	rm $(BUILDDIR)/*
+	rm -rf $(BUILDDIR)*
+
+re: clean all
