@@ -25,6 +25,7 @@ debug: export CFLAGS=-g -DDEBUG
 debug: all
 
 
+HDRDIR =	./include/
 SRCDIR =	./src/
 OBJDIR =	$(BUILDDIR)obj/
 
@@ -91,14 +92,14 @@ $(BUILDDIR)$(NAME_LIB_SHARED): $(OBJS)
 $(OBJDIR)%.o : $(SRCDIR)%.c
 	$(MAKEDIR)
 	@printf "Compiling file: "$@" -> "
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@ -I$(HDRDIR)
 	@printf $(GREEN)"OK!"$(RESET)"\n"
 
 # This rule compiles shared object files from source files for .so compilation
 $(OBJDIR)%_shared.o : $(SRCDIR)%.c
 	$(MAKEDIR)
 	@printf "Compiling file: "$@" -> "
-	@$(CC) $(CFLAGS) -fPIC -c $< -o $@
+	@$(CC) $(CFLAGS) -fPIC -c $< -o $@ -I$(HDRDIR)
 	@printf $(GREEN)"OK!"$(RESET)"\n"
 
 # This rule compiles all shared object files to prepare linux release
