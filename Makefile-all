@@ -15,7 +15,6 @@ MAKEDIR			= @mkdir -p $(@D)
 PLATFORMDIR		= _
 BUILDDIR		= $(PLATFORMDIR)release/
 NAME_LIB		= libwjelement
-NAME_LIB_SHARED	= libwjelement_shared
 CFLAGS			+= -Wall -Wextra -DWJE_DISTINGUISH_INTEGER_TYPE -Iinclude
 
 release: export CFLAGS=-O3
@@ -63,13 +62,28 @@ SRCS = 	lib/xpl.c \
 		wjwriter/wjwriter.c
 
 OBJS		=	${SRCS:%.c=$(OBJDIR)%.o}
-OBJS_SHARED	=	${SRCS:%.c=$(OBJDIR)%_shared.o}
 
 
 
-all: $(BUILDDIR)$(NAME_LIB).a $(BUILDDIR)$(NAME_LIB_SHARED)
+all: $(NAME_LIB)_static $(NAME_LIB)_dynamic
 
-$(BUILDDIR)$(NAME_LIB_SHARED): $(OBJS)
+
+# This rule compiles object files from source files
+$(OBJDIR)%.o : $(SRCDIR)%.c
+	@$(MAKEDIR)
+	@printf "Compiling file: "$@" -> "
+	@$(CC) $(CFLAGS) -fPIC -c $< -o $@ -I$(HDRDIR)
+	@printf $(GREEN)"OK!"$(RESET)"\n"
+
+#This rule compiles the static version of libwjelement
+$(BUILDDIR)$(NAME_LIB).a: $(OBJS)
+	@ar rs $@ $(OBJS)
+
+#This rule compiles the static version of libwjelement
+$(NAME_LIB)_static: $(BUILDDIR)$(NAME_LIB).a
+
+#This rule compiles the platform-specific dynamic version of libwjelement
+$(NAME_LIB)_dynamic: $(OBJS)
 	@if [ $(OSFLAG) = "WIN" ]; then printf \
 		"Compiling DLL: "$(BUILDDIR)$(NAME_LIB).dll" -> " ; \
 		$(CC) -shared -o $(BUILDDIR)$(NAME_LIB).dll $(CFLAGS) $(OBJS) \
@@ -80,36 +94,12 @@ $(BUILDDIR)$(NAME_LIB_SHARED): $(OBJS)
 		"Compiling dylib: "$(BUILDDIR)$(NAME_LIB).dylib" -> " ; \
 		$(CC) -shared	-o $(BUILDDIR)$(NAME_LIB).dylib $(CFLAGS) $(OBJS) ; \
 	elif [ $(OSFLAG) = "LINUX" ]; then \
-		$(MAKE) -f $(THIS) linux_shared ; \
 		printf "Compiling so: "$(BUILDDIR)$(NAME_LIB).so" -> " ; \
-		$(CC) -shared		-o $(BUILDDIR)$(NAME_LIB).so $(CFLAGS) $(OBJS_SHARED) ; \
+		$(CC) -shared		-o $(BUILDDIR)$(NAME_LIB).so $(CFLAGS) $(OBJS) ; \
 	fi
 	@printf $(GREEN)"OK!"$(RESET)"\n"
 
-
-
-# This rule compiles object files from source files
-$(OBJDIR)%.o : $(SRCDIR)%.c
-	$(MAKEDIR)
-	@printf "Compiling file: "$@" -> "
-	@$(CC) $(CFLAGS) -c $< -o $@ -I$(HDRDIR)
-	@printf $(GREEN)"OK!"$(RESET)"\n"
-
-# This rule compiles shared object files from source files for .so compilation
-$(OBJDIR)%_shared.o : $(SRCDIR)%.c
-	$(MAKEDIR)
-	@printf "Compiling file: "$@" -> "
-	@$(CC) $(CFLAGS) -fPIC -c $< -o $@ -I$(HDRDIR)
-	@printf $(GREEN)"OK!"$(RESET)"\n"
-
-# This rule compiles all shared object files to prepare linux release
-linux_shared: $(OBJS_SHARED)
-
-
-$(BUILDDIR)$(NAME_LIB).a: $(OBJS)
-	ar rvs $@ $(OBJS)
-
 clean:
-	rm -rf $(BUILDDIR)*
+	@rm -rf $(BUILDDIR)*
 
 re: clean all
