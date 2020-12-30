@@ -44,6 +44,7 @@ else
 	ifeq ($(UNAME_S),Linux)
 		OSFLAG := "LINUX"
 		CC := $(CC_LINUX)
+		CFLAGS += -fPIC
 	endif
 	ifeq ($(UNAME_S),Darwin)
 		OSFLAG := "MACOS"
@@ -72,7 +73,7 @@ all: $(NAME_LIB)_static $(NAME_LIB)_dynamic
 $(OBJDIR)%.o : $(SRCDIR)%.c
 	@$(MAKEDIR)
 	@printf "Compiling file: "$@" -> "
-	@$(CC) $(CFLAGS) -fPIC -c $< -o $@ -I$(HDRDIR)
+	@$(CC) $(CFLAGS) -c $< -o $@ -I$(HDRDIR)
 	@printf $(GREEN)"OK!"$(RESET)"\n"
 
 #This rule compiles the static version of libwjelement
