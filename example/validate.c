@@ -71,13 +71,14 @@ static void schema_error(void *client, const char *format, ...) {
 
 
 int main(int argc, char **argv) {
-	FILE *jsonfile;
-	FILE *schemafile;
-	WJReader readjson;
-	WJReader readschema;
-	WJElement json;
-	WJElement schema;
-	char *format;
+	int ret = 0;
+	FILE *jsonfile = NULL;
+	FILE *schemafile = NULL;
+	WJReader readjson = NULL;
+	WJReader readschema = NULL;
+	WJElement json = NULL;
+	WJElement schema = NULL;
+	char *format = NULL;
 
 	if(argc != 3 && argc != 4) {
 		printf("usage:\n");
@@ -89,11 +90,10 @@ int main(int argc, char **argv) {
 
 	if(!(jsonfile = fopen(argv[1], "r"))) {
 		fprintf(stderr, "json file not found: '%s'\n", argv[1]);
-		return 1;
-	}
-	if(!(schemafile = fopen(argv[2], "r"))) {
+		ret = 1;
+	} else if(!(schemafile = fopen(argv[2], "r"))) {
 		fprintf(stderr, "schema file not found: '%s'\n", argv[2]);
-		return 2;
+		ret = 2;
 	}
 	if(argc == 4) {
 		format = argv[3];
@@ -101,35 +101,37 @@ int main(int argc, char **argv) {
 		format = NULL;
 	}
 
-	if(!(readjson = WJROpenFILEDocument(jsonfile, NULL, 0)) ||
-	   !(json = WJEOpenDocument(readjson, NULL, NULL, NULL))) {
-		fprintf(stderr, "json could not be read.\n");
-		return 3;
-	}
-	if(!(readschema = WJROpenFILEDocument(schemafile, NULL, 0)) ||
-	   !(schema = WJEOpenDocument(readschema, NULL, NULL, NULL))) {
-		fprintf(stderr, "schema could not be read.\n");
-		WJECloseDocument(json);
-		return 4;
-	}
-
-	WJEDump(json);
-	printf("json: %s\n", readjson->depth ? "bad" : "good");
-	WJEDump(schema);
-	printf("schema: %s\n", readschema->depth ? "bad" : "good");
-
-	if(WJESchemaValidate(schema, json, schema_error, schema_load, schema_free,
-						 format)) {
-		printf("validation: PASS\n");
-	} else {
-		printf("validation: FAIL\n");
+	if(jsonfile && schemafile) {
+		if(!(readjson = WJROpenFILEDocument(jsonfile, NULL, 0)) ||
+		   !(json = WJEOpenDocument(readjson, NULL, NULL, NULL))) {
+			fprintf(stderr, "json could not be read.\n");
+			ret = 3;
+		} else if(!(readschema = WJROpenFILEDocument(schemafile, NULL, 0)) ||
+				  !(schema = WJEOpenDocument(readschema, NULL, NULL, NULL))) {
+			fprintf(stderr, "schema could not be read.\n");
+			ret = 4;
+		}
 	}
 
-	WJECloseDocument(json);
-	WJECloseDocument(schema);
-	WJRCloseDocument(readjson);
-	WJRCloseDocument(readschema);
-	fclose(jsonfile);
-	fclose(schemafile);
-	return 0;
+	if(json && schema) {
+		WJEDump(json);
+		printf("json: %s\n", readjson->depth ? "bad" : "good");
+		WJEDump(schema);
+		printf("schema: %s\n", readschema->depth ? "bad" : "good");
+
+		if(WJESchemaValidate(schema, json, schema_error,
+							 schema_load, schema_free, format)) {
+			printf("validation: PASS\n");
+		} else {
+			printf("validation: FAIL\n");
+		}
+	}
+
+	if(json) WJECloseDocument(json);
+	if(schema) WJECloseDocument(schema);
+	if(readjson) WJRCloseDocument(readjson);
+	if(readschema) WJRCloseDocument(readschema);
+	if(jsonfile) fclose(jsonfile);
+	if(schemafile) fclose(schemafile);
+	return ret;
 }
