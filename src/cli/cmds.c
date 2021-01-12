@@ -350,7 +350,11 @@ static int WJECLIDump(WJElement *doc, WJElement *current, char *line)
 
 	}
 
-	fprintf(stderr, "Could not find a value for the specified element: %s\n", selector);
+	if(selector) {
+		fprintf(stderr, "Could not find a value for the specified element: %s\n", selector);
+	} else {
+		fprintf(stderr, "Could not find a value for the specified element (NULL)\n");
+	}
 	return(4);
 }
 
