@@ -814,7 +814,7 @@ EXPORT void WJEMemFree(void *mem)
 }
 EXPORT void WJEMemRelease(void **mem)
 {
-	if(mem != NULL && !*mem != NULL) {
+	if(mem != NULL && *mem != NULL) {
 		MemRelease(mem);
 	}
 }
