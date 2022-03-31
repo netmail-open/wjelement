@@ -45,8 +45,8 @@
 #define MemMallocWait( s )						malloc( (s) )
 #define MemFree( p )							free( (p) )
 #define MemFreeEx( p, f, l )					free( (p) )
-#define MemRelease( p )							free( (*p) ); (*p) = NULL
-#define MemReleaseEx( p, f, l )					free( (*p) ); (*p) = NULL
+#define MemRelease( p )							do { free( (*p) ); (*p) = NULL; } while (0)
+#define MemReleaseEx( p, f, l )					do { free( (*p) ); (*p) = NULL; } while (0)
 #define MemRealloc( p, s )						realloc( (p), (s) )
 #define MemReallocWait( p, s )					realloc( (p), (s) )
 #define MemStrdup( s )							strdup( (s) )
