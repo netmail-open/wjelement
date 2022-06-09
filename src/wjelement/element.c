@@ -398,7 +398,7 @@ static size_t WJEMemCallback(char *buffer, size_t length, size_t seen, void *use
 */
 EXPORT WJElement __WJEFromString(const char *json, char quote, const char *file, const int line)
 {
-	WJElement		doc;
+	WJElement		doc = NULL;
 	WJEMemArgs		args;
 	WJReader		reader;
 
