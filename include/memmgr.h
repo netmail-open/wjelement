@@ -54,7 +54,7 @@
 #define MemStrndup( s, m )						strndup( (s), (m) )
 #define MemStrndupWait( s, m )					strndup( (s), (m) )
 #define MemSprintf( f, ... )					sprintf( (f), __VA_ARGS__ )
-#define MemAsprintf( p, f, ... )				asprintf( (p), (f), __VA_ARGS__ )
+#define MemAsprintf( p, f, ... )				(void)!asprintf( (p), (f), __VA_ARGS__ )
 #define MemCalloc( c, s )						calloc( (c), (s) )
 #define MemCallocWait( c, s )					calloc( (c), (s) )
 
