@@ -459,7 +459,6 @@ static XplBool WJWriteString(char *value, size_t length, XplBool done, WJIWriter
 			case '\n':	*(esc + 1) = 'n';	break;
 			case '\b':	*(esc + 1) = 'b';	break;
 			case '\t':	*(esc + 1) = 't';	break;
-			case '\v':	*(esc + 1) = 'v';	break;
 			case '\f':	*(esc + 1) = 'f';	break;
 			case '\r':	*(esc + 1) = 'r';	break;
 
