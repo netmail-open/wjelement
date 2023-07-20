@@ -1333,7 +1333,7 @@ static void WJRNumber(void *value, WJRNumberType type, WJReader indoc)
 				break;
 			case WJR_TYPE_MIXED:
 				((WJRMixedNumber *) value)->hasDecimalPoint = FALSE;
-				((WJRMixedNumber *) value)->i = strtoul(doc->read, &end, 0);
+				((WJRMixedNumber *) value)->i = strtoll(doc->read, &end, 0);
 
 				if (end && '.' == *end) {
 					/* A decimal point was found, parse again as a double */
@@ -1372,7 +1372,7 @@ static void WJRNumber(void *value, WJRNumberType type, WJReader indoc)
 					break;
 				case WJR_TYPE_MIXED:
 					((WJRMixedNumber *) value)->hasDecimalPoint = FALSE;
-					((WJRMixedNumber *) value)->i = strtoul(doc->read, &end, 0);
+					((WJRMixedNumber *) value)->i = strtoll(doc->read, &end, 0);
 
 					if (end && '.' == *end) {
 						/* A decimal point was found, parse again as a double */
