@@ -19,5 +19,13 @@ package, or use it in ways we haven't thought of.  Read the docs/headers, have
 fun, and if you use it for something awesome, let us know about it!  :^)
 
 
-Owen Swerkstrom <owens@netmail.com>  - community/repo front-man, WJESchema
-Micah N Gorrell <micahg@netmail.com> - primary author of WJElement
+License:
+WJElement may be used, modified, and distributed under the terms of any of
+the following licenses.
+- GPL             (see COPYING)
+- LGPL            (see COPYING.LESSER)
+- MIT (aka Expat) (see COPYING.MIT)
+
+
+Owen Swerkstrom <oswerkstrom@revealdata.com> - community/repo admin, WJESchema
+Micah N Gorrell - primary author of WJElement
