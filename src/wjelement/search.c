@@ -517,6 +517,19 @@ DebugAssert(0);
 }
 
 /*
+	Determine if the provided character is valid in an unquoted JSON name.
+	This will mimic the functionality of isalnum(). But this will follow the
+	rules for JSON names, which can be found in RFC 7159. Section 4 states a
+	name must be a string. Section 7 gives the characters that can be used in a
+	name.
+*/
+static int is_json_ch(int c)
+{
+	// unescaped = %x20-21 / %x23-5B / %x5D-10FFFF
+	return((c >= 0x20 && c <= 0x21) || (c >= 0x23 && c <= 0x5B) || (c >= 0x5D && c <= 0x10FFFF));
+}
+
+/*
 	Return the begining of the name of the next element in the path.  Length
 	will be filled out, and end will be set to the first character that is not
 	part of the path for this element.
@@ -678,14 +691,14 @@ DebugAssert(0);
 				p++;
 			}
 		}
-	} else if (isalnumx(*path)) {
+	} else if (is_json_ch(*path)) {
 		/*
 			alpha-numeric name
 
 			Find the first character that is not part of the alpha-numeric name
 			and verify that it is a valid terminator for this name.
 		*/
-		for (p = path + 1; isalnumx(*p); p++);
+		for (p = path + 1; is_json_ch(*p); p++);
 
 		if (len) *len = p - path;
 		if (!WJENextNameCheck(p, path, len, end)) {
