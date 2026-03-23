@@ -55,3 +55,8 @@ ipch/
 *.user
 *.tlog
 
+# nix build result dir
+result
+
+# direnv working directory
+.direnv
